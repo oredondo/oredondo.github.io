@@ -63,4 +63,5 @@ Brief hook paragraph introducing the technical problem, why it matters, and what
 5. **Dogfooding & Real-World Anchors:** Connect abstract theory back to real-world operational challenges (e.g., MTTR, idempotency, API versioning).
 6. **Cross-Links to Case Studies:** Include a footer note linking to the corresponding architectural case study (e.g. `[Blueprint case study](../../projects/blueprint.md)`).
 7. **Bilingual 1:1 Parity:** Every post in English must have its Spanish mirror in `docs_es/blog/posts/` with translated text and Mermaid labels, keeping code blocks, tags and slugs aligned.
-8. **Validation:** Run `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml` to verify build.
+8. **Local Preview:** Test both language versions with `python3 serve.py` to inspect `/blog/` and `/es/blog/`.
+9. **Validation:** Run `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml` to verify build.

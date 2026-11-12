@@ -70,4 +70,5 @@ flowchart TD
 3. Add entries to `nav` in both `mkdocs.yml` (under `Projects`) and `mkdocs.es.yml` (under `Proyectos`).
 4. Add Material grid cards (`<div class="grid cards" markdown>`) with relative Markdown links in `projects/index.md` (EN & ES), and in `index.md` if it is a flagship project. Never use raw HTML `<a href="*.md">`.
 5. Check parity: `python3 .agents/skills/i18n-sync/scripts/sync_i18n.py`.
-6. Run strict dual build: `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`.
+6. Preview both languages locally with `python3 serve.py` to inspect `/` and `/es/`.
+7. Run strict dual build: `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`.

@@ -38,6 +38,7 @@ docs/                        # English content (primary)
 docs_es/                     # Spanish content (1:1 mirror)
 mkdocs.yml                   # English site configuration
 mkdocs.es.yml                # Spanish site configuration
+serve.py                     # Local bilingual dev server (EN at / and ES at /es/)
 overrides/404.html           # Custom 404 page
 .github/workflows/deploy.yml # Strict build & deploy to GitHub Pages on main
 .agents/skills/              # Antigravity / Gemini CLI skills
@@ -51,13 +52,14 @@ overrides/404.html           # Custom 404 page
 
 - **Automatic:** every push to `main` runs a strict Zensical build and deploys to GitHub Pages
   (`gh-pages` branch) via `peaceiris/actions-gh-pages`. Pull requests run the strict build only.
-- **Manual preview / build:** `uv run zensical build -s`
+- **Manual preview / build:** `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`
 
 ## Agent skills
 
-- `portfolio-manager` — run, build, validate and deploy the site.
-- `case-study-author` — scaffold architecture case studies in the house style.
-- `tech-blog-publisher` — publish blog posts with correct metadata and excerpts.
+- `portfolio-manager` — run, build, validate and deploy the site (via `python3 serve.py` or Zensical CLI).
+- `i18n-sync` — keep English and Spanish versions in 1:1 synchronization with automated parity checks.
+- `case-study-author` — scaffold architecture case studies in the house style for both languages.
+- `tech-blog-publisher` — publish bilingual blog posts with correct metadata, excerpts and cross-links.
 
 ## License
 

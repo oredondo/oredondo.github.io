@@ -52,8 +52,14 @@ Translate the corresponding counterpart adhering to these technical conventions:
    - Relative links to other `.md` files must stay relative (e.g., `projects/orion-iaas.md` in both trees).
    - If a new case study is added, register it in both `mkdocs.yml` and `mkdocs.es.yml` under `nav`.
 
-### Step 3: Validate Strict Builds for Both Languages
-Run the dual strict build:
+### Step 3: Local Preview & Strict Build Validation
+To visually inspect both languages side-by-side with working language switchers:
+```bash
+python3 serve.py
+```
+This serves `http://localhost:8000/` (EN) and `http://localhost:8000/es/` (ES) and auto-rebuilds on changes.
+
+Before committing, run the dual strict build:
 ```bash
 uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml
 ```
