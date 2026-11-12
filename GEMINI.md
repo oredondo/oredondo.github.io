@@ -9,8 +9,9 @@ This repository contains the professional portfolio, architectural case studies,
 - **Deployment:** GitHub Pages via `.github/workflows/deploy.yml` on push to `main`.
 
 ## Workspace Commands
-- **Run local server (EN):** `uv run zensical serve`
-- **Run local server (ES):** `uv run zensical serve -f mkdocs.es.yml`
+- **Run bilingual local server (EN + ES):** `python3 serve.py` (serves `/` and `/es/` on port 8000 with auto-rebuild).
+- **Run single-language server (EN):** `uv run zensical serve`
+- **Run single-language server (ES):** `uv run zensical serve -f mkdocs.es.yml`
 - **Build site (both languages):** `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`
 - **Check i18n parity:** `python3 .agents/skills/i18n-sync/scripts/sync_i18n.py`
 

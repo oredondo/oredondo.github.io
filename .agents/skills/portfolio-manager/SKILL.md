@@ -24,14 +24,18 @@ cd /Users/oscarredondo/Documents/portfolio-platform
 ## Workflows
 
 ### 1. Local Development Server
-To start the live-reloading dev server for **English** (default at `http://localhost:8000`):
-```bash
-uv run zensical serve
-```
 
-To start the dev server for **Spanish**:
+**Recommended: Bilingual Server (serves both English at `/` and Spanish at `/es/` with auto-rebuild):**
 ```bash
-uv run zensical serve -f mkdocs.es.yml
+python3 serve.py
+```
+- Available at `http://localhost:8000/` and `http://localhost:8000/es/`.
+- File watcher monitors `docs/` and `docs_es/` and rebuilds the affected language automatically.
+
+**Alternative: Single-language preview with native Zensical serve:**
+```bash
+uv run zensical serve                 # English at http://localhost:8000/
+uv run zensical serve -f mkdocs.es.yml # Spanish at http://localhost:8000/
 ```
 
 ### 2. Parity & i18n Check

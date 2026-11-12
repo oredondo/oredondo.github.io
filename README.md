@@ -14,11 +14,12 @@ Mermaid diagrams and [`uv`](https://docs.astral.sh/uv/) (Python 3.13).
 # Install uv (once)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Live-reloading dev server (English at http://localhost:8000)
-uv run zensical serve
+# Live bilingual dev server (serves English at / and Spanish at /es/ with auto-rebuild)
+python3 serve.py
 
-# Live-reloading dev server (Spanish)
-uv run zensical serve -f mkdocs.es.yml
+# Or single-language live preview with Zensical native serve
+uv run zensical serve                 # English at http://localhost:8000/
+uv run zensical serve -f mkdocs.es.yml # Spanish at http://localhost:8000/
 
 # Strict dual build (English & Spanish)
 uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml
