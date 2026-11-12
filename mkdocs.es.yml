@@ -1,0 +1,144 @@
+site_name: Oscar Redondo
+site_description: >-
+  Senior Python & Platform Engineer — plataformas internas de desarrollo,
+  automatización declarativa de infraestructura e IA agéntica para operaciones.
+site_author: Oscar Redondo
+site_url: https://oredondo.github.io/es/
+
+docs_dir: docs_es
+site_dir: site/es
+
+repo_name: oredondo/oredondo.github.io
+repo_url: https://github.com/oredondo/oredondo.github.io
+edit_uri: ""
+
+copyright: >-
+  &copy; 2026 Oscar Redondo · Construido con Python, Zensical &amp; uv
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: es
+  font:
+    text: Inter
+    code: JetBrains Mono
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    # Dark mode (default)
+    - scheme: slate
+      primary: custom
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Cambiar a modo claro
+    # Light mode
+    - scheme: default
+      primary: custom
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Cambiar a modo oscuro
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tooltips
+    - content.tabs.link
+
+plugins:
+  - search
+  - tags
+  - blog:
+      blog_dir: blog
+      post_dir: "{blog}/posts"
+      post_date_format: long
+      post_readtime: true
+      post_url_format: "{date}/{slug}"
+      archive_name: Archivo
+      categories_name: Categorías
+      pagination_per_page: 5
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.betterem
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  generator: false
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: Español
+      link: /es/
+      lang: es
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/oredondo
+      name: GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/oscarredondodjangopython
+      name: LinkedIn
+    - icon: fontawesome/solid/envelope
+      link: mailto:o.redondo91@gmail.com
+      name: Email
+
+nav:
+  - Inicio: index.md
+  - Proyectos:
+      - projects/index.md
+      - "Orion — Plataforma IaaS": projects/orion-iaas.md
+      - "Blueprint — Orquestador Declarativo": projects/blueprint.md
+      - "Orion AI — Diagnóstico CI/CD": projects/orion-ai.md
+      - "OmniLecture — Suite IA Multimodal": projects/omni-lecture.md
+  - CV: cv/index.md
+  - Blog:
+      - blog/index.md
+  - Sobre mí: about.md

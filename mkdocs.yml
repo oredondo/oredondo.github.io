@@ -5,6 +5,9 @@ site_description: >-
 site_author: Oscar Redondo
 site_url: https://oredondo.github.io/
 
+docs_dir: docs
+site_dir: site
+
 repo_name: oredondo/oredondo.github.io
 repo_url: https://github.com/oredondo/oredondo.github.io
 edit_uri: ""
@@ -112,6 +115,13 @@ extra_css:
   - stylesheets/extra.css
 
 extra:
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: Español
+      link: /es/
+      lang: es
   generator: false
   social:
     - icon: fontawesome/brands/github

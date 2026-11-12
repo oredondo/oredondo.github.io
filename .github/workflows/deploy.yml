@@ -35,8 +35,10 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
 
-      - name: Strict build with Zensical
-        run: uv run zensical build -s
+      - name: Strict build with Zensical (English & Spanish)
+        run: |
+          uv run zensical build -s
+          uv run zensical build -s -f mkdocs.es.yml
 
       - name: Deploy to GitHub Pages (gh-pages)
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

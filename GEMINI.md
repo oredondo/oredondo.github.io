@@ -9,25 +9,23 @@ This repository contains the professional portfolio, architectural case studies,
 - **Deployment:** GitHub Pages via `.github/workflows/deploy.yml` on push to `main`.
 
 ## Workspace Commands
-- **Run local server:** `uv run zensical serve`
-- **Build site:** `uv run zensical build`
-- **Strict link & syntax check:** `uv run zensical build -s`
-- **Legacy / MkDocs build:** `uv run mkdocs build --strict`
+- **Run local server (EN):** `uv run zensical serve`
+- **Run local server (ES):** `uv run zensical serve -f mkdocs.es.yml`
+- **Build site (both languages):** `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`
+- **Check i18n parity:** `python3 .agents/skills/i18n-sync/scripts/sync_i18n.py`
 
-## Content Structure
-- `docs/index.md`: Main landing page with hero, key metrics (30k+ nodes, 40k ops/day), and flagship case studies.
-- `docs/projects/`: Detailed architectural case studies with Mermaid diagrams and business impact metrics.
-- `docs/cv/index.md`: Complete curriculum vitae with one-click PDF printing.
-- `docs/blog/posts/`: Technical blog articles formatted with `YYYY-MM-DD-<slug>.md`.
-- `docs/blog/.authors.yml`: Author definitions for the blog.
-- `overrides/`: Theme overrides (custom 404 page).
-- `docs/assets/logo.svg`: Logo and favicon.
-- `.agents/skills/`: Custom Antigravity / Gemini CLI skills for managing the portfolio, authoring case studies, and publishing blog posts.
+## Content Structure & Multilingual Setup
+- `mkdocs.yml`: English configuration (`docs_dir: docs`, `site_dir: site`, URL `/`).
+- `mkdocs.es.yml`: Spanish configuration (`docs_dir: docs_es`, `site_dir: site/es`, URL `/es/`).
+- `docs/`: English content tree (primary).
+- `docs_es/`: Spanish mirror content tree.
+- `.agents/skills/i18n-sync/`: Custom skill to keep English and Spanish in 1:1 parity with automatic translation.
 
 ## Development Rules
 1. Never commit `.venv/` or `site/`.
-2. Always test builds with `uv run zensical build -s` before finalizing changes.
-3. Keep Markdown internal links relative to the `.md` file (e.g., `projects/orion-iaas.md`).
-4. Never use raw HTML `<a href="*.md">` links: use Markdown links inside `markdown`-enabled blocks (e.g., Material grid cards).
-5. Code in case studies must be labelled as simplified/illustrative — never publish proprietary employer code.
-6. Enforce LF endings on all files (configured via `.gitattributes`).
+2. Always maintain 1:1 parity between `docs/` and `docs_es/` using the `i18n-sync` skill.
+3. Test dual builds with `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`.
+4. Keep Markdown internal links relative to the `.md` file (e.g., `projects/orion-iaas.md`).
+5. Never use raw HTML `<a href="*.md">` links: use Markdown links inside `markdown`-enabled blocks (e.g., Material grid cards).
+6. Code in case studies must be labelled as simplified/illustrative — never publish proprietary employer code.
+7. Enforce LF endings on all files (configured via `.gitattributes`).

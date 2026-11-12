@@ -14,27 +14,36 @@ Mermaid diagrams and [`uv`](https://docs.astral.sh/uv/) (Python 3.13).
 # Install uv (once)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Live-reloading dev server at http://localhost:8000
+# Live-reloading dev server (English at http://localhost:8000)
 uv run zensical serve
 
-# Strict build (verifies links and syntax)
-uv run zensical build -s
+# Live-reloading dev server (Spanish)
+uv run zensical serve -f mkdocs.es.yml
+
+# Strict dual build (English & Spanish)
+uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml
 ```
+
+## Multilingual Architecture (i18n)
+
+- **English (Primary):** configured in `mkdocs.yml`, source in `docs/`, served at `https://oredondo.github.io/`.
+- **Spanish:** configured in `mkdocs.es.yml`, source in `docs_es/`, served at `https://oredondo.github.io/es/`.
+- **Switcher:** interactive language selector in the header (`extra.alternate`) with full search and navigation translated in each language.
 
 ## Project structure
 
 ```text
-docs/
-├── index.md                 # Landing page: hero, KPIs, featured work, stack, timeline
-├── projects/                # Architecture case studies (problem → design → trade-offs → impact)
-├── cv/index.md              # CV with print-optimised CSS (Print → Save as PDF)
-├── blog/                    # Blog posts, categories, archive
-├── about.md                 # Background & engineering principles
-├── assets/logo.svg          # Logo & favicon
-└── stylesheets/extra.css    # Brand palette, hero, cards, timeline, print styles
+docs/                        # English content (primary)
+docs_es/                     # Spanish content (1:1 mirror)
+mkdocs.yml                   # English site configuration
+mkdocs.es.yml                # Spanish site configuration
 overrides/404.html           # Custom 404 page
-.github/workflows/deploy.yml # Strict build on PRs, deploy to GitHub Pages on main
-.agents/skills/              # Antigravity / Gemini CLI skills for maintaining the site
+.github/workflows/deploy.yml # Strict build & deploy to GitHub Pages on main
+.agents/skills/              # Antigravity / Gemini CLI skills
+  ├── i18n-sync/             # Automated EN <-> ES translation and parity skill
+  ├── portfolio-manager/     # Lifecycle and build management
+  ├── case-study-author/     # Case study drafting
+  └── tech-blog-publisher/   # Blog article publishing
 ```
 
 ## Deployment
