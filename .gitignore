@@ -1,0 +1,16 @@
+# Virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# MkDocs / Zensical build and cache
+site/
+.cache/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/

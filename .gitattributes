@@ -1,0 +1,11 @@
+# Enforce LF endings across all platforms (macOS, Linux, Windows)
+* text=auto eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.py text eol=lf
+*.svg text eol=lf
+*.json text eol=lf

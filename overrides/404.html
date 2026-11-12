@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="error-page">
+  <p class="error-code">404</p>
+  <h1>Resource not found</h1>
+  <p>
+    The page you requested does not exist — it may have moved during a refactor.
+  </p>
+  <p>
+    <a href="{{ config.site_url | default(base_url ~ '/') }}" class="md-button md-button--primary">Back to home</a>
+    <a href="{{ config.site_url | default(base_url ~ '/') }}projects/" class="md-button">Browse case studies</a>
+  </p>
+</div>
+{% endblock %}

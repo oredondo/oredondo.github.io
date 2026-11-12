@@ -1,0 +1,11 @@
+[project]
+name = "portfolio-platform"
+version = "0.1.0"
+description = "Portfolio, case studies, CV and engineering blog of Oscar Redondo — Senior Python & Platform Engineer"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mkdocs-material[imaging]>=9.8.1",
+    "mkdocs-minify-plugin>=0.8.0",
+    "zensical>=0.1.1",
+]
