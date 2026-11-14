@@ -102,8 +102,10 @@ Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de inf
 
 </div>
 
-<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;">
-  <a href="blog/index.md" class="md-button md-button--primary">Explorar todos los ensayos del blog :octicons-arrow-right-24:</a>
+<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;" markdown>
+
+[Explorar todos los ensayos del blog :octicons-arrow-right-24:](blog/index.md){ .md-button .md-button--primary }
+
 </div>
 
 ## Sistemas de Plataforma e Infraestructura Corporativa
@@ -154,8 +156,10 @@ Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de inf
 
 </div>
 
-<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;">
-  <a href="projects/index.md" class="md-button">Ver la evolución completa de arquitectura y subsistemas :octicons-arrow-right-24:</a>
+<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;" markdown>
+
+[Ver la evolución completa de arquitectura y subsistemas :octicons-arrow-right-24:](projects/index.md){ .md-button }
+
 </div>
 
 ## Sistemas Open-Source en GitHub

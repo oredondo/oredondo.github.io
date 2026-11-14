@@ -102,8 +102,10 @@ I design and build <strong>infrastructure deployment and provisioning platforms 
 
 </div>
 
-<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;">
-  <a href="blog/index.md" class="md-button md-button--primary">Explore all engineering essays :octicons-arrow-right-24:</a>
+<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;" markdown>
+
+[Explore all engineering essays :octicons-arrow-right-24:](blog/index.md){ .md-button .md-button--primary }
+
 </div>
 
 ## Enterprise Platform Systems & Infrastructure
@@ -154,8 +156,10 @@ I design and build <strong>infrastructure deployment and provisioning platforms 
 
 </div>
 
-<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;">
-  <a href="projects/index.md" class="md-button">View full platform architecture &amp; subsystems :octicons-arrow-right-24:</a>
+<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;" markdown>
+
+[View full platform architecture &amp; subsystems :octicons-arrow-right-24:](projects/index.md){ .md-button }
+
 </div>
 
 ## Open-Source Systems on GitHub
