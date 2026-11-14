@@ -54,30 +54,26 @@ Operar infraestructura a escala bancaria entre nube pública, nube privada, plat
 
 ## 3. Topología Abstracta del Sistema: Ciclo de Vida de una Operación
 
-Orion centraliza el ciclo de vida de la infraestructura bancaria: desde la llamada API o el scheduler programado, pasando por la capa de drivers y la configuración Ansible en capas, hasta el sellado inmutable de auditoría forense.
+Orion centraliza el ciclo de vida de la infraestructura bancaria mediante un flujo secuencial estricto: desde la llamada API o el scheduler programado, pasando por el aprovisionamiento cloud y la configuración en dos capas con Ansible, hasta el sellado final en el motor de auditoría.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Trigger as Ingeniero (API REST) / Scheduler (Cron)
-    participant Orion as Orion Control Plane & RBAC
-    participant Disp as Dispatcher HA (Celery)
-    participant Cloud as Driver Multi-Cloud (AWS / OpenStack / Bare-Metal)
-    participant AnsG as Ansible: Ground (Seguridad & Mon)
-    participant AnsU as Ansible: Carga de Usuario
-    participant Audit as Motor de Auditoría (PostgreSQL + MongoDB)
-
-    Trigger->>Orion: 1. Petición autenticada (API OpenAPI o Scheduler)
-    Orion->>Audit: Registra solicitud, identidad y permisos (RBAC)
-    Orion->>Disp: Encola ejecución asíncrona
-    Disp->>Cloud: Aprovisiona nodo en el proveedor destino
-    Cloud-->>Disp: Nodo activo e IP asignada
-    Disp->>AnsG: Ejecuta Ground obligatorio (Bastionado, Mon, Repos)
-    AnsG-->>Disp: Ground validado con éxito (100% compliance)
-    Disp->>AnsU: Ejecuta playbooks de usuario (Apps, Middleware, DB)
-    AnsU-->>Disp: Carga de trabajo desplegada correctamente
-    Disp->>Audit: Sella software instalado, versiones de paquetes y eventos
+flowchart LR
+    Trig["Disparo<br/><b>(API / Scheduler)</b>"] --> Disp["Dispatcher HA<br/><b>(RBAC & Celery)</b>"]
+    Disp --> Prov["1. Provisión<br/><b>(Drivers Cloud)</b>"]
+    Prov --> Conf["2. Configuración<br/><b>(Ansible Ground + Usuario)</b>"]
+    Conf --> Audit[("3. Auditoría<br/><b>(Software & Histórico)</b>")]
 ```
+
+### Pipeline de Ejecución Paso a Paso
+
+| Fase | Componente Responsable | Qué se ejecuta exactamente | Garantía de Ingeniería |
+| :--- | :--- | :--- | :--- |
+| **1. Disparo** | API REST OpenAPI / Schedulers (Celery Beat) | Invocación de autoservicio, pipeline CI/CD o tarea programada periódica (reconciliación/mantenimiento). | Ingesta asíncrona desacoplada con respuesta inmediata. |
+| **2. Autorización** | Motor RBAC & PostgreSQL | Verificación de permisos del usuario solicitante, token corporativo y registro inmutable de la solicitud. | Cero peticiones anónimas o sin trazabilidad de cambio. |
+| **3. Provisión** | Capa de Drivers Multi-Cloud | Llamada al proveedor correspondiente (**AWS, OpenStack, OpenShift o Bare-Metal**) para crear el cómputo y asignar IP/DNS. | Abstracción homogénea sin acoplamiento a APIs propietarias. |
+| **4. Ground Ops** | Ansible Core (Línea Base Bancaria) | **Fase obligatoria y previa al usuario:** bastionado CIS del SO, inyección de certificados TLS corporativos, cortafuegos y despliegue de agentes de monitorización. | **Garantía 100% compliance:** si la fase Ground falla, el despliegue se aborta de inmediato. |
+| **5. User Ops** | Ansible Runner (Carga de Usuario) | Inyección de variables en runtime y ejecución de los playbooks del usuario (middleware, bases de datos, microservicios). | Aislamiento entre la configuración corporativa y la lógica de la app. |
+| **6. Auditoría** | Motor de Auditoría (PostgreSQL + MongoDB) | Recolección de telemetría final: versiones exactas de todos los paquetes instalados en el nodo, puertos abiertos y log de eventos. | Informes forenses inmediatos para auditores y reguladores. |
 
 ---
 

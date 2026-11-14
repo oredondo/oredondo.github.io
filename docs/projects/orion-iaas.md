@@ -54,30 +54,26 @@ Operating infrastructure at banking scale across public cloud, private cloud, co
 
 ## 3. Abstract System Topology: Operation Lifecycle
 
-Orion governs the full infrastructure lifecycle: from REST API calls or scheduled jobs, through cloud provisioning drivers and layered Ansible configurations, down to an immutable forensic audit record.
+Orion centralizes the banking infrastructure lifecycle through a strict, sequential pipeline: from REST API calls or scheduled jobs, through cloud provisioning and two-layer Ansible configuration, down to the final seal in the audit engine.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Trigger as Engineer (REST API) / Scheduler (Cron)
-    participant Orion as Orion Control Plane & RBAC
-    participant Disp as Dispatcher HA (Celery)
-    participant Cloud as Multi-Cloud Driver (AWS / OpenStack / Bare-Metal)
-    participant AnsG as Ansible: Ground (Security & Mon)
-    participant AnsU as Ansible: User Workload
-    participant Audit as Audit Engine (PostgreSQL + MongoDB)
-
-    Trigger->>Orion: 1. Authenticated request (OpenAPI or Scheduler)
-    Orion->>Audit: Records request, identity, and RBAC permissions
-    Orion->>Disp: Enqueues asynchronous execution
-    Disp->>Cloud: Provisions compute resource in target provider
-    Cloud-->>Disp: Node active with assigned IP
-    Disp->>AnsG: Executes mandatory Ground (Hardening, Mon, Repos)
-    AnsG-->>Disp: Ground verification passed (100% compliance)
-    Disp->>AnsU: Executes user playbooks (Apps, Middleware, DB)
-    AnsU-->>Disp: Workload successfully configured
-    Disp->>Audit: Seals installed software, package versions & event history
+flowchart LR
+    Trig["Trigger<br/><b>(API / Scheduler)</b>"] --> Disp["HA Dispatcher<br/><b>(RBAC & Celery)</b>"]
+    Disp --> Prov["1. Provisioning<br/><b>(Cloud Drivers)</b>"]
+    Prov --> Conf["2. Configuration<br/><b>(Ansible Ground + User)</b>"]
+    Conf --> Audit[("3. Audit Engine<br/><b>(Software & History)</b>")]
 ```
+
+### Step-by-Step Execution Pipeline
+
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. Trigger** | REST API / Schedulers (Celery Beat) | Invocation via developer self-service, CI/CD pipeline, or recurring scheduled job (reconciliation/maintenance). | Asynchronous, non-blocking ingestion with immediate HTTP response. |
+| **2. Authorization** | RBAC Engine & PostgreSQL | Validation of requester permissions, corporate token, and immutable logging of the operation request. | Zero anonymous or untracked operational requests. |
+| **3. Provisioning** | Multi-Cloud Driver Layer | Downstream call to target provider (**AWS, OpenStack, OpenShift, or Bare-Metal**) to create the compute instance and assign IP/DNS. | Consistent abstraction without vendor lock-in to proprietary APIs. |
+| **4. Ground Ops** | Ansible Core (Banking Baseline) | **Mandatory pre-user baseline:** CIS operating system hardening, corporate TLS certificates, firewall policies, and monitoring agent deployment. | **100% compliance guarantee:** if Ground validation fails, provisioning is aborted immediately. |
+| **5. User Ops** | Ansible Runner (User Workload) | Dynamic runtime variable injection and execution of user-defined playbooks (middleware, databases, microservices). | Strict isolation between corporate infrastructure baseline and app logic. |
+| **6. Audit** | Audit Engine (PostgreSQL + MongoDB) | Collection of final forensic telemetry: exact versions of all installed packages on the node, open ports, and execution event logs. | Instant forensic compliance reports for internal auditors and regulators. |
 
 ---
 
