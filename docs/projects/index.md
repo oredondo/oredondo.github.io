@@ -158,7 +158,7 @@ Public systems built outside enterprise constraints — with complete source cod
 
     ---
 
-    Native Linux (Wayland/GNOME, GTK 3) screen/audio recorder with an optimized FFmpeg multimedia pipeline (tuned H.264 10 FPS stillimage encoding cutting file size by 70%, hardware PTS clock sync, and afftdn spectral filtering) paired with LangGraph workflows. Combines dual-engine Whisper (`faster-whisper` CPU `int8` + cloud API), OpenCV CLAHE + Tesseract slide/handwriting OCR, and anti-hallucination guardrails to generate Markdown notes, `.docx` documents, and Anki decks.
+    Native Linux (Wayland/GNOME, GTK 3) screen/audio recorder with an optimized FFmpeg multimedia pipeline (tuned H.264 10 FPS stillimage encoding cutting file size by 70%, hardware PTS clock sync, and afftdn spectral filtering) paired with LangGraph workflows. Combines dual-engine Whisper (`faster-whisper` CPU `int8` + cloud API), OpenCV CLAHE + Tesseract slide/handwriting OCR, and anti-hallucination guardrails to generate interconnected Markdown knowledge graphs and Anki flashcard decks.
 
     <span class="tech-tag">Python 3.12</span><span class="tech-tag">GTK 3 / PyGObject</span><span class="tech-tag">FFmpeg</span><span class="tech-tag">faster-whisper</span><span class="tech-tag">LangGraph</span><span class="tech-tag">OpenCV</span>
 

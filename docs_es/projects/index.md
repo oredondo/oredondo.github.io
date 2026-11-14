@@ -158,7 +158,7 @@ Sistemas públicos construidos fuera de las restricciones bancarias — con cód
 
     ---
 
-    Grabador nativo de pantalla/audio para Linux (Wayland/GNOME, GTK 3) con pipeline multimedia en FFmpeg (compresión H.264 a 10 FPS con `-tune stillimage` que ahorra hasta un 70% de espacio en disco, sincronización de reloj PTS y filtrado espectral `afftdn`) y flujos en LangGraph. Combina Whisper de doble motor (`faster-whisper` CPU `int8` + API cloud), OCR de diapositivas y manuscritos con OpenCV CLAHE + Tesseract y guardarraíles anti-alucinación para generar apuntes Markdown, documentos `.docx` y mazos Anki.
+    Grabador nativo de pantalla/audio para Linux (Wayland/GNOME, GTK 3) con pipeline multimedia en FFmpeg (compresión H.264 a 10 FPS con `-tune stillimage` que ahorra hasta un 70% de espacio en disco, sincronización de reloj PTS y filtrado espectral `afftdn`) y flujos en LangGraph. Combina Whisper de doble motor (`faster-whisper` CPU `int8` + API cloud), OCR de diapositivas y manuscritos con OpenCV CLAHE + Tesseract y guardarraíles anti-alucinación para generar grafos de conocimiento interconectados en Markdown y mazos Anki.
 
     <span class="tech-tag">Python 3.12</span><span class="tech-tag">GTK 3 / PyGObject</span><span class="tech-tag">FFmpeg</span><span class="tech-tag">faster-whisper</span><span class="tech-tag">LangGraph</span><span class="tech-tag">OpenCV</span>
 
