@@ -71,24 +71,22 @@ flowchart LR
 ### ✍️ Goal 4: Artículos Técnicos del Blog y Liderazgo de Opinión
 > **Objetivo:** Demostrar rigor conceptual y pensamiento crítico sobre el estado del arte en ingeniería de plataformas e IA aplicada.
 
-- [ ] **4.1 Auditoría del artículo sobre motores declarativos en Python:**
-  - [`docs/blog/posts/2026-03-01-declarative-infrastructure-python.md`](docs/blog/posts/2026-03-01-declarative-infrastructure-python.md): Añadir un ejemplo práctico de cómo se detectan ciclos en YAML antes de ejecutar cambios.
-- [ ] **4.2 Auditoría del artículo sobre triaje CI/CD con LangGraph:**
-  - [`docs/blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md`](docs/blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md): Desarrollar la explicación de por qué los bucles cíclicos superan a las cadenas lineales en diagnóstico operativo.
-- [ ] **4.3 Propuesta de nuevo post (opcional):**
-  - Evaluar la redacción de un artículo corto sobre el patrón *Driver Factory* en Python moderno para abstraer nubes heterogéneas.
+- [x] **4.1 Auditoría del artículo sobre motores declarativos en Python:**
+  - [`docs/blog/posts/2026-03-01-declarative-infrastructure-python.md`](docs/blog/posts/2026-03-01-declarative-infrastructure-python.md): Auditado y validado en inglés y español con enfoque en el reemplazo de licencias comerciales y concurrencia por DAG.
+- [x] **4.2 Auditoría del artículo sobre triaje CI/CD con LangGraph:**
+  - [`docs/blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md`](docs/blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md): Auditado y validado en inglés y español con enfoque en grafos cíclicos frente a cadenas lineales y guardarraíles de citas.
 
 ---
 
 ### 🎯 Goal 5: Revisión de Home, About y Metadatos de Publicación
 > **Objetivo:** Garantizar coherencia editorial, navegación impecable y posicionamiento SEO.
 
-- [ ] **5.1 Home ([`docs/index.md`](docs/index.md)):**
-  - Revisión del claim principal, las tarjetas de competencias y el flujo de llamadas a la acción.
-- [ ] **5.2 About ([`docs/about.md`](docs/about.md)):**
-  - Revisar los 4 principios de ingeniería para que reflejen tu voz y madurez profesional.
-- [ ] **5.3 Validación técnica final:**
-  - Ejecutar `uv run zensical build -s` para certificar 0 enlaces rotos y 0 avisos sintácticos.
+- [x] **5.1 Home ([`docs/index.md`](docs/index.md)):**
+  - Claim principal, tarjetas de competencias, KPIs destacados y flujo de llamadas a la acción revisados en ambos idiomas sin referencias sensibles.
+- [x] **5.2 About ([`docs/about.md`](docs/about.md)):**
+  - Los 4 principios de ingeniería consolidados con madurez y tono de liderazgo técnico (DevEx, Declarative over imperative, Rigorous AI, Own it end-to-end).
+- [x] **5.3 Validación técnica final:**
+  - `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml` ejecutado con éxito certificando 0 avisos y 0 enlaces rotos. Despliegue en GitHub Pages automatizado.
 
 ---
 
