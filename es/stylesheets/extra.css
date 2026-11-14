@@ -1,0 +1,606 @@
+/* ==========================================================================
+   Oscar Redondo — Python & Platform Engineering portfolio
+   ========================================================================== */
+
+/* ---------- Brand palette (used by `primary: custom`) ---------- */
+:root {
+  --md-primary-fg-color: #1e3a8a;
+  --md-primary-fg-color--light: #3b5bdb;
+  --md-primary-fg-color--dark: #172554;
+  --brand-accent: #0284c7;
+  --brand-gradient: linear-gradient(120deg, #2563eb 0%, #0ea5e9 55%, #14b8a6 100%);
+  --card-radius: 12px;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0f172a;
+  --md-primary-fg-color--light: #1e293b;
+  --md-primary-fg-color--dark: #020617;
+  --md-default-bg-color: #0b1120;
+  --md-code-bg-color: #111a2e;
+  --md-typeset-a-color: #38bdf8;
+  --brand-accent: #38bdf8;
+  --brand-gradient: linear-gradient(120deg, #60a5fa 0%, #38bdf8 50%, #2dd4bf 100%);
+}
+
+/* Buttons: keep good contrast in the dark scheme, whose primary is near-black */
+[data-md-color-scheme="slate"] .md-typeset .md-button {
+  color: var(--brand-accent);
+  border-color: var(--brand-accent);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .md-button--primary {
+  background-color: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .md-button:hover,
+[data-md-color-scheme="slate"] .md-typeset .md-button:focus {
+  background-color: #0ea5e9;
+  border-color: #0ea5e9;
+  color: #ffffff;
+}
+
+.md-typeset h1,
+.md-typeset h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.md-typeset h1 {
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset h3 {
+  font-weight: 600;
+}
+
+/* Two-column card grid for featured content */
+.md-typeset .grid.cards.two-col {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  margin: 1.5rem 0 2.5rem;
+  max-width: 48rem;
+}
+
+.hero__eyebrow {
+  margin: 0 0 0.5rem;
+  font-family: var(--md-code-font-family);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+
+.md-typeset h1.hero__title {
+  margin: 0 0 1rem;
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.05;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.md-typeset h1.hero__title .headerlink {
+  display: none;
+}
+
+.hero__lead {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.hero .md-button {
+  margin: 0.3rem 0.4rem 0.3rem 0;
+}
+
+@media screen and (max-width: 44.9375em) {
+  .md-typeset h1.hero__title {
+    font-size: 2.3rem;
+  }
+}
+
+/* ---------- KPI cards ---------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.kpi-card {
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: var(--card-radius);
+  padding: 1.1rem 1.2rem;
+  text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--md-accent-fg-color);
+}
+
+.kpi-value {
+  display: block;
+  font-family: var(--md-code-font-family);
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.kpi-label {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+}
+
+/* ---------- Material grid cards ---------- */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid.cards > ol > li {
+  border-radius: var(--card-radius);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  transform: translateY(-2px);
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 8px 28px -14px rgba(14, 165, 233, 0.6);
+}
+
+.md-typeset .grid.cards .lg {
+  color: var(--brand-accent);
+}
+
+/* ---------- Tech tags & stack ---------- */
+.tech-tag {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  margin: 0 0.35rem 0.35rem 0;
+  font-family: var(--md-code-font-family);
+  font-size: 0.68rem;
+  border-radius: 999px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-code-bg-color);
+  color: var(--md-default-fg-color--light);
+  white-space: nowrap;
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+
+.stack-group {
+  padding: 1rem 1.1rem 0.7rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: var(--card-radius);
+}
+
+.md-typeset .stack-group__title {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+
+/* ---------- Timeline ---------- */
+.timeline {
+  position: relative;
+  margin: 1rem 0 1.5rem;
+  padding-left: 1.6rem;
+  border-left: 2px solid var(--md-default-fg-color--lightest);
+}
+
+.timeline__item {
+  position: relative;
+  margin-bottom: 1.4rem;
+}
+
+.timeline__item::before {
+  content: "";
+  position: absolute;
+  left: calc(-1.6rem - 7px);
+  top: 0.35rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+}
+
+.md-typeset .timeline__item p {
+  margin: 0.25rem 0;
+}
+
+.timeline__date {
+  font-family: var(--md-code-font-family);
+  font-size: 0.72rem;
+  color: var(--brand-accent);
+  letter-spacing: 0.05em;
+}
+
+/* ---------- CTA banner ---------- */
+.cta-banner {
+  margin: 3rem 0 1rem;
+  padding: 1.8rem 2rem;
+  border-radius: var(--card-radius);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background:
+    linear-gradient(var(--md-code-bg-color), var(--md-code-bg-color)) padding-box,
+    var(--brand-gradient) border-box;
+  border: 1px solid transparent;
+}
+
+.md-typeset .cta-banner h3 {
+  margin-top: 0;
+}
+
+
+
+/* ---------- CV ---------- */
+.cv-actions {
+  float: right;
+  margin-top: 0.4rem;
+}
+
+.md-typeset .cv-headline {
+  margin-top: -0.6rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brand-accent);
+}
+
+.md-typeset .cv-contact {
+  font-size: 0.8rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .cv-meta {
+  margin-top: -0.4rem;
+  font-size: 0.8rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .cv-tech {
+  font-size: 0.75rem;
+  padding: 0.5rem 0.8rem;
+  border-left: 3px solid var(--brand-accent);
+  background: var(--md-code-bg-color);
+  border-radius: 0 6px 6px 0;
+}
+
+/* ---------- 404 ---------- */
+.error-page {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.md-typeset .error-code {
+  margin: 0;
+  font-family: var(--md-code-font-family);
+  font-size: 5rem;
+  font-weight: 800;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Print (CV → PDF) ---------- */
+@page {
+  size: A4;
+  margin: 1.2cm 1.4cm;
+}
+
+@media print {
+  /* Force light theme CSS variables regardless of active screen scheme */
+  :root,
+  [data-md-color-scheme="slate"],
+  [data-md-color-scheme="default"] {
+    --md-default-bg-color: #ffffff !important;
+    --md-default-bg-color--light: #ffffff !important;
+    --md-default-bg-color--lighter: #f8fafc !important;
+    --md-default-bg-color--lightest: #f1f5f9 !important;
+    --md-default-fg-color: #0f172a !important;
+    --md-default-fg-color--light: #334155 !important;
+    --md-default-fg-color--lighter: #64748b !important;
+    --md-default-fg-color--lightest: #cbd5e1 !important;
+    --md-typeset-color: #0f172a !important;
+    --md-typeset-a-color: #1e3a8a !important;
+    --md-code-bg-color: #f8fafc !important;
+    --md-code-fg-color: #0f172a !important;
+    --md-primary-fg-color: #1e3a8a !important;
+    --brand-accent: #1e3a8a !important;
+    --brand-gradient: none !important;
+  }
+
+  /* Hide screen-only interactive & navigation elements */
+  .md-header,
+  .md-sidebar,
+  .md-tabs,
+  .md-footer,
+  .md-top,
+  .md-source-file,
+  .md-content__button,
+  .headerlink,
+  .no-print,
+  .cv-actions {
+    display: none !important;
+  }
+
+  /* Reset layout containers to full width with zero clipping */
+  html,
+  body,
+  .md-container,
+  .md-main,
+  .md-main__inner,
+  .md-content,
+  .md-content__inner,
+  .md-typeset {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .md-content__inner::before {
+    display: none !important;
+  }
+
+  /* Typography defaults & justification */
+  body,
+  .md-typeset {
+    font-size: 9.5pt !important;
+    line-height: 1.45 !important;
+    color: #0f172a !important;
+  }
+
+  .md-typeset p {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    margin: 0 0 0.5rem !important;
+  }
+
+  .md-typeset h1 {
+    font-size: 19pt !important;
+    margin: 0 0 0.2rem !important;
+    color: #0f172a !important;
+    text-align: left !important;
+    hyphens: manual !important;
+  }
+
+  .md-typeset h2 {
+    font-size: 11.5pt !important;
+    margin: 0.9rem 0 0.35rem !important;
+    padding-bottom: 0.15rem !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+    color: #1e3a8a !important;
+    text-align: left !important;
+    hyphens: manual !important;
+    break-after: avoid !important;
+  }
+
+  .md-typeset h3 {
+    font-size: 10pt !important;
+    margin: 0.65rem 0 0.2rem !important;
+    color: #0f172a !important;
+    text-align: left !important;
+    hyphens: manual !important;
+    break-after: avoid !important;
+  }
+
+  .md-typeset strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  .md-typeset ul {
+    padding-left: 1.25rem !important;
+    margin: 0.3rem 0 0.6rem !important;
+  }
+
+  .md-typeset li {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    break-inside: avoid !important;
+    margin-bottom: 0.35rem !important;
+    color: #1e293b !important;
+  }
+
+  .md-typeset a {
+    color: #1e3a8a !important;
+    text-decoration: none !important;
+  }
+
+  /* CV Header & Metadata */
+  .md-typeset .cv-headline {
+    font-size: 10.5pt !important;
+    font-weight: 600 !important;
+    color: #1e3a8a !important;
+    margin: 0 0 0.2rem !important;
+    text-align: left !important;
+    hyphens: manual !important;
+  }
+
+  .md-typeset .cv-contact,
+  .md-typeset .cv-meta {
+    font-size: 8.5pt !important;
+    color: #475569 !important;
+    margin: 0 0 0.3rem !important;
+    text-align: left !important;
+    hyphens: manual !important;
+  }
+
+  /* CV Tech block: clean light background, full width flush with content */
+  .md-typeset .cv-tech {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 8pt !important;
+    line-height: 1.35 !important;
+    padding: 0.35rem 0.65rem !important;
+    margin: 0.35rem 0 0.75rem !important;
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 3px solid #1e3a8a !important;
+    border-radius: 4px !important;
+    text-align: left !important;
+    hyphens: manual !important;
+    break-inside: avoid !important;
+  }
+
+  .md-typeset .cv-tech strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  /* Tables: clean white paper styling spanning exactly 100% width */
+  .md-typeset table:not([class]) {
+    display: table !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 8.5pt !important;
+    line-height: 1.4 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-collapse: collapse !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    overflow: visible !important;
+    margin: 0.5rem 0 0.8rem !important;
+  }
+
+  .md-typeset table:not([class]) th {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 5px 8px !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+
+  .md-typeset table:not([class]) td {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 5px 8px !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Column 1 of 2-column tables: left-aligned category / system name */
+  .md-typeset table:not([class]) tr > td:first-child {
+    text-align: left !important;
+    width: 30% !important;
+  }
+
+  /* Column 2 of 2-column tables: justified descriptions */
+  .md-typeset table:not([class]) tr > td:nth-child(2) {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+  }
+
+  /* Multi-column tables (e.g. 3-column Certifications): left-aligned text */
+  .md-typeset table:not([class]) tr:has(> td:nth-child(3)) > td {
+    text-align: left !important;
+    width: auto !important;
+  }
+
+  .md-typeset table:not([class]) tr {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  .md-typeset table:not([class]) tr:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .md-typeset table:not([class]) td strong {
+    color: #0f172a !important;
+  }
+
+  .md-typeset table:not([class]) td a {
+    color: #1e3a8a !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+  }
+
+  /* Inline code & code blocks in print */
+  .md-typeset code {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 3px !important;
+    padding: 1px 4px !important;
+    font-size: 8pt !important;
+    box-shadow: none !important;
+  }
+
+  /* Tags & KPI cards in print */
+  .tech-tag {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .kpi-card {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+  }
+
+  .kpi-value {
+    color: #1e3a8a !important;
+  }
+
+  .kpi-label {
+    color: #475569 !important;
+  }
+}

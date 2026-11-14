@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Oscar Redondo - Platform Engineering &amp; IaC">
+  <defs>
+    <linearGradient id="brandGrad" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#38bdf8" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="64" height="64" rx="14" fill="url(#glowGrad)"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="13.25" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+
+  <!-- Left: The "O" Arc & Spine -->
+  <!-- Left arc curves from top of spine (26, 17) out to (15, 32.5) down to bottom of spine (26, 47) -->
+  <path d="M 26 17 C 14 17, 13 47, 26 47" fill="none" stroke="url(#brandGrad)" stroke-width="4.5" stroke-linecap="round"/>
+  
+  <!-- Central Stem of R -->
+  <line x1="26" y1="17" x2="26" y2="47" stroke="url(#brandGrad)" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- R Upper Loop (from 26,17 out to 43, 24.5 down to 26, 32) -->
+  <path d="M 26 17 C 40 17, 44 21, 44 26 C 44 31, 39 33.5, 26 33.5" fill="none" stroke="url(#brandGrad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- R Diagonal Leg (from 32, 33.5 down-right to 45, 47) -->
+  <path d="M 32 33.5 L 45 47" fill="none" stroke="url(#brandGrad)" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- DAG Topology Nodes -->
+  <!-- Node 1: Left source node on the O -->
+  <circle cx="15.5" cy="32" r="2.5" fill="#38bdf8" filter="url(#glow)"/>
+  <!-- Node 2: Top coordinator apex -->
+  <circle cx="26" cy="17" r="2.2" fill="#bae6fd"/>
+  <!-- Node 3: Loop decision node -->
+  <circle cx="44" cy="26" r="2.2" fill="#60a5fa"/>
+  <!-- Node 4: DAG forward terminal execution node -->
+  <circle cx="45" cy="47" r="3" fill="#38bdf8" filter="url(#glow)"/>
+</svg>
