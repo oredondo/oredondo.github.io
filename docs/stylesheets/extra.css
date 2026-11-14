@@ -355,20 +355,24 @@
   .md-main,
   .md-main__inner,
   .md-content,
-  .md-content__inner {
+  .md-content__inner,
+  .md-typeset {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    max-width: 100% !important;
     background: #ffffff !important;
     color: #0f172a !important;
     box-shadow: none !important;
+    box-sizing: border-box !important;
   }
 
   .md-content__inner::before {
     display: none !important;
   }
 
-  /* Typography defaults */
+  /* Typography defaults & justification */
   body,
   .md-typeset {
     font-size: 9.5pt !important;
@@ -376,10 +380,20 @@
     color: #0f172a !important;
   }
 
+  .md-typeset p {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    margin: 0 0 0.5rem !important;
+  }
+
   .md-typeset h1 {
     font-size: 19pt !important;
     margin: 0 0 0.2rem !important;
     color: #0f172a !important;
+    text-align: left !important;
+    hyphens: manual !important;
   }
 
   .md-typeset h2 {
@@ -388,6 +402,8 @@
     padding-bottom: 0.15rem !important;
     border-bottom: 1.5px solid #cbd5e1 !important;
     color: #1e3a8a !important;
+    text-align: left !important;
+    hyphens: manual !important;
     break-after: avoid !important;
   }
 
@@ -395,6 +411,8 @@
     font-size: 10pt !important;
     margin: 0.65rem 0 0.2rem !important;
     color: #0f172a !important;
+    text-align: left !important;
+    hyphens: manual !important;
     break-after: avoid !important;
   }
 
@@ -403,7 +421,16 @@
     font-weight: 700 !important;
   }
 
+  .md-typeset ul {
+    padding-left: 1.25rem !important;
+    margin: 0.3rem 0 0.6rem !important;
+  }
+
   .md-typeset li {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
     break-inside: avoid !important;
     margin-bottom: 0.35rem !important;
     color: #1e293b !important;
@@ -420,6 +447,8 @@
     font-weight: 600 !important;
     color: #1e3a8a !important;
     margin: 0 0 0.2rem !important;
+    text-align: left !important;
+    hyphens: manual !important;
   }
 
   .md-typeset .cv-contact,
@@ -427,10 +456,15 @@
     font-size: 8.5pt !important;
     color: #475569 !important;
     margin: 0 0 0.3rem !important;
+    text-align: left !important;
+    hyphens: manual !important;
   }
 
-  /* CV Tech block: clean light background, no dark boxes */
+  /* CV Tech block: clean light background, full width flush with content */
   .md-typeset .cv-tech {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
     font-size: 8pt !important;
     line-height: 1.35 !important;
     padding: 0.35rem 0.65rem !important;
@@ -441,6 +475,8 @@
     border: 1px solid #e2e8f0 !important;
     border-left: 3px solid #1e3a8a !important;
     border-radius: 4px !important;
+    text-align: left !important;
+    hyphens: manual !important;
     break-inside: avoid !important;
   }
 
@@ -449,11 +485,13 @@
     font-weight: 700 !important;
   }
 
-  /* Tables: clean white paper styling with full width and clear borders */
+  /* Tables: clean white paper styling spanning exactly 100% width */
   .md-typeset table:not([class]) {
     display: table !important;
     width: 100% !important;
+    min-width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box !important;
     font-size: 8.5pt !important;
     line-height: 1.4 !important;
     background: #ffffff !important;
@@ -475,6 +513,7 @@
     border: 1px solid #cbd5e1 !important;
     padding: 5px 8px !important;
     text-align: left !important;
+    box-sizing: border-box !important;
   }
 
   .md-typeset table:not([class]) td {
@@ -484,6 +523,27 @@
     border: 1px solid #e2e8f0 !important;
     padding: 5px 8px !important;
     vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Column 1 of 2-column tables: left-aligned category / system name */
+  .md-typeset table:not([class]) tr > td:first-child {
+    text-align: left !important;
+    width: 30% !important;
+  }
+
+  /* Column 2 of 2-column tables: justified descriptions */
+  .md-typeset table:not([class]) tr > td:nth-child(2) {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+  }
+
+  /* Multi-column tables (e.g. 3-column Certifications): left-aligned text */
+  .md-typeset table:not([class]) tr:has(> td:nth-child(3)) > td {
+    text-align: left !important;
+    width: auto !important;
   }
 
   .md-typeset table:not([class]) tr {
