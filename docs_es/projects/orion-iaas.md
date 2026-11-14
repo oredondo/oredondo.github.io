@@ -9,7 +9,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Arquitecto y Responsable de Plataforma |
-| **Organización** | BBVA (Infraestructura Core Banking) · 2017 – Presente |
+| **Organización** | BBVA (Infraestructura Core Banking) |
 | **Escala** | 30.000+ máquinas gobernadas · 40.000+ operaciones diarias · 500+ ingenieros |
 | **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, Ansible, AWS, OpenStack, OpenShift, Infoblox |
 
