@@ -10,11 +10,6 @@ Great platforms are rarely designed on a blank whiteboard in a single afternoon.
 
 This section maps how the systems I architected over the last decade connect into a single, cohesive engineering trajectory — followed by deep-dive case studies and my public open-source work.
 
-!!! note "On enterprise confidentiality vs. open-source code"
-
-    - **Enterprise systems (BBVA Technology & Oesia):** Because banking source code is strictly proprietary, enterprise case studies contain **no fabricated or internal code**. They focus exclusively on abstract system topology, architectural trade-offs, failure modes, and operational lessons.
-    - **Open-source systems ([GitHub @oredondo](https://github.com/oredondo)):** My personal engineering projects (**OmniLecture Studio** and **WrenchBuddy**) are fully open-source and link directly to their public repositories.
-
 ---
 
 ## 1. The Nine-Year Evolution of an Internal Developer Platform

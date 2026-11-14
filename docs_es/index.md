@@ -62,7 +62,7 @@ flowchart LR
 
 ## Casos de Estudio de Arquitectura Corporativa
 
-*Topología abstracta, trade-offs y modos de fallo — respetando la confidencialidad bancaria sin código propietario ni inventado:*
+*Topología de sistemas, trade-offs de arquitectura y modos de fallo en entornos de producción multi-cloud:*
 
 <div class="grid cards two-col" markdown>
 

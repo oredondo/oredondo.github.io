@@ -62,7 +62,7 @@ flowchart LR
 
 ## Enterprise Architecture Case Studies
 
-*Abstracted architecture, trade-offs, and failure modes — respecting banking confidentiality with zero proprietary or fabricated code:*
+*System topology, architectural trade-offs, and failure modes across multi-cloud production environments:*
 
 <div class="grid cards two-col" markdown>
 

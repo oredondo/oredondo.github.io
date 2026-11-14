@@ -10,11 +10,6 @@ Las grandes plataformas rara vez nacen en una pizarra en blanco en una sola tard
 
 Esta sección muestra cómo los sistemas que he diseñado durante la última década se conectan en una única trayectoria coherente de ingeniería — seguida de los casos de estudio en profundidad y mis proyectos open-source en GitHub.
 
-!!! note "Sobre confidencialidad empresarial frente a código open-source"
-
-    - **Sistemas corporativos (BBVA Technology y Oesia):** Dado que el código bancario es estrictamente propietario, los casos de estudio corporativos **no incluyen código inventado ni código interno**. Se centran exclusivamente en topología abstracta de sistemas, trade-offs de arquitectura, modos de fallo y lecciones operativas reales.
-    - **Sistemas open-source ([GitHub @oredondo](https://github.com/oredondo)):** Mis proyectos personales de ingeniería (**OmniLecture Studio** y **WrenchBuddy**) son completamente públicos y enlazan directamente a sus repositorios en GitHub.
-
 ---
 
 ## 1. Nueve Años de Evolución de una Plataforma Interna de Desarrollo

@@ -15,7 +15,7 @@ description: >-
 
 !!! abstract "Resumen"
 
-    Mientras que mi trabajo corporativo sobre Orion en BBVA es confidencial, **WrenchBuddy** es una plataforma pública en GitHub estructurada con la misma base arquitectónica: **Django + DRF + Celery + Redis + PostgreSQL**. Combina modelado relacional con **embeddings vectoriales de 768 dimensiones en `pgvector`** sobre manuales técnicos de taller, **extracción asíncrona de facturas por Visión/OCR**, almacenamiento compatible con S3 y un asistente conversacional de mantenimiento con contexto inyectado para motocicletas y automóviles.
+    Mientras que mi trabajo corporativo en BBVA es de código propietario, **WrenchBuddy** es una plataforma pública en GitHub estructurada con la misma base arquitectónica: **Django + DRF + Celery + Redis + PostgreSQL**. Combina modelado relacional con **embeddings vectoriales de 768 dimensiones en `pgvector`** sobre manuales técnicos de taller, **extracción asíncrona de facturas por Visión/OCR**, almacenamiento compatible con S3 y un asistente conversacional de mantenimiento con contexto inyectado para motocicletas y automóviles.
 
 ---
 
