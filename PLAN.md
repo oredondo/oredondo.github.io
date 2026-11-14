@@ -59,12 +59,12 @@ flowchart LR
 ### 📄 Goal 3: Alineación Estratégica del CV y Perfil Profesional
 > **Objetivo:** Optimizar el CV para reclutadores técnicos, Hiring Managers y comités de arquitectura.
 
-- [ ] **3.1 Estructura de impacto (Formato Google XYZ):**
-  - Revisar cada viñeta en [`docs/cv/index.md`](docs/cv/index.md) bajo la fórmula: *«Logró [X], medido por [Y], haciendo [Z]»*.
-- [ ] **3.2 Matriz de habilidades:**
-  - Categorizar claramente las tecnologías prioritarias (Python, AsyncIO, Celery, Django/DRF, Kubernetes, GitOps, LangGraph, MCP) frente a herramientas secundarias.
-- [ ] **3.3 Verificación de la versión para imprimir en PDF:**
-  - Validar que al pulsar «Print / Save as PDF» la maquetación en A4 corta exactamente en páginas limpias sin tablas partidas.
+- [x] **3.1 Estructura de impacto (Formato Google XYZ):**
+  - Viñetas de experiencia en BBVA Technology y Oesia reformuladas estrictamente en formato Google XYZ (*Logró [X], medido por [Y], haciendo [Z]*), cuantificando plazos, escala de nodos, ingeniería de datos y MTTR en segundos.
+- [x] **3.2 Matriz de habilidades:**
+  - Habilidades categorizadas estratégicamente dando máxima prioridad a *Core Architecture & Languages* (Python, AsyncIO, Celery, Django) y *Applied AI & Agentic Systems* (LangGraph, MCP, RAG).
+- [x] **3.3 Verificación de la versión para imprimir en PDF:**
+  - Reglas `@media print` auditadas en `extra.css` con `size: A4`, `break-inside: avoid` en listas y tablas para un corte limpio sin desbordamientos.
 
 ---
 

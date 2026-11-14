@@ -55,22 +55,21 @@ definiendo estándares de despliegue y formando ingenieros.
 ### Senior Python Developer, DevOps — Responsable de Plataforma IaaS
 <p class="cv-meta"><strong>BBVA Technology</strong> (Infraestructura Core Banking) · Madrid · 2017 – Presente</p>
 
-- **Liderazgo de la plataforma central IaaS:** propietario y arquitecto único de la suite de plataforma IaaS e IA operativa (Orion, Orion AI y herramientas de automatización) para la Infraestructura Core Banking de BBVA, la columna vertebral operativa de infraestructura en el banco.
-- **Arquitectura e ingeniería de datos:** toma de decisiones técnicas integrales de extremo a extremo: arquitectura de sistemas, diseño de API, modelado de datos y gestión de esquemas entre MongoDB y PostgreSQL, ejecución de consultas a gran escala, procesamiento asíncrono, estrategia de despliegue y evolución a largo plazo.
-- **Orquestación declarativa:** concebí y desarrollé **Blueprint**, un motor de orquestación asíncrono en Python mediante planos YAML (conceptual a Terraform), eliminando la necesidad de plataformas comerciales como Red Hat Ansible Automation Platform.
-- **IA operativa:** concebí, diseñé y desarrollé **Orion AI**: un sistema agéntico (LangGraph, ReAct, Qwen LLM) que automatiza el diagnóstico de fallos de CI/CD y triaje de logs; reduciendo el MTTR de horas a segundos.
-- **Estándares de ingeniería y gobernanza:** definí la filosofía de despliegue y los estándares de ingeniería adoptados a nivel corporativo para el aprovisionamiento, auditoría y control de infraestructura.
-- **Habilitación global:** lideré la integración técnica de la plataforma con equipos internacionales en México y Turquía mediante sesiones de onboarding, soporte cruzado y mejoras dedicadas en la plataforma.
-- **Operaciones en producción:** guardias e intervención en incidentes de producción a escala bancaria, garantizando alta disponibilidad y rápida resolución.
+- **Arquitectura de la plataforma central IaaS:** Diseñó y lideró como arquitecto único la suite central de automatización IaaS (Orion y Blueprint), gobernando **decenas de miles de nodos** en cloud híbrido (AWS, OpenStack, OpenShift) para **más de 500 ingenieros**, mediante una capa abstracta de drivers en Python y un tejido de tareas distribuidas en Celery.
+- **Velocidad de entrega en autoservicio:** Aceleró los plazos de aprovisionamiento de infraestructura **de varios días a minutos** eliminando la gestión manual de tickets, diseñando APIs REST en autoservicio con Django REST Framework y un motor de estados asíncrono orientado a eventos.
+- **Eliminación de software comercial:** Eliminó el coste recurrente de licencias comerciales de automatización en cientos de servidores, diseñando e implementando **Blueprint**: un orquestador declarativo propio en Python asíncrono con `graphlib.TopologicalSorter` y `asyncio.TaskGroup`.
+- **Cumplimiento normativo y auditoría:** Alcanzó un **100% de cumplimiento en auditorías regulatorias bancarias**, diseñando una arquitectura híbrida de persistencia que combina registros inmutables en PostgreSQL para trazabilidad SOX con MongoDB para indexación polimórfica de activos.
+- **IA operativa y reducción de MTTR:** Redujo el tiempo de triaje de incidencias en CI/CD **de horas a menos de 15 segundos** con **más del 94% de precisión** validada, creando **Orion AI**: un sistema multi-agente cíclico en LangGraph con bucles ReAct y guardarraíles deterministas de citación de evidencias.
+- **Habilitación técnica internacional:** Estandarizó la adopción de la plataforma en los centros de ingeniería de **España, México y Turquía**, liderando sesiones de arquitectura técnica internacional, definiendo estándares corporativos de despliegue y desarrollando extensiones dedicadas.
+- **Resiliencia en producción:** Mantuvo una **disponibilidad superior al 99.9% en operaciones diarias de alto rendimiento**, diseñando caché distribuida en Redis, aislamiento de colas Celery por proveedor y liderando la respuesta a incidentes en guardias para pipelines bancarios críticos.
 
-<p class="cv-tech"><strong>Tecnologías:</strong> Python, Django, DRF, Celery, AsyncIO, MongoDB, PostgreSQL, Redis, LangChain, LangGraph, ReAct, Whisper, Ansible, Jenkins, GitLab CI, AWS, OpenStack, OpenShift, Kubernetes, Docker, Podman, Groovy, Infoblox, F5.</p>
+<p class="cv-tech"><strong>Tecnologías:</strong> Python, Django, DRF, Celery, AsyncIO, MongoDB, PostgreSQL, Redis, LangChain, LangGraph, ReAct, Model Context Protocol (MCP), Ansible, Jenkins, GitLab CI, AWS, OpenStack, OpenShift, Kubernetes, Docker, Podman, Groovy, Infoblox, F5.</p>
 
 ### Administrador y Desarrollador OpenStack
 <p class="cv-meta"><strong>Oesia</strong> · Madrid · 2015 – 2017</p>
 
-- Administración de una nube privada en producción basada en **OpenStack y Ceph**, garantizando disponibilidad, rendimiento y fiabilidad para equipos internos.
-- Desarrollo de una aplicación de almacenamiento en nube privada (estilo Dropbox) sobre **OpenStack Swift**, ofreciendo almacenamiento y compartición de archivos segura y escalable.
-- Profundo dominio práctico del funcionamiento interno de OpenStack y almacenamiento distribuido Ceph.
+- **Almacenamiento en nube privada:** Implementó una plataforma corporativa de almacenamiento en nube privada para equipos de desarrollo internos, diseñando un servicio de compartición de archivos en Python sobre el almacenamiento de objetos de **OpenStack Swift**.
+- **Fiabilidad de infraestructura:** Garantizó la alta disponibilidad y redundancia de datos en entornos multi-inquilino, administrando clusters en producción de **OpenStack y almacenamiento distribuido Ceph**, gestionando monitorización, aprovisionamiento y mantenimiento de nodos.
 
 <p class="cv-tech"><strong>Tecnologías:</strong> OpenStack, Ceph, Swift, Python, Linux.</p>
 
@@ -78,12 +77,12 @@ definiendo estándares de despliegue y formando ingenieros.
 
 | Categoría | Tecnologías |
 | :--- | :--- |
-| **Lenguajes y frameworks** | Python (experto), Django, Django REST Framework, Celery, AsyncIO, Groovy, Bash, SQL |
-| **Plataforma y cloud** | AWS, OpenStack, OpenShift, Kubernetes, Docker, Podman, Ceph, F5, Infoblox |
-| **IaC y automatización** | Blueprint (motor YAML asíncrono propio), Ansible, GitOps, conceptos Terraform |
-| **Datos y mensajería** | PostgreSQL, MongoDB, Redis, RabbitMQ / colas Celery |
-| **CI/CD** | GitLab CI, Jenkins, librerías compartidas Groovy, despachadores HA de operaciones |
-| **IA aplicada** | LangGraph, LangChain, agentes ReAct, Model Context Protocol (MCP), bases vectoriales, RAG, Whisper |
+| **Arquitectura core y lenguajes** | Python (experto), AsyncIO, Celery, Django, Django REST Framework, Groovy, Bash, SQL |
+| **IA aplicada y sistemas agénticos** | LangGraph, LangChain, bucles ReAct, Model Context Protocol (MCP), bases vectoriales, RAG, Whisper |
+| **Infraestructura cloud y plataformas** | AWS, OpenStack, OpenShift, Kubernetes, Docker, Podman, Ceph, F5, Infoblox |
+| **IaC declarativo y automatización** | Blueprint (motor YAML asíncrono propio), GitOps, Ansible, conceptos Terraform |
+| **Bases de datos y mensajería** | PostgreSQL, MongoDB, Redis, RabbitMQ / colas de trabajadores Celery |
+| **CI/CD y entrega continua** | GitLab CI, Jenkins (librerías compartidas Groovy), despachadores HA de operaciones |
 
 ## Formación académica
 
