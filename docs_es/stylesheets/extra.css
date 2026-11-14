@@ -309,10 +309,32 @@
 /* ---------- Print (CV → PDF) ---------- */
 @page {
   size: A4;
-  margin: 1.4cm 1.5cm;
+  margin: 1.2cm 1.4cm;
 }
 
 @media print {
+  /* Force light theme CSS variables regardless of active screen scheme */
+  :root,
+  [data-md-color-scheme="slate"],
+  [data-md-color-scheme="default"] {
+    --md-default-bg-color: #ffffff !important;
+    --md-default-bg-color--light: #ffffff !important;
+    --md-default-bg-color--lighter: #f8fafc !important;
+    --md-default-bg-color--lightest: #f1f5f9 !important;
+    --md-default-fg-color: #0f172a !important;
+    --md-default-fg-color--light: #334155 !important;
+    --md-default-fg-color--lighter: #64748b !important;
+    --md-default-fg-color--lightest: #cbd5e1 !important;
+    --md-typeset-color: #0f172a !important;
+    --md-typeset-a-color: #1e3a8a !important;
+    --md-code-bg-color: #f8fafc !important;
+    --md-code-fg-color: #0f172a !important;
+    --md-primary-fg-color: #1e3a8a !important;
+    --brand-accent: #1e3a8a !important;
+    --brand-gradient: none !important;
+  }
+
+  /* Hide screen-only interactive & navigation elements */
   .md-header,
   .md-sidebar,
   .md-tabs,
@@ -321,69 +343,82 @@
   .md-source-file,
   .md-content__button,
   .headerlink,
-  .no-print {
+  .no-print,
+  .cv-actions {
     display: none !important;
   }
 
+  /* Reset layout containers to full width with zero clipping */
+  html,
+  body,
+  .md-container,
+  .md-main,
   .md-main__inner,
   .md-content,
   .md-content__inner {
     margin: 0 !important;
     padding: 0 !important;
     max-width: 100% !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
   }
 
   .md-content__inner::before {
     display: none !important;
   }
 
+  /* Typography defaults */
   body,
   .md-typeset {
-    background: #ffffff !important;
-    color: #111827 !important;
     font-size: 9.5pt !important;
     line-height: 1.45 !important;
+    color: #0f172a !important;
   }
 
   .md-typeset h1 {
-    font-size: 20pt !important;
+    font-size: 19pt !important;
     margin: 0 0 0.2rem !important;
     color: #0f172a !important;
   }
 
   .md-typeset h2 {
-    font-size: 12pt !important;
-    margin: 1rem 0 0.4rem !important;
-    padding-bottom: 0.15rem;
-    border-bottom: 1px solid #cbd5e1;
+    font-size: 11.5pt !important;
+    margin: 0.9rem 0 0.35rem !important;
+    padding-bottom: 0.15rem !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
     color: #1e3a8a !important;
-    break-after: avoid;
+    break-after: avoid !important;
   }
 
   .md-typeset h3 {
-    font-size: 10.5pt !important;
-    margin: 0.7rem 0 0.2rem !important;
-    break-after: avoid;
+    font-size: 10pt !important;
+    margin: 0.65rem 0 0.2rem !important;
+    color: #0f172a !important;
+    break-after: avoid !important;
   }
 
-  .md-typeset li,
-  .md-typeset table {
-    break-inside: avoid;
+  .md-typeset strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  .md-typeset li {
+    break-inside: avoid !important;
+    margin-bottom: 0.35rem !important;
+    color: #1e293b !important;
   }
 
   .md-typeset a {
-    color: #111827 !important;
+    color: #1e3a8a !important;
     text-decoration: none !important;
   }
 
-  .md-typeset .cv-headline,
-  .md-typeset .cv-tech {
-    color: #1e3a8a !important;
-    background: none !important;
-  }
-
+  /* CV Header & Metadata */
   .md-typeset .cv-headline {
-    font-size: 11pt !important;
+    font-size: 10.5pt !important;
+    font-weight: 600 !important;
+    color: #1e3a8a !important;
     margin: 0 0 0.2rem !important;
   }
 
@@ -394,14 +429,118 @@
     margin: 0 0 0.3rem !important;
   }
 
+  /* CV Tech block: clean light background, no dark boxes */
+  .md-typeset .cv-tech {
+    font-size: 8pt !important;
+    line-height: 1.35 !important;
+    padding: 0.35rem 0.65rem !important;
+    margin: 0.35rem 0 0.75rem !important;
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 3px solid #1e3a8a !important;
+    border-radius: 4px !important;
+    break-inside: avoid !important;
+  }
+
+  .md-typeset .cv-tech strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  /* Tables: clean white paper styling with full width and clear borders */
   .md-typeset table:not([class]) {
+    display: table !important;
+    width: 100% !important;
+    max-width: 100% !important;
     font-size: 8.5pt !important;
+    line-height: 1.4 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-collapse: collapse !important;
+    border: 1px solid #cbd5e1 !important;
     box-shadow: none !important;
-    border: 1px solid #e5e7eb;
+    break-inside: avoid !important;
+    overflow: visible !important;
+    margin: 0.5rem 0 0.8rem !important;
+  }
+
+  .md-typeset table:not([class]) th {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 5px 8px !important;
+    text-align: left !important;
+  }
+
+  .md-typeset table:not([class]) td {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 5px 8px !important;
+    vertical-align: top !important;
+  }
+
+  .md-typeset table:not([class]) tr {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  .md-typeset table:not([class]) tr:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .md-typeset table:not([class]) td strong {
+    color: #0f172a !important;
+  }
+
+  .md-typeset table:not([class]) td a {
+    color: #1e3a8a !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+  }
+
+  /* Inline code & code blocks in print */
+  .md-typeset code {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 3px !important;
+    padding: 1px 4px !important;
+    font-size: 8pt !important;
+    box-shadow: none !important;
+  }
+
+  /* Tags & KPI cards in print */
+  .tech-tag {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
   }
 
   .kpi-card {
-    border: 1px solid #d1d5db !important;
-    break-inside: avoid;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+  }
+
+  .kpi-value {
+    color: #1e3a8a !important;
+  }
+
+  .kpi-label {
+    color: #475569 !important;
   }
 }
