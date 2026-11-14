@@ -92,7 +92,7 @@ flowchart TB
 
     ---
 
-    Prototipo multi-agente en LangGraph + ReAct que correlaciona logs de pipelines, documentación en caché Redis y diffs de GitLab bajo guardarraíles deterministas — junto con un análisis honesto de las barreras reales de paso a producción en banca.
+    Prototipo multi-agente en LangGraph + ReAct que correlaciona logs de pipelines, runbooks indexados en Redis y diffs de GitLab bajo guardarraíles deterministas — junto con un análisis honesto de las barreras reales de paso a producción en banca.
 
     [:octicons-arrow-right-24: Arquitectura y lecciones de rollout](orion-ai.md)
 

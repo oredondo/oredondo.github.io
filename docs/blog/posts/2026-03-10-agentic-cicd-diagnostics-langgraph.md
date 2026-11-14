@@ -22,7 +22,7 @@ tags:
 
 Most engineering posts about AI agents end at the moment the prototype works on a benchmark dataset. In a regulated enterprise, that is actually where the hardest part begins.
 
-When we designed and validated the **Orion AI** Proof of Concept (PoC) at BBVA — a multi-agent system built with **LangGraph** and **ReAct** loops to automate CI/CD root-cause failure analysis — the technical goal was clear: stop engineers from spending hours digging through megabytes of execution logs, Redis-cached runbooks, and GitLab commit diffs every time a pipeline broke.
+When we designed and validated the **Orion AI** Proof of Concept (PoC) at BBVA — a multi-agent system built with **LangGraph** and **ReAct** loops to automate CI/CD root-cause failure analysis — the technical goal was clear: stop engineers from spending hours digging through megabytes of execution logs, internal runbooks, and GitLab commit diffs every time a pipeline failed.
 
 The prototype worked: it slashed triage from hours of manual log correlation to seconds. Yet its current status — **validated and prepared, awaiting integration guidelines for central AI infrastructure** — taught me just as much about enterprise platform architecture as writing the LangGraph nodes themselves.
 
@@ -43,7 +43,7 @@ That is why we modeled **Orion AI** as a **stateful, cyclic graph in LangGraph**
 flowchart TD
     Event["Pipeline Failure Event"] --> Supervisor["LangGraph Supervisor"]
     Supervisor --> Logs["Execution Logs"]
-    Supervisor --> Docs["Redis-Cached Support Docs"]
+    Supervisor --> Docs["Support Runbooks (Redis RAG Cache)"]
     Supervisor --> Diffs["GitLab Commit Diffs"]
     Logs & Docs & Diffs --> ReAct["ReAct Reasoning (Qwen 131k Context)"]
     ReAct --> Gate{"Deterministic Guardrails"}
@@ -51,7 +51,7 @@ flowchart TD
     Gate -- "Grounded & schema-valid" --> Diagnosis["Actionable Root-Cause Report"]
 ```
 
-- **Concurrent context gathering:** The graph pulls raw execution traces, Redis-cached documentation, and repository metadata in parallel.
+- **Concurrent context gathering:** The graph pulls raw execution traces, operational runbooks (cached in Redis to accelerate RAG retrieval), and repository metadata in parallel.
 - **Long-context correlation (`Qwen` 131k):** Feeding consolidated evidence into a high-context model preserves the causal chain from initialization to failure.
 - **Bounded ReAct loops:** When a log trace points to a modified configuration file, the agent loops back to inspect the exact commit diff before formulating its diagnosis.
 
@@ -61,7 +61,7 @@ In banking operations, a hallucinated remediation command is worse than no diagn
 
 - **Strict output schemas:** The agent cannot return free-form prose; it must populate a typed diagnostic contract.
 - **Explicit evidence grounding:** Every root-cause claim must point to concrete evidence retrieved during the run (log fragments, runbook entries, or commit diffs).
-- **Isolated tool contracts (MCP):** External systems (Jenkins, Redis, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
+- **Isolated tool contracts (MCP):** External systems (Jenkins, Redis runbook cache, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
 
 ## 3. Why a Validated PoC Still Waits on Enterprise Foundations
 

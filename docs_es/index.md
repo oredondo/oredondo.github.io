@@ -100,7 +100,7 @@ flowchart LR
 
     ---
 
-    Prototipo multi-agente validado con LangGraph y bucles ReAct que correlaciona logs de ejecución, documentación en Redis y diffs de GitLab bajo guardarraíles deterministas — junto con un análisis honesto de las restricciones de despliegue bancario.
+    Prototipo multi-agente validado con LangGraph y bucles ReAct que correlaciona logs de ejecución, runbooks indexados en Redis y diffs de GitLab bajo guardarraíles deterministas — junto con un análisis honesto de las restricciones de despliegue bancario.
 
     <span class="tech-tag">LangGraph</span><span class="tech-tag">ReAct</span><span class="tech-tag">MCP</span><span class="tech-tag">Qwen 131k</span><span class="tech-tag">Guardarraíles Deterministas</span>
 

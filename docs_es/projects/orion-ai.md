@@ -15,7 +15,7 @@ description: >-
 
 !!! abstract "Resumen de arquitectura"
 
-    Orion AI es una **Prueba de Concepto (PoC) funcional y validada** diseñada para evaluar un pipeline multi-agente paralelo de análisis de causa raíz sobre fallos en CI/CD e infraestructura. Mediante máquinas de estado en **LangGraph** y bucles de razonamiento **ReAct**, el sistema agrega concurrentemente logs de ejecución, documentación de soporte cacheada en Redis y diffs de commits en GitLab utilizando modelos de contexto amplio (`Qwen` 131k) bajo guardarraíles deterministas estrictos — reduciendo el triaje manual de horas a segundos durante las pruebas de validación.
+    Orion AI es una **Prueba de Concepto (PoC) funcional y validada** diseñada para evaluar un pipeline multi-agente paralelo de análisis de causa raíz sobre fallos en CI/CD e infraestructura. Mediante máquinas de estado en **LangGraph** y bucles de razonamiento **ReAct**, el sistema agrega concurrentemente logs de ejecución, runbooks operativos (indexados en caché Redis para acelerar la recuperación RAG) y diffs de commits en GitLab utilizando modelos de contexto amplio (`Qwen` 131k) bajo guardarraíles deterministas estrictos — reduciendo el triaje manual de horas a segundos durante las pruebas de validación.
 
 ---
 
@@ -39,13 +39,14 @@ flowchart TD
 
     subgraph ParallelEvidence["Recopilación Concurrente de Contexto"]
         Orchestrator --> LogNode["Analizador de Logs de Ejecución<br/>(Trazas de Jenkins / Dispatcher)"]
-        Orchestrator --> DocNode["Recuperador de Base de Conocimiento<br/>(Documentación y runbooks en caché Redis)"]
+        Orchestrator --> DocNode["Recuperador de Base de Conocimiento<br/>(Runbooks operativos en caché Redis)"]
         Orchestrator --> GitNode["Inspector de Repositorio<br/>(Historial de commits y diffs en GitLab)"]
     end
 
     LogNode & DocNode & GitNode --> ReAct["Bucle de Razonamiento ReAct<br/>(Qwen 131k Context LLM + Herramientas MCP)"]
 
-    ReAct --> Guardrails{"Guardarraíles Deterministas<br/>(Validación de Esquema y Evidencia)"}
+    Guardrails{"Guardarraíles Deterministas<br/>(Validación de Esquema y Evidencia)"}
+    ReAct --> Guardrails
     Guardrails -- "Traza ambigua → inspeccionar diff en detalle" --> GitNode
     Guardrails -- "Salida validada" --> Report["Diagnóstico Estructurado de Causa Raíz"]
 ```
@@ -58,14 +59,14 @@ flowchart TD
 Los fallos en pipelines rara vez pueden diagnosticarse en una única pasada secuencial. Cuando un log solo muestra un código de salida genérico, el agente necesita retroceder e inspeccionar los diffs recientes del repositorio o cambios de configuración antes de emitir una conclusión. **LangGraph** mantiene un estado tipado entre nodos, permitiendo bifurcaciones condicionales y bucles ReAct acotados en lugar de prompts frágiles de un solo paso.
 
 ### B. Agregación Concurrente de Evidencias con Contexto Amplio
-En lugar de consultar fuentes secuencialmente, el grafo recupera en paralelo las trazas de ejecución, la documentación operativa en Redis y los metadatos de GitLab, inyectando el contexto consolidado en un **LLM de 131k tokens de contexto (Qwen)** para preservar la causalidad desde la inicialización del entorno hasta el error final.
+En lugar de consultar fuentes secuencialmente, el grafo recupera en paralelo las trazas de ejecución, los manuales y runbooks operativos en caché Redis y los metadatos de GitLab, inyectando el contexto consolidado en un **LLM de 131k tokens de contexto (Qwen)** para preservar la causalidad desde la inicialización del entorno hasta el error final.
 
 ### C. Guardarraíles Deterministas Estrictos
 En un entorno bancario regulado, una herramienta de diagnóstico operativo no puede especular ni inventar comandos:
 
 - **Contratos de salida tipados:** Las respuestas se restringen a esquemas estructurados en lugar de texto libre.
 - **Evidencia fundamentada:** Cada hallazgo debe correlacionarse directamente con fragmentos reales del log, entradas existentes en la base de conocimiento o diffs de commits verificados.
-- **Fronteras de herramientas estandarizadas (MCP):** Las integraciones externas (logs, caché Redis, APIs de GitLab) se exponen tras contratos de herramientas limpios para que el modelo no ejecute acciones arbitrarias.
+- **Fronteras de herramientas estandarizadas (MCP):** Las integraciones externas (logs, caché de runbooks en Redis, APIs de GitLab) se exponen tras contratos de herramientas limpios para que el modelo no ejecute acciones arbitrarias.
 
 ---
 

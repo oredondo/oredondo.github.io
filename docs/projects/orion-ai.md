@@ -15,7 +15,7 @@ description: >-
 
 !!! abstract "Architectural summary"
 
-    Orion AI is a functional, validated **Proof of Concept (PoC)** built to evaluate parallel, multi-agent root-cause diagnostics across CI/CD and infrastructure pipelines. Using **LangGraph** state machines and **ReAct** reasoning loops, the system concurrently aggregates execution logs, Redis-cached support documentation, and GitLab commit diffs with high-context LLMs (`Qwen` 131k context) under strict deterministic guardrails — cutting manual triage from hours to seconds during validation.
+    Orion AI is a functional, validated **Proof of Concept (PoC)** built to evaluate parallel, multi-agent root-cause diagnostics across CI/CD and infrastructure pipelines. Using **LangGraph** state machines and **ReAct** reasoning loops, the system concurrently aggregates execution logs, operational runbooks (cached in Redis to accelerate RAG retrieval), and GitLab commit diffs with high-context LLMs (`Qwen` 131k context) under strict deterministic guardrails — cutting manual triage from hours to seconds during validation.
 
 ---
 
@@ -39,13 +39,14 @@ flowchart TD
 
     subgraph ParallelEvidence["Concurrent Context Gathering"]
         Orchestrator --> LogNode["Execution Log Parser<br/>(Jenkins / Dispatcher traces)"]
-        Orchestrator --> DocNode["Knowledge Base Retriever<br/>(Redis-cached support docs & runbooks)"]
+        Orchestrator --> DocNode["Knowledge Base Retriever<br/>(Operational runbooks in Redis cache)"]
         Orchestrator --> GitNode["Repository Inspector<br/>(GitLab commit history & diffs)"]
     end
 
     LogNode & DocNode & GitNode --> ReAct["ReAct Reasoning Loop<br/>(Qwen 131k Context LLM + MCP Tools)"]
 
-    ReAct --> Guardrails{"Deterministic Guardrails<br/>(Schema & Evidence Check)"}
+    Guardrails{"Deterministic Guardrails<br/>(Schema & Evidence Check)"}
+    ReAct --> Guardrails
     Guardrails -- "Ambiguous trace → inspect deeper diff" --> GitNode
     Guardrails -- "Validated output" --> Report["Structured Root-Cause Diagnosis"]
 ```
@@ -58,14 +59,14 @@ flowchart TD
 Pipeline failures are rarely diagnosable in a single linear pass. When a raw log only shows a generic exit code, the agent needs to loop back and inspect recent commit diffs or configuration changes before concluding. **LangGraph** maintains a typed state across nodes, enabling conditional branching and bounded ReAct loops rather than brittle one-shot prompting.
 
 ### B. Concurrent Evidence Aggregation with Long-Context Reasoning
-Rather than querying tools sequentially, the graph fetches execution traces, Redis-cached operational documentation, and repository metadata in parallel, feeding the consolidated evidence into a **131k-context LLM (Qwen)** so long dependency chains in build logs are preserved without losing early setup errors.
+Rather than querying tools sequentially, the graph fetches execution traces, operational runbooks cached in Redis, and repository metadata in parallel, feeding the consolidated evidence into a **131k-context LLM (Qwen)** so long dependency chains in build logs are preserved without losing early setup errors.
 
 ### C. Strict Deterministic Guardrails
 In a regulated banking environment, an operational diagnostic tool cannot speculate or invent commands:
 
 - **Typed output contracts:** Agent responses are constrained to strict schemas rather than free-form chat.
 - **Grounded evidence:** Every diagnostic finding must correlate directly with retrieved log fragments, known runbook entries, or actual commit diffs.
-- **Standardized tool boundaries (MCP):** External integrations (logs, Redis cache, GitLab APIs) are isolated behind clean tool interfaces so the reasoning layer cannot execute arbitrary side effects.
+- **Standardized tool boundaries (MCP):** External integrations (logs, Redis runbook cache, GitLab APIs) are isolated behind clean tool interfaces so the reasoning layer cannot execute arbitrary side effects.
 
 ---
 

@@ -22,7 +22,7 @@ tags:
 
 La mayoría de los artículos técnicos sobre agentes de IA terminan en el instante en que el prototipo funciona sobre un conjunto de pruebas. En una gran empresa regulada, ahí es exactamente donde empieza la parte más difícil.
 
-Cuando diseñamos y validamos la Prueba de Concepto (PoC) de **Orion AI** en BBVA — un sistema multi-agente construido con **LangGraph** y bucles **ReAct** para automatizar el análisis de causa raíz en fallos de CI/CD — el objetivo técnico era evidente: evitar que los ingenieros perdieran horas revisando megabytes de logs de ejecución, documentación cacheada en Redis y diffs de commits en GitLab cada vez que se rompía una tubería.
+Cuando diseñamos y validamos la Prueba de Concepto (PoC) de **Orion AI** en BBVA — un sistema multi-agente construido con **LangGraph** y bucles **ReAct** para automatizar el análisis de causa raíz en fallos de CI/CD — el objetivo técnico era evidente: evitar que los ingenieros perdieran horas revisando megabytes de logs de ejecución, manuales internos de soporte (*runbooks*) y diffs de commits en GitLab cada vez que fallaba un pipeline.
 
 El prototipo cumplió su objetivo: redujo el triaje de horas de correlación manual a segundos. Sin embargo, su estado actual — **prototipo validado y preparado, a la espera de directrices de integración con la infraestructura central de IA** — me enseñó tanto sobre arquitectura de plataformas corporativas como el propio diseño de los nodos en LangGraph.
 
@@ -43,7 +43,7 @@ Por eso modelamos **Orion AI** como un **grafo cíclico con estado en LangGraph*
 flowchart TD
     Event["Evento de Fallo en Pipeline"] --> Supervisor["Supervisor en LangGraph"]
     Supervisor --> Logs["Logs de Ejecución"]
-    Supervisor --> Docs["Documentación de Soporte en Redis"]
+    Supervisor --> Docs["Runbooks de Soporte (Caché RAG en Redis)"]
     Supervisor --> Diffs["Diffs de Commits en GitLab"]
     Logs & Docs & Diffs --> ReAct["Razonamiento ReAct (Qwen 131k Contexto)"]
     ReAct --> Gate{"Guardarraíles Deterministas"}
@@ -51,7 +51,7 @@ flowchart TD
     Gate -- "Fundamentado y válido en esquema" --> Diagnosis["Informe Accionable de Causa Raíz"]
 ```
 
-- **Recopilación concurrente de contexto:** El grafo extrae en paralelo las trazas de ejecución, la documentación cacheada en Redis y los metadatos del repositorio.
+- **Recopilación concurrente de contexto:** El grafo extrae en paralelo las trazas de ejecución, los manuales y runbooks operativos (indexados en caché Redis para acelerar la recuperación RAG) y los metadatos del repositorio.
 - **Correlación con contexto amplio (`Qwen` 131k):** Inyectar las evidencias consolidadas en un modelo de gran ventana de contexto preserva la cadena causal desde la inicialización hasta el error final.
 - **Bucles ReAct acotados:** Cuando una traza apunta a un archivo de configuración modificado, el agente retrocede para inspeccionar el diff exacto del commit antes de emitir su conclusión.
 
@@ -61,7 +61,7 @@ En operaciones bancarias, sugerir un comando de remediación alucinado es peor q
 
 - **Esquemas estrictos de salida:** El agente no devuelve prosa libre; debe completar un contrato de diagnóstico tipado.
 - **Evidencia explícita:** Cada causa raíz señalada debe apoyarse en evidencia concreta recuperada durante la ejecución (fragmentos de log, entradas de documentación o diffs de commits).
-- **Fronteras de herramientas aisladas (MCP):** Los sistemas externos (Jenkins, Redis, GitLab) se consultan mediante herramientas tipadas de solo lectura en lugar de otorgar acceso arbitrario a consola.
+- **Fronteras de herramientas aisladas (MCP):** Los sistemas externos (Jenkins, caché de runbooks en Redis, GitLab) se consultan mediante herramientas tipadas de solo lectura en lugar de otorgar acceso arbitrario a consola.
 
 ## 3. Por Qué una PoC Validada Espera a los Cimientos Corporativos
 

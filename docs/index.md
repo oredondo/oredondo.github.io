@@ -100,7 +100,7 @@ flowchart LR
 
     ---
 
-    Validated multi-agent prototype using LangGraph and ReAct loops to correlate execution logs, Redis-cached docs, and GitLab diffs under deterministic guardrails — plus a candid breakdown of enterprise rollout constraints.
+    Validated multi-agent prototype using LangGraph and ReAct loops to correlate execution logs, Redis-indexed runbooks, and GitLab diffs under deterministic guardrails — plus a candid breakdown of enterprise rollout constraints.
 
     <span class="tech-tag">LangGraph</span><span class="tech-tag">ReAct</span><span class="tech-tag">MCP</span><span class="tech-tag">Qwen 131k</span><span class="tech-tag">Deterministic Guardrails</span>
 

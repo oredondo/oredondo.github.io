@@ -92,7 +92,7 @@ flowchart TB
 
     ---
 
-    Multi-agent LangGraph + ReAct diagnostic prototype that correlates pipeline logs, Redis-cached runbooks, and GitLab diffs under deterministic guardrails — plus a candid look at enterprise rollout constraints.
+    Multi-agent LangGraph + ReAct diagnostic prototype that correlates pipeline logs, Redis-indexed runbooks, and GitLab diffs under deterministic guardrails — plus a candid look at enterprise rollout constraints.
 
     [:octicons-arrow-right-24: Architecture & rollout lessons](orion-ai.md)
 
