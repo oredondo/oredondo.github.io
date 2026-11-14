@@ -1,51 +1,54 @@
 ---
-title: Ecosistema de Plataforma y Casos de Estudio
+title: Ecosistema de Plataforma y Proyectos de Ingeniería
 description: >-
-  Cómo encajan diez años de ingeniería de plataformas — desde almacenamiento en OpenStack/Ceph y librerías compartidas en Jenkins hasta dispatchers HA propios, pipelines por drivers, Orion, Blueprint e IA aplicada.
+  Resumen a vuela pluma y catálogo completo de plataformas de despliegue, motores declarativos IaC, subsistemas de infraestructura y proyectos open-source.
 ---
 
-# Ecosistema de Plataforma y Casos de Estudio
+# Ecosistema de Plataforma y Proyectos de Ingeniería
 
-Las grandes plataformas rara vez nacen en una pizarra en blanco en una sola tarde. Evolucionan **capa por capa** a medida que las herramientas existentes tocan su techo de escalabilidad, las integraciones de fabricantes quedan deprecadas y el gobierno manual deja de escalar.
-
-Esta sección muestra cómo los sistemas que he diseñado durante la última década se conectan en una única trayectoria coherente de ingeniería — seguida de los casos de estudio en profundidad y mis proyectos open-source en GitHub.
-
----
-
-## 1. La Evolución de Orion: De CMDB e Inventario a Dispatcher de Alta Disponibilidad
-
-En **BBVA Technology** (2017 – Presente), **Orion** no nació como un producto estático, sino como una respuesta evolutiva a los cuellos de botella reales de escala bancaria — gobernando **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y bare-metal** y procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
-
-```mermaid
-flowchart TD
-    subgraph Origen["1. Origen: CMDB, Inventario y Catálogo Apificado"]
-        direction TB
-        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Catálogo de operaciones REST (OpenAPI / RBAC)<br/>• Canalizaciones automáticas de auditoría"]
-    end
-
-    subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
-        direction LR
-        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF crítico)<br/>❌ UI rígida e inadecuada para operaciones<br/>❌ Muy complejo de mantener, escalar y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ API REST y UI orientada a operaciones<br/>✅ Fácil integración de nuevas funcionalidades"]
-    end
-
-    subgraph Expansion["3. Ecosistema Declarativo e IA"]
-        direction LR
-        BP["Blueprint<br/>(Motor declarativo en YAML, olas DAG y teardown idempotente)"]
-        AI["Orion AI (PoC Validada)<br/>(Diagnóstico multi-agente de CI/CD con LangGraph)"]
-    end
-
-    CMDB -->|"Evolucionó integrando"| DISP
-    DISP --> BP & AI
-```
-
-1. **Fase 1 — El Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado:** Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos, combinando una base de datos híbrida (PostgreSQL, MongoDB, Redis), permisos RBAC y canalizaciones automáticas de auditoría consumidas directamente por los auditores del banco.
-2. **Fase 2 — El Cuello de Botella de Jenkins:** Inicialmente, el disparo de operaciones del catálogo dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad nativa (siendo un punto único de fallo crítico para el banco), su interfaz web estaba diseñada para builds de software y no para operaciones de infraestructura, y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
-3. **Fase 3 — La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución con un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta migración reemplazó por completo a Jenkins para operaciones de infraestructura, desacopló las variables en runtime (evitando deriva de configuración) y garantizó una arquitectura API-first con ejecución en contenedores efímeros aislados.
-4. **Fase 4 — Extensión Declarativa (Blueprint) e IA Operativa (Orion AI):** Con la CMDB y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales como Red Hat Automation Platform) y el auto-diagnóstico agéntico con **Orion AI** (LangGraph).
+Durante más de una década he diseñado y evolucionado sistemas de plataforma, herramientas de infraestructura como código (IaC), planos de control multi-cloud y aplicaciones con inteligencia artificial aplicada.
 
 ---
 
-## 2. Casos de Estudio de Arquitectura Corporativa
+### Resumen del Ecosistema a Vuela Pluma
+
+El trabajo de ingeniería recogido en este portal se articula en torno a tres grandes pilares tecnológicos:
+
+1. **Plataformas de Infraestructura Bancaria (BBVA):** Diseñadas para resolver la gobernanza de más de **30.000 máquinas** y **40.000 operaciones diarias**. Destacan **Orion** (plano de control IaaS que evolucionó de CMDB apificada a dispatcher en alta disponibilidad reemplazando a Jenkins), **Blueprint** (motor declarativo en YAML que orquesta despliegues mediante olas DAG y teardown idempotente) e iniciativas de IA operativa como **Orion AI** (LangGraph).
+2. **Subsistemas Críticos de Red y Automatización:** Soluciones de ingeniería creadas para blindar la continuidad de negocio frente a obsolescencias técnicas (como el **puente REST a medida F5/OpenStack** desplegado con *zero downtime* tras la deprecación del soporte oficial), servicios de **gestión dinámica de configuración** y plataformas de almacenamiento masivo en nubes privadas con **OpenStack Swift y Ceph**.
+3. **Sistemas Open-Source e I+D Personal en GitHub:** Herramientas públicas donde aplico optimizaciones multimedia de bajo nivel en **FFmpeg** (compresión H.264 stillimage a 10 FPS con ahorro del 70%, sincronización de reloj PTS y filtrado espectral en **OmniLecture Studio**), transcripción Whisper de doble motor, y arquitecturas RAG contextuales con **PostgreSQL (`pgvector`) y Django 6** en **WrenchBuddy**.
+
+<div class="grid cards" markdown>
+
+-   :material-server-network:{ .lg .middle } __Plataformas Enterprise & Control Plane__
+
+    ---
+
+    Planos de control de despliegue, motores declarativos estilo IaC y sustitución de monolitos CI/CD para operar más de 30.000 máquinas y 40.000 operaciones diarias en banca sin puntos únicos de fallo (SPOF).
+
+    [:octicons-arrow-down-24: Ver plataformas corporativas](#casos-de-estudio-corporativos)
+
+-   :material-lan-connect:{ .lg .middle } __Subsistemas de Red y Automatización__
+
+    ---
+
+    Puentes REST a medida para sortear deprecaciones de fabricante (F5 / OpenStack) con zero downtime, inyección dinámica de configuración en runtime y almacenamiento en OpenStack Swift / Ceph.
+
+    [:octicons-arrow-down-24: Ver subsistemas](#subsistemas-de-plataforma)
+
+-   :material-robot-industrial:{ .lg .middle } __Open-Source, FFmpeg e IA Aplicada__
+
+    ---
+
+    Desarrollo nativo en Linux/GTK con pipelines multimedia optimizados en FFmpeg (H.264 stillimage, PTS sync), transcripción Whisper y arquitecturas RAG con PostgreSQL, `pgvector` y LangChain.
+
+    [:octicons-arrow-down-24: Ver proyectos open-source](#proyectos-open-source)
+
+</div>
+
+---
+
+## 1. Casos de Estudio de Arquitectura Corporativa {: #casos-de-estudio-corporativos }
 
 <div class="grid cards two-col" markdown>
 
@@ -55,6 +58,8 @@ flowchart TD
 
     Arquitecto único del plano de control IaaS y despliegue: una sola interfaz OpenAPI que gobierna 30.000+ máquinas en AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por una capa híbrida PostgreSQL + MongoDB + Redis y canalizaciones automáticas de auditoría.
 
+    <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
+
     [:octicons-arrow-right-24: Arquitectura y trade-offs](orion-iaas.md)
 
 -   :material-file-tree-outline:{ .lg .middle } __[Blueprint — Motor Declarativo de Ciclo de Vida](blueprint.md)__
@@ -62,6 +67,8 @@ flowchart TD
     ---
 
     Motor de orquestación asíncrono en Python guiado por planos YAML versionados. Calcula grafos DAG de ejecución, reconcilia contra el estado en vivo de Orion y reanuda destrucciones interrumpidas de forma idempotente — eliminando licencias comerciales.
+
+    <span class="tech-tag">Python</span><span class="tech-tag">AsyncIO</span><span class="tech-tag">Planificación DAG</span><span class="tech-tag">YAML Declarativo</span><span class="tech-tag">GitOps</span>
 
     [:octicons-arrow-right-24: Arquitectura y trade-offs](blueprint.md)
 
@@ -71,6 +78,8 @@ flowchart TD
 
     Cómo migramos desde los cuellos de botella de Jenkins hacia un Dispatcher de Operaciones en Alta Disponibilidad (Django + Celery), inyección dinámica de configuración en runtime y ejecución efímera en Kubernetes Jobs.
 
+    <span class="tech-tag">Django</span><span class="tech-tag">Celery</span><span class="tech-tag">Kubernetes Jobs</span><span class="tech-tag">Ansible</span><span class="tech-tag">OpenAPI</span>
+
     [:octicons-arrow-right-24: Arquitectura y trade-offs](dispatcher-migration.md)
 
 -   :material-radar:{ .lg .middle } __[Orion AI — Diagnóstico Agéntico CI/CD (PoC Validada)](orion-ai.md)__
@@ -79,13 +88,15 @@ flowchart TD
 
     Prototipo multi-agente en LangGraph + ReAct que correlaciona logs de pipelines, runbooks indexados en Redis y diffs de GitLab bajo guardarraíles deterministas — junto con un análisis honesto de las barreras reales de paso a producción en banca.
 
+    <span class="tech-tag">LangGraph</span><span class="tech-tag">ReAct</span><span class="tech-tag">MCP</span><span class="tech-tag">Qwen 131k</span><span class="tech-tag">Guardarraíles Deterministas</span>
+
     [:octicons-arrow-right-24: Arquitectura y lecciones de rollout](orion-ai.md)
 
 </div>
 
 ---
 
-## 3. Subsistemas de Plataforma y Proyectos Previos de Infraestructura
+## 2. Subsistemas de Plataforma y Automatización de Infraestructura {: #subsistemas-de-plataforma }
 
 Además de los cuatro análisis en profundidad anteriores, estos subsistemas constituyeron piezas clave de la arquitectura:
 
@@ -137,7 +148,7 @@ Además de los cuatro análisis en profundidad anteriores, estos subsistemas con
 
 ---
 
-## 4. Proyectos Open-Source e I+D Personal
+## 3. Proyectos Open-Source e I+D Personal {: #proyectos-open-source }
 
 Sistemas públicos construidos fuera de las restricciones bancarias — con código fuente completo disponible en GitHub:
 
@@ -149,6 +160,8 @@ Sistemas públicos construidos fuera de las restricciones bancarias — con cód
 
     Grabador nativo de pantalla/audio para Linux (Wayland/GNOME, GTK 3) con pipeline multimedia en FFmpeg (compresión H.264 a 10 FPS con `-tune stillimage` que ahorra hasta un 70% de espacio en disco, sincronización de reloj PTS y filtrado espectral `afftdn`) y flujos en LangGraph. Combina Whisper de doble motor (`faster-whisper` CPU `int8` + API cloud), OCR de diapositivas y manuscritos con OpenCV CLAHE + Tesseract y guardarraíles anti-alucinación para generar apuntes Markdown, documentos `.docx` y mazos Anki.
 
+    <span class="tech-tag">Python 3.12</span><span class="tech-tag">GTK 3 / PyGObject</span><span class="tech-tag">FFmpeg</span><span class="tech-tag">faster-whisper</span><span class="tech-tag">LangGraph</span><span class="tech-tag">OpenCV</span>
+
     [:octicons-arrow-right-24: Caso de estudio](omni-lecture.md) · [:fontawesome-brands-github: Repositorio GitHub](https://github.com/oredondo/omnilecture-studio)
 
 -   :material-wrench-outline:{ .lg .middle } __[WrenchBuddy — Plataforma IA de Mantenimiento y RAG con pgvector](wrenchbuddy.md)__
@@ -156,6 +169,8 @@ Sistemas públicos construidos fuera de las restricciones bancarias — con cód
     ---
 
     Plataforma full-stack de ciclo de vida de vehículos construida con **Django 6, DRF, PostgreSQL (`pgvector`), Celery, Redis y LangChain** (más un frontend en TypeScript). Utiliza visión/OCR para extraer facturas de taller y RAG vectorial de 768 dimensiones sobre manuales técnicos para alimentar un asistente mecánico contextual.
+
+    <span class="tech-tag">Django 6</span><span class="tech-tag">PostgreSQL / pgvector</span><span class="tech-tag">LangChain</span><span class="tech-tag">Celery / Redis</span><span class="tech-tag">TypeScript</span>
 
     [:octicons-arrow-right-24: Caso de estudio](wrenchbuddy.md) · [:fontawesome-brands-github: Backend](https://github.com/oredondo/WrenchBuddy) · [:fontawesome-brands-github: Frontend](https://github.com/oredondo/WrenchBuddy-frontend)
 

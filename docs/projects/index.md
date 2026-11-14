@@ -1,51 +1,54 @@
 ---
-title: Platform Ecosystem & Case Studies
+title: Platform Ecosystem & Engineering Projects
 description: >-
-  How ten years of platform engineering fit together — from OpenStack/Ceph storage and Jenkins shared libraries to custom HA dispatchers, driver-based deployment pipelines, Orion, Blueprint, and applied AI.
+  Executive bird's-eye view and complete catalog of deployment control planes, declarative IaC engines, infrastructure subsystems, and open-source work.
 ---
 
-# Platform Ecosystem & Case Studies
+# Platform Ecosystem & Engineering Projects
 
-Great platforms are rarely designed on a blank whiteboard in a single afternoon. They evolve **layer by layer** as existing tools hit scaling ceilings, vendor integrations get deprecated, and manual governance stops working.
-
-This section maps how the systems I architected over the last decade connect into a single, cohesive engineering trajectory — followed by deep-dive case studies and my public open-source work.
-
----
-
-## 1. The Evolution of Orion: From API-First CMDB & Inventory to a High-Availability Dispatcher
-
-At **BBVA Technology** (2017 – Present), **Orion** was not built as a static tool, but as an evolving architectural response to enterprise infrastructure bottlenecks at scale — governing **30,000+ machines** across **AWS, OpenStack, OpenShift, and bare metal**, processing **40,000+ daily operations** for **500+ engineers**:
-
-```mermaid
-flowchart TD
-    subgraph Origin["1. Origin: API-First CMDB, Inventory & Catalog"]
-        direction TB
-        CMDB["Orion Control Plane<br/>• Multi-cloud inventory (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Hybrid persistence (PostgreSQL + MongoDB + Redis)<br/>• REST operation catalog (OpenAPI / RBAC)<br/>• Automated compliance audit pipelines"]
-    end
-
-    subgraph Replacement["2. Strategic Jenkins Replacement"]
-        direction LR
-        JNK["Legacy Jenkins<br/>❌ No High Availability (Critical SPOF)<br/>❌ Rigid UI unsuited for ops<br/>❌ Highly complex to maintain, scale & extend"] -.->|"Replaced by"| DISP["Integrated HA Dispatcher in Orion<br/>(Django + Celery + Kubernetes Job Workers)<br/>✅ Native High Availability (HA)<br/>✅ Operation-centric UI & REST APIs<br/>✅ Seamless integration of new banking features"]
-    end
-
-    subgraph Expansion["3. Declarative IaC & Applied AI"]
-        direction LR
-        BP["Blueprint<br/>(Declarative YAML engine, DAG waves & idempotent teardowns)"]
-        AI["Orion AI (Validated PoC)<br/>(Multi-agent CI/CD diagnostics with LangGraph)"]
-    end
-
-    CMDB -->|"Evolved by integrating"| DISP
-    DISP --> BP & AI
-```
-
-1. **Phase 1 — The Origin: Multi-Cloud CMDB, Inventory & API-First Catalog:** Orion originated as a centralized control plane to inventory and govern heterogeneous assets across AWS, OpenStack, OpenShift, and bare metal, combining a hybrid database tier (PostgreSQL, MongoDB, Redis), RBAC, and automated compliance audit pipelines directly consumed by bank auditors.
-2. **Phase 2 — The Jenkins Bottleneck:** Initially, operation catalog execution relied on Jenkins. However, Jenkins lacked native High Availability (posing a critical single point of failure for the bank), its UI was tailored for software compilation logs rather than infrastructure state machines, and it was notoriously complex to operate, scale, and integrate with new bank functionalities and core systems.
-3. **Phase 3 — Evolution into a Purpose-Built HA Dispatcher:** Orion evolved by absorbing the execution plane into a **native High-Availability Operation Dispatcher (Django + Celery + Kubernetes Jobs)**. This migration completely replaced Jenkins for infrastructure workflows, decoupled variables at runtime (preventing configuration drift), and delivered an API-first architecture with isolated ephemeral container execution.
-4. **Phase 4 — Declarative Extension (Blueprint) & Operational AI (Orion AI):** With the CMDB and dispatcher united under the same architecture, Orion expanded into declarative provisioning with **Blueprint** (asynchronous YAML engine with DAG waves and idempotent teardowns, eliminating suites like Red Hat Automation Platform) and agentic auto-diagnostics with **Orion AI** (LangGraph).
+Over the past decade, I have architected and evolved platform systems, infrastructure-as-code (IaC) engines, multi-cloud control planes, and applied artificial intelligence applications.
 
 ---
 
-## 2. Enterprise Architecture Deep-Dives
+### Bird's-Eye View of the Ecosystem
+
+The engineering systems documented across this portal center around three core pillars:
+
+1. **Enterprise Banking Platforms (BBVA):** Built to govern **30,000+ machines** and **40,000+ daily operations**. Highlights include **Orion** (an IaaS control plane that evolved from an API-first CMDB into a high-availability dispatcher replacing Jenkins), **Blueprint** (a declarative YAML engine executing DAG waves with idempotent teardowns), and operational AI initiatives like **Orion AI** (LangGraph).
+2. **Critical Infrastructure & Network Subsystems:** Engineering components designed to ensure business continuity against technical obsolescence (such as the **custom F5/OpenStack REST bridge** delivered with *zero downtime* when vendor drivers were deprecated), **dynamic configuration management** services, and private cloud storage on **OpenStack Swift and Ceph**.
+3. **Open-Source Systems & Applied AI on GitHub:** Public projects showcasing low-level multimedia pipeline engineering in **FFmpeg** (10 FPS stillimage H.264 compression saving 70% disk space, hardware PTS clock sync, and spectral filtering in **OmniLecture Studio**), dual-engine Whisper transcription, and contextual RAG architectures with **PostgreSQL (`pgvector`) and Django 6** in **WrenchBuddy**.
+
+<div class="grid cards" markdown>
+
+-   :material-server-network:{ .lg .middle } __Enterprise Platforms & Control Plane__
+
+    ---
+
+    Deployment control planes, declarative IaC engines, and monolithic CI/CD replacements designed to govern 30,000+ machines and 40,000 daily ops without single points of failure (SPOF).
+
+    [:octicons-arrow-down-24: View corporate case studies](#enterprise-architecture-deep-dives)
+
+-   :material-lan-connect:{ .lg .middle } __Network & Infrastructure Subsystems__
+
+    ---
+
+    Custom REST bridges shielding against vendor deprecation (F5 / OpenStack) with zero downtime, dynamic runtime config injection, and private cloud storage on OpenStack Swift / Ceph.
+
+    [:octicons-arrow-down-24: View subsystems](#core-platform-subsystems)
+
+-   :material-robot-industrial:{ .lg .middle } __Open-Source, FFmpeg & Applied AI__
+
+    ---
+
+    Native Linux/GTK development with optimized FFmpeg multimedia pipelines (H.264 stillimage, PTS sync), Whisper transcription, and RAG architectures with PostgreSQL, `pgvector`, and LangChain.
+
+    [:octicons-arrow-down-24: View open-source projects](#open-source-projects)
+
+</div>
+
+---
+
+## 1. Enterprise Architecture Deep-Dives {: #enterprise-architecture-deep-dives }
 
 <div class="grid cards two-col" markdown>
 
@@ -55,6 +58,8 @@ flowchart TD
 
     Sole architect of the central IaaS and deployment control plane: one OpenAPI interface governing 30,000+ machines across AWS, OpenStack, OpenShift, and bare metal (40,000+ daily ops), backed by a hybrid PostgreSQL + MongoDB + Redis tier and automated compliance audit pipelines.
 
+    <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
+
     [:octicons-arrow-right-24: Architecture & trade-offs](orion-iaas.md)
 
 -   :material-file-tree-outline:{ .lg .middle } __[Blueprint — Declarative Lifecycle Engine](blueprint.md)__
@@ -62,6 +67,8 @@ flowchart TD
     ---
 
     Asynchronous Python orchestration engine driven by versioned YAML blueprints. Computes execution DAGs, reconciles against live Orion state, and resumes interrupted teardowns idempotently — eliminating commercial automation licensing.
+
+    <span class="tech-tag">Python</span><span class="tech-tag">AsyncIO</span><span class="tech-tag">DAG Scheduling</span><span class="tech-tag">Declarative YAML</span><span class="tech-tag">GitOps</span>
 
     [:octicons-arrow-right-24: Architecture & trade-offs](blueprint.md)
 
@@ -71,6 +78,8 @@ flowchart TD
 
     How we migrated away from centralized Jenkins bottlenecks to a purpose-built High-Availability Operation Dispatcher (Django + Celery), dynamic runtime configuration injection, and ephemeral Kubernetes Job execution.
 
+    <span class="tech-tag">Django</span><span class="tech-tag">Celery</span><span class="tech-tag">Kubernetes Jobs</span><span class="tech-tag">Ansible</span><span class="tech-tag">OpenAPI</span>
+
     [:octicons-arrow-right-24: Architecture & trade-offs](dispatcher-migration.md)
 
 -   :material-radar:{ .lg .middle } __[Orion AI — Agentic CI/CD Diagnostics (Validated PoC)](orion-ai.md)__
@@ -79,13 +88,15 @@ flowchart TD
 
     Multi-agent LangGraph + ReAct diagnostic prototype that correlates pipeline logs, Redis-indexed runbooks, and GitLab diffs under deterministic guardrails — plus a candid look at enterprise rollout constraints.
 
+    <span class="tech-tag">LangGraph</span><span class="tech-tag">ReAct</span><span class="tech-tag">MCP</span><span class="tech-tag">Qwen 131k</span><span class="tech-tag">Deterministic Guardrails</span>
+
     [:octicons-arrow-right-24: Architecture & rollout lessons](orion-ai.md)
 
 </div>
 
 ---
 
-## 3. Core Platform Subsystems & Earlier Infrastructure Work
+## 2. Core Platform Subsystems & Infrastructure Automation {: #core-platform-subsystems }
 
 Beyond the four flagship deep-dives above, these subsystems formed critical building blocks of the platform stack:
 
@@ -137,7 +148,7 @@ Beyond the four flagship deep-dives above, these subsystems formed critical buil
 
 ---
 
-## 4. Open-Source Projects & Personal R&D
+## 3. Open-Source Projects & Personal R&D {: #open-source-projects }
 
 Public systems built outside enterprise constraints — with complete source code available on GitHub:
 
@@ -149,6 +160,8 @@ Public systems built outside enterprise constraints — with complete source cod
 
     Native Linux (Wayland/GNOME, GTK 3) screen/audio recorder with an optimized FFmpeg multimedia pipeline (tuned H.264 10 FPS stillimage encoding cutting file size by 70%, hardware PTS clock sync, and afftdn spectral filtering) paired with LangGraph workflows. Combines dual-engine Whisper (`faster-whisper` CPU `int8` + cloud API), OpenCV CLAHE + Tesseract slide/handwriting OCR, and anti-hallucination guardrails to generate Markdown notes, `.docx` documents, and Anki decks.
 
+    <span class="tech-tag">Python 3.12</span><span class="tech-tag">GTK 3 / PyGObject</span><span class="tech-tag">FFmpeg</span><span class="tech-tag">faster-whisper</span><span class="tech-tag">LangGraph</span><span class="tech-tag">OpenCV</span>
+
     [:octicons-arrow-right-24: Case study](omni-lecture.md) · [:fontawesome-brands-github: GitHub repo](https://github.com/oredondo/omnilecture-studio)
 
 -   :material-wrench-outline:{ .lg .middle } __[WrenchBuddy — AI Vehicle Lifecycle & RAG Platform](wrenchbuddy.md)__
@@ -156,6 +169,8 @@ Public systems built outside enterprise constraints — with complete source cod
     ---
 
     Full-stack vehicle maintenance and telemetry platform built with **Django 6, DRF, PostgreSQL (`pgvector`), Celery, Redis, and LangChain** (plus a TypeScript frontend). Uses Vision/OCR to parse workshop invoices and 768-dim vector RAG over technical manuals to power a context-aware mechanical assistant.
+
+    <span class="tech-tag">Django 6</span><span class="tech-tag">PostgreSQL / pgvector</span><span class="tech-tag">LangChain</span><span class="tech-tag">Celery / Redis</span><span class="tech-tag">TypeScript</span>
 
     [:octicons-arrow-right-24: Case study](wrenchbuddy.md) · [:fontawesome-brands-github: Backend](https://github.com/oredondo/WrenchBuddy) · [:fontawesome-brands-github: Frontend](https://github.com/oredondo/WrenchBuddy-frontend)
 

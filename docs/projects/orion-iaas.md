@@ -19,7 +19,40 @@ description: >-
 
 ---
 
-## 1. Context & Problem Statement
+## 1. The Evolution of Orion: From API-First CMDB & Inventory to a High-Availability Dispatcher
+
+Orion was not built as a static monolithic tool, but as an evolving architectural response to enterprise infrastructure bottlenecks at scale within **BBVA Technology** — governing **30,000+ machines** across **AWS, OpenStack, OpenShift, and bare metal**, processing **40,000+ daily operations** for **500+ engineers**:
+
+```mermaid
+flowchart TD
+    subgraph Origin["1. Origin: API-First CMDB, Inventory & Catalog"]
+        direction TB
+        CMDB["Orion Control Plane<br/>• Multi-cloud inventory (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Hybrid persistence (PostgreSQL + MongoDB + Redis)<br/>• REST operation catalog (OpenAPI / RBAC)<br/>• Automated compliance audit pipelines"]
+    end
+
+    subgraph Replacement["2. Strategic Jenkins Replacement"]
+        direction LR
+        JNK["Legacy Jenkins<br/>❌ No High Availability (Critical SPOF)<br/>❌ Rigid UI unsuited for ops<br/>❌ Highly complex to maintain, scale & extend"] -.->|"Replaced by"| DISP["Integrated HA Dispatcher in Orion<br/>(Django + Celery + Kubernetes Job Workers)<br/>✅ Native High Availability (HA)<br/>✅ Operation-centric UI & REST APIs<br/>✅ Seamless integration of new banking features"]
+    end
+
+    subgraph Expansion["3. Declarative IaC & Applied AI"]
+        direction LR
+        BP["Blueprint<br/>(Declarative YAML engine, DAG waves & idempotent teardowns)"]
+        AI["Orion AI (Validated PoC)<br/>(Multi-agent CI/CD diagnostics with LangGraph)"]
+    end
+
+    CMDB -->|"Evolved by integrating"| DISP
+    DISP --> BP & AI
+```
+
+1. **Phase 1 — The Origin: Multi-Cloud CMDB, Inventory & API-First Catalog:** Orion originated as a centralized control plane to inventory and govern heterogeneous assets across AWS, OpenStack, OpenShift, and bare metal, combining a hybrid database tier (PostgreSQL, MongoDB, Redis), RBAC, and automated compliance audit pipelines directly consumed by bank auditors.
+2. **Phase 2 — The Jenkins Bottleneck:** Initially, operation catalog execution relied on Jenkins. However, Jenkins lacked native High Availability (posing a critical single point of failure for the bank), its UI was tailored for software compilation logs rather than infrastructure state machines, and it was notoriously complex to operate, scale, and integrate with new bank functionalities and core systems.
+3. **Phase 3 — Evolution into a Purpose-Built HA Dispatcher:** Orion evolved by absorbing the execution plane into a **native High-Availability Operation Dispatcher (Django + Celery + Kubernetes Jobs)**. This migration completely replaced Jenkins for infrastructure workflows, decoupled variables at runtime (preventing configuration drift), and delivered an API-first architecture with isolated ephemeral container execution.
+4. **Phase 4 — Declarative Extension (Blueprint) & Operational AI (Orion AI):** With the CMDB and dispatcher united under the same architecture, Orion expanded into declarative provisioning with **Blueprint** (asynchronous YAML engine with DAG waves and idempotent teardowns, eliminating suites like Red Hat Automation Platform) and agentic auto-diagnostics with **Orion AI** (LangGraph).
+
+---
+
+## 2. Context & Problem Statement
 
 Operating infrastructure at banking scale across public cloud, private cloud, container clusters, and legacy data centers created three structural bottlenecks:
 
@@ -29,7 +62,7 @@ Operating infrastructure at banking scale across public cloud, private cloud, co
 
 ---
 
-## 2. Abstract System Topology
+## 3. Abstract System Topology
 
 Orion was architected from scratch to make the underlying cloud provider effectively invisible to the 500+ engineers consuming it, while centralizing permissions, product catalogs, remediation workflows, and audit trails.
 
@@ -73,7 +106,7 @@ flowchart TD
 
 ---
 
-## 3. Core Architectural Decisions
+## 4. Core Architectural Decisions
 
 ### A. Hybrid Persistence Tier (PostgreSQL + MongoDB + Redis)
 A single database engine could not cleanly serve both strict banking compliance and massive multi-cloud inventory queries:
@@ -96,7 +129,7 @@ Rather than treating compliance as an ad-hoc manual data gathering exercise befo
 
 ---
 
-## 4. Architectural Trade-Offs
+## 5. Architectural Trade-Offs
 
 | Decision | Alternative Considered | Rationale |
 | :--- | :--- | :--- |
@@ -106,7 +139,7 @@ Rather than treating compliance as an ad-hoc manual data gathering exercise befo
 
 ---
 
-## 5. Operational Impact
+## 6. Operational Impact
 
 - **Self-service at scale:** Enabled **500+ engineers** to provision, govern, and remediate infrastructure autonomously across **tens of thousands of nodes**, reducing provisioning lead times from days of ticket handoffs to minutes.
 - **Continuous auditability:** Replaced manual compliance evidence gathering with automated, verifiable audit pipelines consumed directly by governance teams.

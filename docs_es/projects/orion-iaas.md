@@ -19,7 +19,40 @@ description: >-
 
 ---
 
-## 1. Contexto y Problema de Ingeniería
+## 1. La Evolución de Orion: De CMDB e Inventario a Dispatcher de Alta Disponibilidad
+
+Orion no nació como un producto monolítico estático, sino como una respuesta arquitectónica evolutiva a los cuellos de botella reales de escala en **BBVA Technology** — gobernando **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y bare-metal** y procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
+
+```mermaid
+flowchart TD
+    subgraph Origen["1. Origen: CMDB, Inventario y Catálogo Apificado"]
+        direction TB
+        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Catálogo de operaciones REST (OpenAPI / RBAC)<br/>• Canalizaciones automáticas de auditoría"]
+    end
+
+    subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
+        direction LR
+        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF crítico)<br/>❌ UI rígida e inadecuada para operaciones<br/>❌ Muy complejo de mantener, escalar y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ API REST y UI orientada a operaciones<br/>✅ Fácil integración de nuevas funcionalidades"]
+    end
+
+    subgraph Expansion["3. Ecosistema Declarativo e IA"]
+        direction LR
+        BP["Blueprint<br/>(Motor declarativo en YAML, olas DAG y teardown idempotente)"]
+        AI["Orion AI (PoC Validada)<br/>(Diagnóstico multi-agente de CI/CD con LangGraph)"]
+    end
+
+    CMDB -->|"Evolucionó integrando"| DISP
+    DISP --> BP & AI
+```
+
+1. **Fase 1 — El Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado:** Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos, combinando una base de datos híbrida (PostgreSQL, MongoDB, Redis), permisos RBAC y canalizaciones automáticas de auditoría consumidas directamente por los auditores del banco.
+2. **Fase 2 — El Cuello de Botella de Jenkins:** Inicialmente, el disparo de operaciones del catálogo dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad nativa (siendo un punto único de fallo crítico para el banco), su interfaz web estaba diseñada para builds de compilación y no para operaciones de infraestructura, y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
+3. **Fase 3 — La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución con un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta migración reemplazó por completo a Jenkins para operaciones de infraestructura, desacopló las variables en runtime (evitando deriva de configuración) y garantizó una arquitectura API-first con ejecución en contenedores efímeros aislados.
+4. **Fase 4 — Extensión Declarativa (Blueprint) e IA Operativa (Orion AI):** Con la CMDB y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales como Red Hat Automation Platform) y el auto-diagnóstico agéntico con **Orion AI** (LangGraph).
+
+---
+
+## 2. Contexto y Problema de Ingeniería
 
 Operar infraestructura a escala bancaria entre nube pública, nube privada, plataformas de contenedores y centros de datos propios generaba tres cuellos de botella estructurales:
 
@@ -29,7 +62,7 @@ Operar infraestructura a escala bancaria entre nube pública, nube privada, plat
 
 ---
 
-## 2. Topología Abstracta del Sistema
+## 3. Topología Abstracta del Sistema
 
 Orion fue diseñado desde cero para hacer que el proveedor subyacente resulte transparente para los más de 500 ingenieros que lo consumen, centralizando permisos, catálogos de productos, flujos de remediación y trazas de auditoría.
 
@@ -73,7 +106,7 @@ flowchart TD
 
 ---
 
-## 3. Decisiones Clave de Arquitectura
+## 4. Decisiones Clave de Arquitectura
 
 ### A. Persistencia Híbrida (PostgreSQL + MongoDB + Redis)
 Un único motor de base de datos no podía resolver simultáneamente el cumplimiento bancario estricto y las consultas masivas de inventario multi-cloud:
@@ -96,7 +129,7 @@ En vez de tratar las auditorías como una recopilación manual de datos previa a
 
 ---
 
-## 4. Trade-Offs de Arquitectura
+## 5. Trade-Offs de Arquitectura
 
 | Decisión | Alternativa Evaluada | Justificación |
 | :--- | :--- | :--- |
@@ -106,7 +139,7 @@ En vez de tratar las auditorías como una recopilación manual de datos previa a
 
 ---
 
-## 5. Impacto Operativo
+## 6. Impacto Operativo
 
 - **Autoservicio a gran escala:** Permitió a **más de 500 ingenieros** aprovisionar, gobernar y remediar infraestructura de forma autónoma sobre **decenas de miles de nodos**, reduciendo los tiempos de entrega de días de tickets manuales a minutos.
 - **Auditoría continua:** Sustituyó la extracción manual de evidencias por canalizaciones automáticas y verificables consumidas directamente por los equipos de cumplimiento.
