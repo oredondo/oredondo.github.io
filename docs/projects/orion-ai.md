@@ -9,7 +9,7 @@ description: >-
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Architect & Developer |
-| **Organization / Stage** | BBVA Technology · **Validated Proof of Concept (PoC)** |
+| **Organization / Stage** | BBVA · **Validated Proof of Concept (PoC)** |
 | **Outcome** | Validated prototype reducing incident log triage from hours to seconds; prepared and awaiting central AI infrastructure integration guidelines |
 | **Stack** | Python, LangGraph, ReAct Agents, Qwen LLM (131k context), Model Context Protocol (MCP), Redis, Jenkins & GitLab APIs |
 

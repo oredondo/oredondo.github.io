@@ -9,7 +9,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Arquitecto y Responsable de Plataforma |
-| **Organización** | BBVA Technology (Infraestructura Core Banking) · 2017 – Presente |
+| **Organización** | BBVA (Infraestructura Core Banking) · 2017 – Presente |
 | **Escala** | 30.000+ máquinas gobernadas · 40.000+ operaciones diarias · 500+ ingenieros |
 | **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, Ansible, AWS, OpenStack, OpenShift, Infoblox |
 
@@ -21,7 +21,7 @@ description: >-
 
 ## 1. La Evolución de Orion: De CMDB e Inventario a Dispatcher de Alta Disponibilidad
 
-Orion no nació como un producto monolítico estático, sino como una respuesta arquitectónica evolutiva a los cuellos de botella reales de escala en **BBVA Technology** — gobernando **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y bare-metal** y procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
+Orion no nació como un producto monolítico estático, sino como una respuesta arquitectónica evolutiva a los cuellos de botella reales de escala en **BBVA** — gobernando **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y bare-metal** y procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
 
 ### Hitos de la Evolución Arquitectónica
 

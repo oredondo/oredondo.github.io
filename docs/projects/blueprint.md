@@ -9,7 +9,7 @@ description: >-
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Creator & Lead Systems Architect |
-| **Organization** | BBVA Technology (Core Banking Infrastructure) |
+| **Organization** | BBVA (Core Banking Infrastructure) |
 | **Outcome** | Eliminated commercial orchestration licensing (Red Hat Automation Platform); brought declarative GitOps and resumable teardowns to Orion |
 | **Stack** | Python, AsyncIO, Declarative YAML DSL, JSON Schema, GitOps, Orion REST API |
 

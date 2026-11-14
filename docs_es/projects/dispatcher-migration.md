@@ -9,7 +9,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Arquitecto Principal de Plataforma |
-| **Organización** | BBVA Technology (Infraestructura Core Banking) |
+| **Organización** | BBVA (Infraestructura Core Banking) |
 | **Alcance** | Sustitución de Jenkins como motor de ejecución de infraestructura; unificación de gestión de configuración y ejecución efímera en Kubernetes |
 | **Stack** | Python, Django, DRF, Celery, Redis, PostgreSQL, Kubernetes Jobs, Ansible, Groovy |
 

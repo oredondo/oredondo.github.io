@@ -9,7 +9,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Creador y Arquitecto Principal de Sistemas |
-| **Organización** | BBVA Technology (Infraestructura Core Banking) |
+| **Organización** | BBVA (Infraestructura Core Banking) |
 | **Resultado** | Eliminación de licencias comerciales de orquestación (Red Hat Automation Platform); GitOps declarativo y desmontajes reanudables sobre Orion |
 | **Stack** | Python, AsyncIO, DSL Declarativo en YAML, JSON Schema, GitOps, API REST de Orion |
 

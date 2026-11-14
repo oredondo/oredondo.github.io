@@ -9,7 +9,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Arquitecto y Desarrollador |
-| **Organización / Fase** | BBVA Technology · **Prueba de Concepto Validada (PoC)** |
+| **Organización / Fase** | BBVA · **Prueba de Concepto Validada (PoC)** |
 | **Resultado** | Prototipo validado que reduce el triaje de logs de horas a segundos; preparado y a la espera de directrices de integración con la infraestructura central de IA |
 | **Stack** | Python, LangGraph, Agentes ReAct, Qwen LLM (131k de contexto), Model Context Protocol (MCP), Redis, APIs de Jenkins y GitLab |
 

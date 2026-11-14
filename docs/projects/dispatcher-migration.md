@@ -9,7 +9,7 @@ description: >-
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Lead Platform Architect |
-| **Organization** | BBVA Technology (Core Banking Infrastructure) |
+| **Organization** | BBVA (Core Banking Infrastructure) |
 | **Scope** | Replaced Jenkins as the infrastructure execution backbone; unified configuration management and ephemeral Kubernetes execution |
 | **Stack** | Python, Django, DRF, Celery, Redis, PostgreSQL, Kubernetes Jobs, Ansible, Groovy |
 
