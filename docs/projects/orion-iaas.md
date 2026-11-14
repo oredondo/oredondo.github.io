@@ -23,32 +23,22 @@ description: >-
 
 Orion was not built as a static monolithic tool, but as an evolving architectural response to enterprise infrastructure bottlenecks at scale within **BBVA Technology** — governing **30,000+ machines** across **AWS, OpenStack, OpenShift, and bare metal**, processing **40,000+ daily operations** for **500+ engineers**:
 
-```mermaid
-flowchart TD
-    subgraph Origin["1. Origin: API-First CMDB, Inventory & Catalog"]
-        direction TB
-        CMDB["Orion Control Plane<br/>• Multi-cloud inventory (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Hybrid persistence (PostgreSQL + MongoDB + Redis)<br/>• API-driven REST & scheduled operations<br/>• Comprehensive RBAC audit & machine traceability"]
-    end
+### Architectural Evolution Milestones
 
-    subgraph Replacement["2. Strategic Jenkins Replacement"]
-        direction LR
-        JNK["Legacy Jenkins<br/>❌ No High Availability (Critical SPOF)<br/>❌ Rigid UI unsuited for ops<br/>❌ Highly complex to maintain, scale & extend"] -.->|"Replaced by"| DISP["Integrated HA Dispatcher in Orion<br/>(Django + Celery + Kubernetes Job Workers)<br/>✅ Native High Availability (HA)<br/>✅ REST APIs & scheduled execution<br/>✅ Two-layer Ansible pipeline: Ground + User"]
-    end
+- **Phase 1 · Origin: Multi-Cloud CMDB, Inventory & API-First Catalog**
+    - *Context:* Orion originated as a centralized control plane to inventory and govern heterogeneous assets across AWS, OpenStack, OpenShift, and physical bare metal.
+    - *Solution:* Hybrid data tier (PostgreSQL for transactions, MongoDB for polymorphic assets, Redis for caching), OpenAPI catalog, and compliance export pipelines tailored to banking regulations.
 
-    subgraph Expansion["3. Declarative IaC & Applied AI"]
-        direction LR
-        BP["Blueprint<br/>(Declarative YAML engine, DAG waves & idempotent teardowns)"]
-        AI["Orion AI (Validated PoC)<br/>(Multi-agent CI/CD diagnostics with LangGraph)"]
-    end
+- **Phase 2 · The Jenkins Bottleneck**
+    - *Problem:* Catalog operation execution initially relied on a centralized Jenkins cluster.
+    - *Friction:* Jenkins lacked native High Availability (posing a critical single point of failure for the bank), its UI was designed for code builds rather than infrastructure state machines, and plugin bloat made integrating new banking services notoriously complex.
 
-    CMDB -->|"Evolved by integrating"| DISP
-    DISP --> BP & AI
-```
+- **Phase 3 · Emergence of the Integrated HA Dispatcher**
+    - *Transformation:* Orion absorbed the execution plane by developing an **in-house High-Availability Operation Dispatcher (Django + Celery + Kubernetes Jobs)**.
+    - *Outcome:* 100% replacement of Jenkins for infrastructure, dynamic runtime variable injection, native support for API-driven and scheduled automation, and structured two-stage provisioning: cloud drivers followed by layered Ansible pipelines (Ground and User).
 
-1. **Phase 1 — The Origin: Multi-Cloud CMDB, Inventory & API-First Catalog:** Orion originated as a centralized control plane to inventory and govern heterogeneous assets across AWS, OpenStack, OpenShift, and bare metal, combining a hybrid database tier (PostgreSQL, MongoDB, Redis), RBAC, and automated compliance audit pipelines directly consumed by bank auditors.
-2. **Phase 2 — The Jenkins Bottleneck:** Initially, operation catalog execution relied on Jenkins. However, Jenkins lacked native High Availability (posing a critical single point of failure for the bank), its UI was tailored for software compilation logs rather than infrastructure state machines, and it was notoriously complex to operate, scale, and integrate with new bank functionalities and core systems.
-3. **Phase 3 — Evolution into a Purpose-Built HA Dispatcher:** Orion evolved by absorbing the execution plane into a **native High-Availability Operation Dispatcher (Django + Celery + Kubernetes Jobs)**. This migration completely replaced Jenkins for infrastructure workflows, decoupled runtime variables, enabled API-driven and scheduled operations, and structured provisioning into two phases: cloud drivers followed by layered Ansible automation (Ground and User).
-4. **Phase 4 — Declarative Extension (Blueprint) & Operational AI (Orion AI):** With the CMDB, the audit engine, and the dispatcher unified under the same architecture, Orion expanded into declarative provisioning with **Blueprint** (asynchronous YAML engine with DAG waves and idempotent teardowns, eliminating suites like Red Hat Automation Platform) and agentic auto-diagnostics with **Orion AI** (LangGraph).
+- **Phase 4 · Declarative Extension (Blueprint) & Operational AI (Orion AI)**
+    - *Maturity:* With the CMDB, the audit engine, and the dispatcher unified under a single architecture, Orion expanded into declarative provisioning with **Blueprint** (asynchronous YAML engine with DAG waves and idempotent teardowns) and agentic CI/CD failure diagnostics with **Orion AI** (LangGraph).
 
 ---
 
@@ -62,57 +52,31 @@ Operating infrastructure at banking scale across public cloud, private cloud, co
 
 ---
 
-## 3. Abstract System Topology
+## 3. Abstract System Topology: Operation Lifecycle
 
 Orion governs the full infrastructure lifecycle: from REST API calls or scheduled jobs, through cloud provisioning drivers and layered Ansible configurations, down to an immutable forensic audit record.
 
 ```mermaid
-flowchart TD
-    subgraph Consumers["Operation Triggers (API-Driven & Schedulers)"]
-        direction TB
-        API_Call["REST API / OpenAPI (Self-Service & CI/CD)"]
-        Schedulers["Schedulers & Periodic Workflows (Celery Beat)"]
-        BP["Blueprint Declarative Engine"]
-    end
+sequenceDiagram
+    autonumber
+    actor Trigger as Engineer (REST API) / Scheduler (Cron)
+    participant Orion as Orion Control Plane & RBAC
+    participant Disp as Dispatcher HA (Celery)
+    participant Cloud as Multi-Cloud Driver (AWS / OpenStack / Bare-Metal)
+    participant AnsG as Ansible: Ground (Security & Mon)
+    participant AnsU as Ansible: User Workload
+    participant Audit as Audit Engine (PostgreSQL + MongoDB)
 
-    subgraph ControlPlane["Orion Control Plane (Python / Django / DRF)"]
-        API_GW["OpenAPI / Swagger REST Gateway"]
-        RBAC["Centralized RBAC & Permission Control"]
-        Coord["HA Dispatcher & Async Coordinator (Celery)"]
-        Audit["Comprehensive Audit & Traceability Engine"]
-        
-        API_GW --> RBAC --> Coord
-        Schedulers --> Coord
-        RBAC --> Audit
-        Coord --> Audit
-    end
-
-    subgraph DataTier["Hybrid Persistence & Audit Trail Tier"]
-        PG[("PostgreSQL<br/>RBAC, transactional state & immutable history")]
-        Mongo[("MongoDB<br/>Polymorphic inventory & installed software state")]
-        Redis[("Redis<br/>Query caching & Celery broker")]
-    end
-
-    subgraph ProvisioningTier["1. Multi-Cloud Provisioning (Driver Layer)"]
-        AWS_D["AWS Driver"]
-        OS_D["OpenStack Driver"]
-        OSH_D["OpenShift Driver"]
-        BM_D["Bare-Metal / On-Prem Driver"]
-    end
-
-    subgraph ConfigTier["2. Layered Ansible Configuration Pipeline"]
-        direction TB
-        Ground["Ground Layer (Mandatory)<br/>• Hardening & baseline bank security<br/>• Monitoring & observability agents<br/>• Approved corporate repositories & core packages"]
-        UserOp["User Layer<br/>• Workload & application deployment<br/>• Business logic & middleware configuration"]
-        Ground --> UserOp
-    end
-
-    Consumers --> API_GW
-    Coord <--> PG & Mongo & Redis
-    Audit --> PG & Mongo
-    Coord --> ProvisioningTier
-    ProvisioningTier --> ConfigTier
-    ConfigTier -->|"Telemetry, packages & events"| Audit
+    Trigger->>Orion: 1. Authenticated request (OpenAPI or Scheduler)
+    Orion->>Audit: Records request, identity, and RBAC permissions
+    Orion->>Disp: Enqueues asynchronous execution
+    Disp->>Cloud: Provisions compute resource in target provider
+    Cloud-->>Disp: Node active with assigned IP
+    Disp->>AnsG: Executes mandatory Ground (Hardening, Mon, Repos)
+    AnsG-->>Disp: Ground verification passed (100% compliance)
+    Disp->>AnsU: Executes user playbooks (Apps, Middleware, DB)
+    AnsU-->>Disp: Workload successfully configured
+    Disp->>Audit: Seals installed software, package versions & event history
 ```
 
 ---

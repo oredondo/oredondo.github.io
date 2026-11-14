@@ -23,32 +23,22 @@ description: >-
 
 Orion no nació como un producto monolítico estático, sino como una respuesta arquitectónica evolutiva a los cuellos de botella reales de escala en **BBVA Technology** — gobernando **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y bare-metal** y procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
 
-```mermaid
-flowchart TD
-    subgraph Origen["1. Origen: CMDB, Inventario y Catálogo Apificado"]
-        direction TB
-        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Operaciones apificadas REST y programadas vía Schedulers<br/>• Auditoría integral de permisos y trazabilidad de máquinas"]
-    end
+### Hitos de la Evolución Arquitectónica
 
-    subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
-        direction LR
-        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF crítico)<br/>❌ UI rígida e inadecuada para operaciones<br/>❌ Muy complejo de mantener, escalar y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ Operaciones apificadas REST y vía Schedulers<br/>✅ Pipeline Ansible en dos capas: Ground + Usuario"]
-    end
+- **Fase 1 · Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado**
+    - *Contexto:* Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos.
+    - *Solución:* Base de datos híbrida (PostgreSQL para transacciones, MongoDB para activos polimórficos, Redis para caché), catálogo OpenAPI y canalizaciones de auditoría para responder a las exigencias regulatorias del banco.
 
-    subgraph Expansion["3. Ecosistema Declarativo e IA"]
-        direction LR
-        BP["Blueprint<br/>(Motor declarativo en YAML, olas DAG y teardown idempotente)"]
-        AI["Orion AI (PoC Validada)<br/>(Diagnóstico multi-agente de CI/CD con LangGraph)"]
-    end
+- **Fase 2 · El Cuello de Botella de Jenkins**
+    - *Problema:* El disparo de operaciones dependía inicialmente de un clúster centralizado de Jenkins.
+    - *Fricciones:* Jenkins carecía de Alta Disponibilidad nativa (constituyendo un punto único de fallo crítico para el banco), su interfaz estaba concebida para compilaciones de código en lugar de máquinas de estado de infraestructura, y el acoplamiento de plugins dificultaba integrar nuevas funcionalidades bancarias.
 
-    CMDB -->|"Evolucionó integrando"| DISP
-    DISP --> BP & AI
-```
+- **Fase 3 · Nacimiento del Dispatcher HA Integrado**
+    - *Transformación:* Orion absorbió el plano de ejecución desarrollando un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**.
+    - *Resultado:* Reemplazo del 100% de Jenkins para infraestructura, desacoplamiento dinámico de variables en runtime, soporte nativo de operaciones apificadas y vía schedulers, y estructuración de la provisión en dos fases: drivers cloud y pipeline Ansible en capas (Ground y Usuario).
 
-1. **Fase 1 — El Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado:** Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos, combinando una base de datos híbrida (PostgreSQL, MongoDB, Redis), permisos RBAC y canalizaciones de auditoría para responder a las exigencias regulatorias del banco.
-2. **Fase 2 — El Cuello de Botella de Jenkins:** Inicialmente, el disparo de operaciones del catálogo dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad nativa (siendo un punto único de fallo crítico para el banco), su interfaz web estaba diseñada para builds de compilación y no para operaciones de infraestructura, y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
-3. **Fase 3 — La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución con un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta migración reemplazó por completo a Jenkins para operaciones de infraestructura, desacopló las variables en runtime, incorporó operaciones por API y schedulers programados, y estructuró el aprovisionamiento en dos etapas: drivers cloud y configuración Ansible en capas (Ground y Usuario).
-4. **Fase 4 — Extensión Declarativa (Blueprint) e IA Operativa (Orion AI):** Con la CMDB, el motor de auditoría y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales como Red Hat Automation Platform) y el auto-diagnóstico agéntico con **Orion AI** (LangGraph).
+- **Fase 4 · Extensión Declarativa (Blueprint) e IA Operativa (Orion AI)**
+    - *Madurez:* Con la CMDB, el motor de auditoría y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales) y el auto-diagnóstico agéntico de fallos de CI/CD con **Orion AI** (LangGraph).
 
 ---
 
@@ -62,57 +52,31 @@ Operar infraestructura a escala bancaria entre nube pública, nube privada, plat
 
 ---
 
-## 3. Topología Abstracta del Sistema
+## 3. Topología Abstracta del Sistema: Ciclo de Vida de una Operación
 
-Orion centraliza el ciclo de vida de la infraestructura bancaria: desde la llamada API o el scheduler programado, pasando por la capa de drivers y la configuración Ansible en capas, hasta el registro inmutable de auditoría forense.
+Orion centraliza el ciclo de vida de la infraestructura bancaria: desde la llamada API o el scheduler programado, pasando por la capa de drivers y la configuración Ansible en capas, hasta el sellado inmutable de auditoría forense.
 
 ```mermaid
-flowchart TD
-    subgraph Consumers["Disparadores de Operaciones (Apificadas y Planificadas)"]
-        direction TB
-        API_Call["API REST / OpenAPI (Autoservicio & CI/CD)"]
-        Schedulers["Schedulers y Tareas Periódicas (Celery Beat)"]
-        BP["Motor Declarativo Blueprint"]
-    end
+sequenceDiagram
+    autonumber
+    actor Trigger as Ingeniero (API REST) / Scheduler (Cron)
+    participant Orion as Orion Control Plane & RBAC
+    participant Disp as Dispatcher HA (Celery)
+    participant Cloud as Driver Multi-Cloud (AWS / OpenStack / Bare-Metal)
+    participant AnsG as Ansible: Ground (Seguridad & Mon)
+    participant AnsU as Ansible: Carga de Usuario
+    participant Audit as Motor de Auditoría (PostgreSQL + MongoDB)
 
-    subgraph ControlPlane["Plano de Control Orion (Python / Django / DRF)"]
-        API_GW["Pasarela REST OpenAPI / Swagger"]
-        RBAC["RBAC y Control Granular de Permisos"]
-        Coord["Dispatcher HA y Coordinador Asíncrono (Celery)"]
-        Audit["Motor de Auditoría Integral y Trazabilidad"]
-        
-        API_GW --> RBAC --> Coord
-        Schedulers --> Coord
-        RBAC --> Audit
-        Coord --> Audit
-    end
-
-    subgraph DataTier["Persistencia Híbrida y Trazabilidad"]
-        PG[("PostgreSQL<br/>RBAC, estado transaccional e historial inmutable")]
-        Mongo[("MongoDB<br/>Inventario polimórfico, software y paquetes instalados")]
-        Redis[("Redis<br/>Caché de consultas y broker de colas Celery")]
-    end
-
-    subgraph ProvisioningTier["1. Provisión Multi-Cloud (Capa de Drivers)"]
-        AWS_D["Driver AWS"]
-        OS_D["Driver OpenStack"]
-        OSH_D["Driver OpenShift"]
-        BM_D["Driver Bare-Metal / On-Prem"]
-    end
-
-    subgraph ConfigTier["2. Pipeline de Configuración Ansible en Capas"]
-        direction TB
-        Ground["Capa Ground (Obligatoria)<br/>• Bastionado y seguridad base del banco<br/>• Agentes de monitorización y observabilidad<br/>• Repositorios oficiales y paquetería core"]
-        UserOp["Capa Usuario<br/>• Despliegue de servicios y aplicaciones<br/>• Lógica de negocio y middleware específico"]
-        Ground --> UserOp
-    end
-
-    Consumers --> API_GW
-    Coord <--> PG & Mongo & Redis
-    Audit --> PG & Mongo
-    Coord --> ProvisioningTier
-    ProvisioningTier --> ConfigTier
-    ConfigTier -->|"Telemetría, paquetes y eventos"| Audit
+    Trigger->>Orion: 1. Petición autenticada (API OpenAPI o Scheduler)
+    Orion->>Audit: Registra solicitud, identidad y permisos (RBAC)
+    Orion->>Disp: Encola ejecución asíncrona
+    Disp->>Cloud: Aprovisiona nodo en el proveedor destino
+    Cloud-->>Disp: Nodo activo e IP asignada
+    Disp->>AnsG: Ejecuta Ground obligatorio (Bastionado, Mon, Repos)
+    AnsG-->>Disp: Ground validado con éxito (100% compliance)
+    Disp->>AnsU: Ejecuta playbooks de usuario (Apps, Middleware, DB)
+    AnsU-->>Disp: Carga de trabajo desplegada correctamente
+    Disp->>Audit: Sella software instalado, versiones de paquetes y eventos
 ```
 
 ---
