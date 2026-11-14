@@ -30,3 +30,10 @@ This repository contains the professional portfolio, architectural case studies,
 5. Never use raw HTML `<a href="*.md">` links: use Markdown links inside `markdown`-enabled blocks (e.g., Material grid cards).
 6. Enterprise case studies (BBVA / Oesia) must use **abstract architecture diagrams and high-level trade-offs only** — never publish proprietary employer code or invented/toy code snippets. Open-source case studies must link directly to the real public GitHub repositories (`omnilecture-studio`, `WrenchBuddy`).
 7. Enforce LF endings on all files (configured via `.gitattributes`).
+8. Always use **`BBVA Technology`** as the employer company name in the CV / Professional Experience, and **`BBVA`** as the client/target banking organization in the project case studies.
+9. Always use **`Arquitecto y Responsable de Plataforma`** (ES) / **`Architect & Platform Lead`** (EN) as role title (never "Arquitecto Único" or "Sole Architect").
+10. Flowcharts & Diagrams: Prefer clean 1-line horizontal pipelines (`flowchart LR`) followed by a structured step-by-step table; avoid tall sequence diagrams or cluttered multi-box charts.
+11. OmniLecture Studio: Focus on interconnected Markdown (`.md`) knowledge graphs, FFmpeg voice dictation acoustic filtering, and Whisper anti-hallucination guardrails (never mention Word or `.docx`).
+12. WrenchBuddy: Explicitly identify as an early-stage idea under active construction (*idea en fase de construcción muy temprana*).
+13. Orion vs. Blueprint: **Orion** is the central platform and control plane that replaced commercial suites (such as Red Hat Ansible Automation Platform); **Blueprint** is its declarative YAML specification layer interpreted and executed natively by Orion.
+14. Strategic Context (NextGen): Frame the platform evolution within BBVA's **NextGen** cloud initiative (begun in 2017 to offload mission-critical core banking workloads from the legacy mainframe), scaling from initial on-premises datacenters (OpenStack, bare-metal) to a fully hybridized private/public cloud (AWS, OpenShift, OpenStack).

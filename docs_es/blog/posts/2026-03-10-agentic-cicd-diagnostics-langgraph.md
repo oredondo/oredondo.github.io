@@ -40,15 +40,13 @@ En pipelines reales de infraestructura, ese enfoque fracasa por dos motivos:
 Por eso modelamos **Orion AI** como un **grafo cíclico con estado en LangGraph** en lugar de una cadena secuencial:
 
 ```mermaid
-flowchart TD
-    Event["Evento de Fallo en Pipeline"] --> Supervisor["Supervisor en LangGraph"]
-    Supervisor --> Logs["Logs de Ejecución"]
-    Supervisor --> Docs["Runbooks de Soporte (Caché RAG en Redis)"]
-    Supervisor --> Diffs["Diffs de Commits en GitLab"]
-    Logs & Docs & Diffs --> ReAct["Razonamiento ReAct (Qwen 131k Contexto)"]
-    ReAct --> Gate{"Guardarraíles Deterministas"}
-    Gate -- "Evidencia insuficiente → inspeccionar diff en detalle" --> Diffs
-    Gate -- "Fundamentado y válido en esquema" --> Diagnosis["Informe Accionable de Causa Raíz"]
+flowchart LR
+    Event["1. Evento Fallo<br/><b>(Pipeline CI/CD)</b>"] --> Supervisor["2. Supervisor<br/><b>(LangGraph)</b>"]
+    Supervisor --> Gather["3. Evidencia Paralela<br/><b>(Logs · Runbooks · Diffs)</b>"]
+    Gather --> ReAct["4. Razonamiento<br/><b>(ReAct · Qwen 131k)</b>"]
+    ReAct --> Gate{"5. Guardarraíles<br/><b>(Esquema + Evidencia)</b>"}
+    Gate -- "Sin evidencia → re-inspeccionar" --> Gather
+    Gate -- "Válido" --> Diagnosis["6. Diagnóstico<br/><b>(Causa Raíz Accionable)</b>"]
 ```
 
 - **Recopilación concurrente de contexto:** El grafo extrae en paralelo las trazas de ejecución, los manuales y runbooks operativos (indexados en caché Redis para acelerar la recuperación RAG) y los metadatos del repositorio.
@@ -61,7 +59,7 @@ En operaciones bancarias, sugerir un comando de remediación alucinado es peor q
 
 - **Esquemas estrictos de salida:** El agente no devuelve prosa libre; debe completar un contrato de diagnóstico tipado.
 - **Evidencia explícita:** Cada causa raíz señalada debe apoyarse en evidencia concreta recuperada durante la ejecución (fragmentos de log, entradas de documentación o diffs de commits).
-- **Fronteras de herramientas aisladas (MCP):** Los sistemas externos (Jenkins, caché de runbooks en Redis, GitLab) se consultan mediante herramientas tipadas de solo lectura en lugar de otorgar acceso arbitrario a consola.
+- **Fronteras de herramientas aisladas (MCP):** Los sistemas externos (Dispatcher de Orion, caché de runbooks en Redis, GitLab) se consultan mediante herramientas tipadas de solo lectura en lugar de otorgar acceso arbitrario a consola.
 
 ## 3. Por Qué una PoC Validada Espera a los Cimientos Corporativos
 

@@ -135,7 +135,7 @@ nav:
   - Proyectos:
       - "Ecosistema de Plataforma": projects/index.md
       - "Orion — Plataforma IaaS": projects/orion-iaas.md
-      - "Blueprint — Motor Declarativo": projects/blueprint.md
+      - "Blueprint — Capa Declarativa YAML": projects/blueprint.md
       - "Dispatcher HA y Ejecución K8s": projects/dispatcher-migration.md
       - "Orion AI — Diagnóstico CI/CD (PoC)": projects/orion-ai.md
       - "OmniLecture Studio (Open Source)": projects/omni-lecture.md

@@ -40,15 +40,13 @@ In real infrastructure pipelines, that fails for two reasons:
 That is why we modeled **Orion AI** as a **stateful, cyclic graph in LangGraph** rather than a linear chain:
 
 ```mermaid
-flowchart TD
-    Event["Pipeline Failure Event"] --> Supervisor["LangGraph Supervisor"]
-    Supervisor --> Logs["Execution Logs"]
-    Supervisor --> Docs["Support Runbooks (Redis RAG Cache)"]
-    Supervisor --> Diffs["GitLab Commit Diffs"]
-    Logs & Docs & Diffs --> ReAct["ReAct Reasoning (Qwen 131k Context)"]
-    ReAct --> Gate{"Deterministic Guardrails"}
-    Gate -- "Insufficient evidence → inspect deeper diff" --> Diffs
-    Gate -- "Grounded & schema-valid" --> Diagnosis["Actionable Root-Cause Report"]
+flowchart LR
+    Event["1. Failure Event<br/><b>(CI/CD Pipeline)</b>"] --> Supervisor["2. Supervisor<br/><b>(LangGraph)</b>"]
+    Supervisor --> Gather["3. Parallel Evidence<br/><b>(Logs · Runbooks · Diffs)</b>"]
+    Gather --> ReAct["4. Reasoning<br/><b>(ReAct · Qwen 131k)</b>"]
+    ReAct --> Gate{"5. Guardrails<br/><b>(Schema + Grounding)</b>"}
+    Gate -- "Insufficient → inspect deeper" --> Gather
+    Gate -- "Valid" --> Diagnosis["6. Diagnosis<br/><b>(Actionable Root Cause)</b>"]
 ```
 
 - **Concurrent context gathering:** The graph pulls raw execution traces, operational runbooks (cached in Redis to accelerate RAG retrieval), and repository metadata in parallel.
@@ -61,7 +59,7 @@ In banking operations, a hallucinated remediation command is worse than no diagn
 
 - **Strict output schemas:** The agent cannot return free-form prose; it must populate a typed diagnostic contract.
 - **Explicit evidence grounding:** Every root-cause claim must point to concrete evidence retrieved during the run (log fragments, runbook entries, or commit diffs).
-- **Isolated tool contracts (MCP):** External systems (Jenkins, Redis runbook cache, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
+- **Isolated tool contracts (MCP):** External systems (Orion Dispatcher, Redis runbook cache, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
 
 ## 3. Why a Validated PoC Still Waits on Enterprise Foundations
 

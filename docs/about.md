@@ -17,8 +17,8 @@ My answer is to treat internal infrastructure as a software product — paving *
 ## Architectural Trajectory
 
 - **From storage and hypervisors up:** I trained in Communications Electronic Engineering at the **Universidad Politécnica de Madrid** and began my career at **Oesia** operating a production **OpenStack and Ceph** private cloud and building a self-hosted cloud storage platform on **OpenStack Swift**. Starting close to storage clusters, hypervisors, and network fabrics shaped how I design higher-level abstractions today.
-- **Building a bank's internal cloud platform layer by layer:** Since 2017 at **BBVA Technology**, I have served as sole architect and owner of the central IaaS platform suite (**Orion** & **Blueprint**). Whenever an off-the-shelf tool became a scaling or licensing bottleneck, I engineered a lean Python replacement — migrating from Jenkins to a custom **High-Availability Django/Celery Dispatcher**, decoupling runtime configuration, executing workloads in **Kubernetes Jobs**, bridging **F5 and OpenStack** with zero downtime, and building **Orion AI (PoC)** with LangGraph and ReAct.
-- **Open-source engineering:** Outside enterprise environments, I build and maintain open-source AI and backend systems on GitHub — including **[OmniLecture Studio](https://github.com/oredondo/omnilecture-studio)** (a native Linux Wayland/GTK 3 multimodal study suite) and **[WrenchBuddy](https://github.com/oredondo/WrenchBuddy)** (a Django 6, Celery, and `pgvector` RAG vehicle lifecycle platform).
+- **Building a bank's internal cloud platform layer by layer:** I joined **BBVA Technology** in 2017 amidst the strategic shift toward **NextGen**, the bank's cloud platform initiative engineered to decouple and offload mission-critical core banking workloads from the legacy **mainframe**. As architect and technical lead of the central IaaS platform suite (**Orion**) for **BBVA**, I led the infrastructure evolution from its origins in on-premises datacenters (OpenStack and bare-metal nodes) to a fully hybridized architecture spanning private and public clouds (AWS, OpenShift, OpenStack). Whenever an off-the-shelf tool became a scaling or licensing bottleneck, I engineered a lean Python replacement — migrating from Jenkins to a custom **High-Availability Django/Celery Dispatcher**, decoupling runtime configuration, executing workloads in **Kubernetes Jobs**, bridging **F5 and OpenStack** with zero downtime, and building **Orion AI (PoC)** with LangGraph and ReAct.
+- **Personal open-source projects:** Outside enterprise environments, I build personal AI and backend systems on GitHub — including **[OmniLecture Studio](https://github.com/oredondo/omnilecture-studio)** (a native Linux Wayland/GTK 3 multimodal study suite) and **[WrenchBuddy](https://github.com/oredondo/WrenchBuddy)** (an early-stage vehicle lifecycle and `pgvector` RAG idea).
 
 ## Engineering Principles
 
@@ -59,3 +59,9 @@ Outside of distributed systems and infrastructure platforms, hands-on mechanical
 - :fontawesome-brands-linkedin: **LinkedIn:** [linkedin.com/in/oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
 - :fontawesome-brands-github: **GitHub:** [github.com/oredondo](https://github.com/oredondo)
 - :material-email-outline: **Email:** [o.redondo91@gmail.com](mailto:o.redondo91@gmail.com)
+
+---
+
+[:material-sitemap-outline: Explore case studies](projects/index.md){ .md-button .md-button--primary }
+[:material-file-account-outline: View my CV](cv/index.md){ .md-button }
+[:material-newspaper-variant-outline: Read the blog](blog/index.md){ .md-button }

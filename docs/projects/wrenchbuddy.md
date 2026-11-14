@@ -1,7 +1,7 @@
 ---
 title: "Open Source: WrenchBuddy — AI Vehicle Lifecycle & pgvector RAG Platform"
 description: >-
-  An open-source full-stack platform built with Django 6, DRF, PostgreSQL (pgvector), Celery, Redis, S3/MinIO, and LangChain for invoice OCR, workshop manual RAG, and vehicle lifecycle management.
+  Open-source full-stack platform built with Django 6, DRF, PostgreSQL (pgvector), Celery, Redis, S3/MinIO, and LangChain for invoice OCR, workshop manual RAG, and vehicle lifecycle management.
 ---
 
 # WrenchBuddy: AI Vehicle Lifecycle & `pgvector` RAG Platform
@@ -9,86 +9,96 @@ description: >-
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Creator & Maintainer (Open Source) |
+| **Stage** | **Early-stage idea / Under active construction** (Working prototype) |
 | **Repositories** | [:fontawesome-brands-github: `oredondo/WrenchBuddy` (Backend)](https://github.com/oredondo/WrenchBuddy) · [:fontawesome-brands-github: `oredondo/WrenchBuddy-frontend` (TypeScript)](https://github.com/oredondo/WrenchBuddy-frontend) (Apache 2.0 License) |
 | **Domain** | Full-stack backend architecture, asynchronous task queues, Vision OCR & `pgvector` RAG |
 | **Stack** | Python 3.12, Django 6.0, Django REST Framework, PostgreSQL (`pgvector`), Celery 5.4, Redis, AWS S3 / MinIO (`boto3`), LangChain, ReportLab, Docker, TypeScript |
 
-!!! abstract "Overview"
+!!! note "Early-stage development project"
 
-    While my enterprise work on Orion at BBVA is proprietary, **WrenchBuddy** is a public, production-structured **Django + DRF + Celery + Redis + PostgreSQL** platform on GitHub. It combines relational domain modeling with **768-dimensional `pgvector` embeddings** over technical workshop manuals, asynchronous **Vision/OCR invoice parsing**, S3-compatible media storage, and a context-injected conversational maintenance assistant for motorcycles and cars.
+    WrenchBuddy is a personal project and an **early-stage idea currently under active initial construction**. It serves as an architectural testbed applying enterprise infrastructure patterns (Django, Celery, PostgreSQL, Redis) to a consumer use case powered by applied AI (computer vision and `pgvector` RAG).
+
+!!! abstract "Architectural summary"
+
+    **WrenchBuddy** is an open-source early-stage project under construction on GitHub exploring the same architectural foundation as my enterprise work: **Django + DRF + Celery + Redis + PostgreSQL**. It combines transactional relational modeling with **768-dimensional `pgvector` embeddings** across technical workshop manuals, asynchronous **Vision/OCR invoice extraction**, S3-compatible cloud-native storage, and a prototype conversational RAG assistant that injects the vehicle's exact technical specs and maintenance history.
 
 ---
 
-## 1. System Architecture
+## 1. Context & Engineering Challenges
+
+Digital vehicle fleet and personal maintenance tracking typically relies on dispersed manual records or generic tools disconnected from OEM workshop manuals:
+
+1. **Relational and vector split-brain:** Operating a separate external vector database introduces severe data desynchronization risks against the transactional model of users, vehicles, and maintenance logs.
+2. **Vision & AI inference latency:** Processing OCR on scanned invoices and generating dense embeddings are resource-intensive tasks that must never block API HTTP request-response cycles.
+3. **Hallucinations in technical assistance:** Mechanical queries (such as torque specifications or oil viscosity grades) demand exact precision grounded solely in the manufacturer's official documentation.
+
+---
+
+## 2. Abstract System Topology: Operation & RAG Workflow
+
+The architecture decouples synchronous API ingestion, background dispatching, vision inference, and hybrid persistence into a modular pipeline:
 
 ```mermaid
 flowchart LR
-    subgraph Client["Frontend & API Consumers"]
-        TS["WrenchBuddy Frontend<br/>(TypeScript)"]
-    end
-
-    subgraph Backend["Django 6 + DRF Application Tier"]
-        Users["users/<br/>Auth, profiles & i18n"]
-        Vehicles["vehicles/<br/>Specs, PDF manuals & ReportLab export"]
-        Maint["maintenance/<br/>Service events, task catalog & invoices"]
-        Social["social/<br/>Digital garage & activity feed"]
-        AI_API["ai_assistant/<br/>REST & RAG chat endpoints"]
-    end
-
-    subgraph Async["Asynchronous Processing (Celery + Redis)"]
-        Broker[("Redis<br/>Broker & result backend")]
-        Workers["Celery Workers<br/>Chunking, embeddings & invoice OCR"]
-    end
-
-    subgraph Storage["Persistence & Object Storage"]
-        PG[("PostgreSQL + pgvector<br/>Relational data + 768-dim vector chunks")]
-        S3[("AWS S3 / MinIO<br/>Invoices, manuals & garage media")]
-        LLM["OpenAI-Compatible LLM / Vision / Embeddings<br/>(OpenAI · Ollama · Local endpoints)"]
-    end
-
-    TS <--> Users & Vehicles & Maint & Social & AI_API
-    Vehicles & Maint & AI_API --> Broker --> Workers
-    Users & Vehicles & Maint & Social & AI_API <--> PG
-    Vehicles & Maint <--> S3
-    Workers <--> PG & S3 & LLM
-    AI_API <--> LLM
+    Client["1. Client Web / API<br/><b>(TypeScript · DRF REST)</b>"] --> App["2. Django Backend<br/><b>(Auth · Domain · S3)</b>"]
+    App --> Queue["3. Celery Queues<br/><b>(Redis · Async Workers)</b>"]
+    Queue --> RAG["4. RAG & Vision Engine<br/><b>(LangChain · Invoice OCR)</b>"]
+    RAG --> DB[("5. Hybrid Database<br/><b>(PostgreSQL + pgvector)</b>")]
 ```
 
----
+### Step-by-Step Processing Pipeline
 
-## 2. Core Engineering Pillars
-
-### A. Unified Relational + Vector Storage (`PostgreSQL` + `pgvector`)
-Instead of introducing a separate external vector database that can drift out of sync with relational records, WrenchBuddy uses PostgreSQL with the **`pgvector`** extension:
-
-- Uploaded workshop manuals and technical specification sheets (`PDF` / images) are extracted asynchronously, split into semantic chunks, embedded into **768-dimensional vectors**, and stored alongside the vehicle foreign keys in PostgreSQL.
-- Queries combine strict relational filtering (exact vehicle ID, ownership permissions) with cosine similarity search in a single database tier.
-
-### B. Asynchronous Vision/OCR Invoice Parsing & Smart Catalogs (`Celery` + `Redis`)
-Heavy I/O and LLM calls never block HTTP request threads:
-
-- **Invoice & receipt extraction:** When a user uploads a photo or PDF of a workshop invoice, a Celery task invokes vision and text models to automatically extract performed labor, replaced parts, odometer readings, and itemized costs into structured `maintenance` records.
-- **Smart task catalog synthesis:** Background jobs synthesize periodic maintenance schedules tailored to exact vehicle make, model, year, displacement, and riding conditions.
-
-### C. Grounded Vehicle-Contextual RAG Assistant (`ai_assistant/`)
-When a user asks a natural-language question about service intervals, torque specs, or historical repairs, the LangChain pipeline injects:
-
-1. The vehicle's real specifications and current odometer state.
-2. Computed maintenance schedules and historical invoice records.
-3. Top-K retrieved technical manual chunks from `pgvector` — responding in the user's configured language (English or Spanish).
-
-### D. Portable Cloud-Native Storage & PDF Dossier Export
-- **S3 / MinIO abstraction:** Media attachments (manuals, invoices, garage galleries) use `django-storages` and `boto3`, switching seamlessly between local storage, self-hosted MinIO, and AWS S3 via environment configuration.
-- **ReportLab PDF export:** Generates downloadable full-history vehicle condition and maintenance dossiers for resale or workshop handoff.
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. API Ingestion** | TypeScript Frontend / Django REST | Receives natural language queries, invoice image uploads, or workshop manual PDFs. | Strict validation via typed serializers with immediate, non-blocking HTTP response. |
+| **2. Async Dispatch** | Redis Broker & Celery Workers | Enqueues heavy I/O, image processing, and inference jobs into dedicated queues with automatic retries. | Total isolation from the user's interactive HTTP request cycle. |
+| **3. Vision & OCR** | Vision Celery Tasks | Multimodal invoice analysis extracting replaced parts, labor hours, odometer readings, and itemized costs. | Structured extraction from non-standard documents into relational records. |
+| **4. RAG Engine** | LangChain Pipeline | Semantic chunking of workshop manuals, 768-dimensional vector embedding generation, and cosine similarity retrieval. | Factual responses grounded strictly in official vehicle documentation. |
+| **5. Hybrid Persistence** | PostgreSQL with `pgvector` Extension | Unified persistence of relational tables (ACID) and vector collections linked by foreign keys. | Zero data drift or split-brain without external vector database overhead. |
 
 ---
 
-## 3. Repository Structure & Source Code
+## 3. Key Architectural Decisions
+
+### A. Unified Relational and Vector Storage (`pgvector`)
+Rather than introducing a dedicated external vector database (such as Pinecone or Milvus) that introduces operational overhead and sync lag:
+- **`pgvector` on PostgreSQL:** Combines strict relational filters (vehicle ownership, user RBAC permissions) with 768-dimensional vector similarity searches in a single transactional SQL query.
+- **Atomic consistency:** Deleting a vehicle or updating a service record immediately guarantees referential integrity across associated embeddings.
+
+### B. Asynchronous Decoupling via Celery & Redis
+Any operation requiring more than 200 ms of compute is delegated to background workers:
+- **Background invoice OCR:** Image and PDF uploads trigger computer vision tasks that analyze the document, structure financial figures, and notify the user once records are consolidated.
+- **Automated maintenance schedule synthesis:** Background algorithms calculate personalized service intervals based on odometer progression, riding conditions, and elapsed time.
+
+### C. Vehicle-Contextualized RAG Assistant
+The conversational assistant does not answer from generic training data:
+1. Resolves the exact vehicle metadata (make, model, year, displacement, current odometer reading).
+2. Pulls the relational history of past invoices and completed services.
+3. Retrieves top-K relevant chunks from the workshop manual via `pgvector` and constructs an enriched prompt under strict technical grounding guardrails.
+
+### D. Cloud-Native S3 Abstraction & PDF Dossier Generation
+- **S3 / MinIO portability:** Leveraging `django-storages` and `boto3`, the storage layer toggles seamlessly between local disks for development, self-hosted MinIO, and AWS S3 in production with zero code modifications.
+- **Automated PDF dossiers via ReportLab:** Programmatically compiles comprehensive maintenance dossiers containing vehicle condition histories, invoices, and service records for ownership transfer or workshop handoffs.
+
+---
+
+## 4. Architectural Trade-Offs
+
+| Decision | Alternative Considered | Trade-Off Rationale |
+| :--- | :--- | :--- |
+| **PostgreSQL + `pgvector`** | Dedicated vector database (Pinecone/Milvus) | Eliminates operational overhead of synchronizing two databases while guaranteeing ACID transactional consistency in a single tier. |
+| **Asynchronous Celery workers** | Synchronous execution within HTTP request threads | Prevents web socket timeouts and request blocking during heavy multimodal vision inference. |
+| **S3 / MinIO storage abstraction** | Static local filesystem storage | Provides instant cloud-native portability between local development and cloud production deployments. |
+| **Vehicle-scoped RAG retrieval** | Unfiltered generalist LLM queries | Enforces that torque specs, tolerances, and fluid capacities come directly from official OEM service manuals. |
+
+---
+
+## 5. Source Code & Open Source Repositories
 
 Both the Django/Celery backend and the TypeScript frontend are open-source under the Apache 2.0 License:
 
-- :fontawesome-brands-github: **Backend (`Django` / `Celery` / `pgvector`):** [`github.com/oredondo/WrenchBuddy`](https://github.com/oredondo/WrenchBuddy)
-- :fontawesome-brands-github: **Frontend (`TypeScript`):** [`github.com/oredondo/WrenchBuddy-frontend`](https://github.com/oredondo/WrenchBuddy-frontend)
+- :fontawesome-brands-github: **Backend (`Django 6` / `Celery` / `pgvector`):** [`github.com/oredondo/WrenchBuddy`](https://github.com/oredondo/WrenchBuddy)
+- :fontawesome-brands-github: **Frontend (`TypeScript` / `Vite`):** [`github.com/oredondo/WrenchBuddy-frontend`](https://github.com/oredondo/WrenchBuddy-frontend)
 
 ---
 

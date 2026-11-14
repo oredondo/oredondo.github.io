@@ -8,9 +8,31 @@ description: >-
 
 # Case Study Author Skill
 
-Platform Engineering case studies must communicate **scale, architectural intent, developer ergonomics (DevEx), and quantifiable outcomes**. Avoid superficial tool listings.
+Platform Engineering case studies must communicate **scale, architectural intent, developer ergonomics (DevEx), and quantifiable outcomes**. Avoid superficial tool listings or over-explanation.
 
 All case studies must maintain **1:1 bilingual parity** between English (`docs/projects/`) and Spanish (`docs_es/projects/`).
+
+---
+
+## Portfolio Architectural & Editorial Standards
+
+### 1. Naming & Organization Conventions
+- **Banking Organization (Projects):** In project case studies, the target/client banking organization is always **`BBVA`** (Core Banking Infrastructure), as the systems were built for the banking entity.
+- **Role Title:** Always use **`Arquitecto y Responsable de Plataforma`** (ES) or **`Architect & Platform Lead`** (EN). Never use "Arquitecto Único" or "Sole Architect".
+- **Dates in Metadata:** Do **not** include project dates in the metadata tables of case studies. Keep metadata focused on Role, Organization, Scale/Outcome, and Stack.
+- **Strategic Context (NextGen & Mainframe Offloading):** Orion was conceived under BBVA's **NextGen** cloud platform initiative to offload critical banking workloads from the legacy **mainframe**, evolving from on-premises datacenters (OpenStack, bare-metal) into a fully hybridized infrastructure (AWS, OpenShift, OpenStack).
+- **Enterprise Confidentiality:** Enterprise case studies (BBVA / Oesia) must use **abstract architecture diagrams and high-level trade-offs only** — never publish proprietary employer code or invented/toy code snippets. Open-source case studies must link directly to real public GitHub repositories.
+
+### 2. Regulatory Touches (DORA & Banking Compliance)
+Integrate subtle, technical ("pinceladas") compliance touches regarding the **Digital Operational Resilience Act (DORA - Regulation EU 2022/2554)** and European Central Bank guidelines:
+- **ICT Asset Inventory & Risk Management (Orion):** Continuous, auditable tracking of all machines, software versions, and ownership history.
+- **ICT Third-Party / Vendor Concentration Risk (Blueprint):** Eliminating vendor lock-in on proprietary suites (e.g., Red Hat Ansible Automation Platform / Tower), avoiding recurring node-based licensing with cumulative cost avoidance exceeding €6M.
+- **Business Continuity & Zero SPOF (Dispatcher Migration):** High availability with Django/Celery and ephemeral Kubernetes Jobs replacing fragile single points of failure.
+- **ICT Incident Management & Rapid Triage (Orion AI):** Reducing MTTR from hours to seconds by correlating Orion execution logs in the Dispatcher with runbooks and GitLab diffs under deterministic guardrails.
+
+### 3. Open-Source Projects Conventions
+- **OmniLecture Studio:** Emphasize FFmpeg acoustic preprocessing for voice dictations (`afftdn`, vocal bandpass 100 Hz–4000 Hz, `silenceremove`), Whisper anti-hallucination speech filters (VAD, temperature fallback, `compression_ratio`), and **interconnected Markdown (`.md`) knowledge graphs (Obsidian-compatible with wikilinks `[[...]]`)**. **Never mention Word or `.docx`**.
+- **WrenchBuddy:** Always explicitly identify as an **idea in early-stage construction / active prototype** (*idea en fase de construcción muy temprana*). Focus on unified relational + `pgvector` RAG and asynchronous Celery/Redis invoice OCR.
 
 ---
 
@@ -29,46 +51,66 @@ description: "<Brief 1-sentence synopsis of architecture and impact>"
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | <Your Role: Sole Architect / Platform Owner / Lead Engineer> |
-| **Organization / Scope** | <Company / Domain / Personal> |
-| **Scale / Impact** | <e.g., 30k+ nodes, 40k ops/day, 90% MTTR reduction> |
-| **Key Tech** | <Python, Celery, LangGraph, PostgreSQL, Kubernetes, etc.> |
+| **Role** | Architect & Platform Lead |
+| **Organization** | BBVA (Core Banking Infrastructure) |
+| **Scale / Impact** | <e.g., 30,000+ machines · 40,000+ daily operations · 500+ engineers> |
+| **Stack** | <Python, Django, Celery, PostgreSQL, etc.> |
+
+!!! abstract "Architectural summary"
+
+    <Concise 1-paragraph summary highlighting core architecture, inputs, and engineering guarantees>
 ```
 
-### 2. The Engineering Challenge
-- State the baseline operational bottleneck or business constraint.
-- Explain why standard off-the-shelf tools were insufficient or why commercial licenses were rejected.
+### 2. The Engineering Challenge / Context
+- State the baseline operational bottleneck, architectural challenge, or regulatory constraint.
+- Keep bullet points sharp, executive, and non-redundant.
 
-### 3. Architecture & Mermaid Diagram
-Every case study must include a clear **Mermaid.js** diagram (flowchart, sequence, or class diagram):
+### 3. Abstract System Topology: 1-Line Pipeline Flowchart & Table
+To ensure optimal readability across mobile, tablet, and desktop, **always use a clean 1-line horizontal Mermaid flowchart (`flowchart LR`) followed by a structured step-by-step table**:
+
 ```markdown
 ```mermaid
-flowchart TD
-    Client["Client / API"] --> Gateway["Service Gateway"]
-    Gateway --> Worker["Async Engine"]
-    Worker --> State[("Persistent Store")]
+flowchart LR
+    Step1["1. Ingestion / Trigger<br/><b>(Web UI · API · Scheduler)</b>"] --> Step2["2. Control Plane<br/><b>(Dispatcher HA)</b>"]
+    Step2 --> Step3["3. Execution<br/><b>(Drivers / Jobs)</b>"]
+    Step3 --> Step4[("4. Audit & Storage<br/><b>(Immutable Ledger)</b>")]
 ```
+
+### Step-by-Step Processing Pipeline
+
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. Ingestion** | ... | ... | ... |
+| **2. Control Plane** | ... | ... | ... |
+```
+*(Avoid tall multi-column sequence diagrams or recargados multi-box subgraphs that degrade readability).*
+
+### 4. Key Architectural Decisions
+- Detail 3-4 specific architectural pillars (e.g., hybrid persistence, separation of layers, runtime variable injection, stateful graphs).
+- Focus on engineering rationale rather than generic descriptions.
+
+### 5. Architectural Trade-Offs Table
+Every case study must include a clear trade-offs comparison table:
+```markdown
+## Architectural Trade-Offs
+
+| Decision | Alternative Considered | Trade-Off Rationale |
+| :--- | :--- | :--- |
+| ... | ... | ... |
 ```
 
-### 4. Key Architectural Trade-Offs & Decisions
-- Detail 2-3 specific architectural decisions (e.g., synchronous vs asynchronous, relational vs document storage, deterministic guardrails vs unstructured output).
-- Include an explicit trade-offs comparison table.
-- Highlight how developer experience (DevEx) was improved.
-
-### 5. Python Implementation Highlights
-- Include a short, clearly labelled *illustrative* Python code snippet demonstrating the key design pattern (e.g., driver factory, DAG topological sort, Pydantic guardrail).
-- **Rule:** Never publish proprietary employer code; always use simplified illustrative abstractions.
-
-### 6. Measurable Impact
-- Quantify outcomes using concrete numbers (latency reduction, cost savings, MTTR drop, zero-downtime migrations).
+### 6. Measurable Operational & Business Impact
+- Quantify outcomes with concrete metrics (scale, cost avoidance, MTTR reduction, zero downtime, DORA compliance readiness).
 
 ---
 
-## Bilingual Checklist When Adding a New Case Study
-1. Create English version: `docs/projects/<slug>.md`.
-2. Create Spanish mirror: `docs_es/projects/<slug>.md` (translate prose and Mermaid labels; keep technical terms, commands and code unchanged).
-3. Add entries to `nav` in both `mkdocs.yml` (under `Projects`) and `mkdocs.es.yml` (under `Proyectos`).
-4. Add Material grid cards (`<div class="grid cards" markdown>`) with relative Markdown links in `projects/index.md` (EN & ES), and in `index.md` if it is a flagship project. Never use raw HTML `<a href="*.md">`.
-5. Check parity: `python3 .agents/skills/i18n-sync/scripts/sync_i18n.py`.
-6. Preview both languages locally with `python3 serve.py` to inspect `/` and `/es/`.
-7. Run strict dual build: `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`.
+## Bilingual Checklist When Adding or Modifying a Case Study
+1. Update/create English version: `docs/projects/<slug>.md`.
+2. Update/create Spanish mirror: `docs_es/projects/<slug>.md` (translate prose and Mermaid labels; keep technical terms, commands and code unchanged).
+3. Ensure 1:1 structural and anchor parity between both files.
+4. Run strict dual build: `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`.
+5. Run CV & i18n validations:
+   ```bash
+   python3 .agents/skills/cv-architect/scripts/validate_cv.py
+   python3 .agents/skills/i18n-sync/scripts/sync_i18n.py
+   ```

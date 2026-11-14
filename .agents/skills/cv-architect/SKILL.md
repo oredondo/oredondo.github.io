@@ -18,12 +18,27 @@ This skill synthesizes the core principles of **Harvard Career Services**, Reddi
 ## 1. Core Engineering Resume Principles
 
 ### A. The Document Purpose
-A senior resume is not an exhaustive autobiography or a list of job duties; it is a **high-impact architectural marketing document**. Every line must earn its place by proving:
-1. **Architectural Ownership:** Conceived, designed, and led systems rather than simply maintaining or using them.
+A senior resume is not an exhaustive autobiography or a list of job duties; it is a **high-impact architectural marketing document**. Every line must prove:
+1. **Architectural Ownership:** Conceived, designed, and led systems rather than simply using them.
 2. **Technical Mastery:** Python, AsyncIO, custom DSL engines, distributed dispatchers, hybrid persistence tiers, Kubernetes Jobs, and deterministic multi-agent graphs.
-3. **Auditable Scale & Impact:** Quantified results (30k+ nodes, 40k+ ops/day, 500+ engineers, MTTR from hours to seconds, zero downtime).
+3. **Auditable Scale & Impact:** Quantified results (30,000+ nodes, 40,000+ ops/day, 500+ engineers, €6M+ licensing cost avoidance, MTTR from hours to seconds, zero downtime).
 
-### B. Google's XYZ Bullet Formula
+### B. Portfolio & Identity Standards
+- **Organization & Employer:** Always use **`BBVA Technology`** as the employer company in the Professional Experience section, building systems and infrastructure for **`BBVA`** (Core Banking).
+- **Strategic Context (NextGen & Mainframe Migration):** Frame the architecture within BBVA's **NextGen** initiative to offload critical workloads from the legacy **mainframe**, evolving from on-premises datacenters to a fully hybridized private/public cloud.
+- **Role Title:** Always use **`Arquitecto y Responsable de Plataforma`** (ES) or **`Architect & Platform Lead`** (EN). Never use "Arquitecto Único" or "Sole Architect/Sole Owner".
+- **Regulatory Frameworks:** Ground data and reliability bullets in **DORA (Digital Operational Resilience Act - Regulation EU 2022/2554)** requirements for continuous ICT asset tracking, zero single points of failure (SPOF), and business continuity.
+- **Project Descriptions:**
+  - *Orion:* Central IaaS platform & control plane (replacing commercial suites), web self-service forms, OpenAPI REST, automated schedulers, 30,000+ machines, 40,000+ daily ops.
+  - *Blueprint:* Declarative YAML specification layer interpreted and executed natively by Orion, DAG waves, idempotent teardown, €6M+ licensing cost avoidance vs. Red Hat Automation Platform.
+  - *Dispatcher:* Django + Celery HA dispatcher replacing Jenkins master SPOF, runtime variable injection, ephemeral K8s Jobs.
+  - *Orion AI:* Validated PoC in LangGraph + ReAct analyzing Orion execution logs in Dispatcher + GitLab diffs under deterministic guardrails.
+  - *OmniLecture Studio:* Linux native (Wayland, GTK 3), FFmpeg dictation filtering, Whisper anti-hallucination, Markdown knowledge graphs (no DOCX).
+  - *WrenchBuddy:* Early-stage idea under active construction, Django 6 + pgvector RAG + Celery vision OCR.
+
+---
+
+## 2. Google's XYZ Bullet Formula
 Every experience bullet point must follow the **XYZ formula**:
 > **Accomplished [X] as measured by [Y], by doing [Z]**  
 > *(Logró [X] medido por [Y], implementando [Z])*
@@ -34,36 +49,19 @@ Every experience bullet point must follow the **XYZ formula**:
 
 ---
 
-## 2. Bullet Point Construction Taxonomy
+## 3. Bullet Construction Taxonomy
 
 ### The 4-Part Platform Formula
 ```
-[Strong Active Verb] + [System / Architectural Component] + [Mechanism / Technical Implementation] + [Measurable Impact (Scale / Latency / Reliability)]
+[Strong Active Verb] + [System / Architectural Component] + [Mechanism / Technical Implementation] + [Measurable Impact (Scale / Cost / Reliability / DORA)]
 ```
 
 ### Power Verbs by Domain (Never use "Worked on", "Helped", "Responsible for")
 - **IaC & Orchestration:** *Architected, Conceived, Engineered, Decoupled, Reconciled, Automated, Standardized.*
 - **Scale & Reliability:** *Streamlined, Eliminated (SPOF/lock-in), Scaled, Restored (zero-downtime), Optimized, Governed.*
-- **Data & Compliance:** *Engineered (hybrid persistence), Ingested, Indexed, Accelerated, Automated (audit pipelines).*
+- **Data & Compliance:** *Engineered (hybrid persistence), Ingested, Indexed, Accelerated, Automated (audit pipelines & DORA compliance).*
 - **Applied AI:** *Pioneered, Designed (cyclic state machines), Constrained (deterministic guardrails), Slashed (MTTR).*
 - **Leadership & Scale:** *Led (international rollout), Mentored, Established (org-wide standards), Owned (on-call).*
-
----
-
-## 3. Oscar Redondo's Platform Philosophy Pillars
-
-Whenever reviewing or writing CV content, ground every point in these 4 architectural pillars:
-
-1. **Custom Infrastructure as Code (IaC) vs. Off-The-Shelf Tools:**
-   - Highlight **Blueprint**: Not merely using Terraform/Ansible; engineered an asynchronous Python YAML lifecycle engine with DAG wave execution and state reconciliation against Orion, eliminating commercial suites (Red Hat Automation Platform / Ansible Tower).
-2. **Universal Driver Abstraction & Zero Configuration Drift:**
-   - Modular driver pattern: Target AWS, OpenStack, OpenShift, and bare metal with the exact same codebase by swapping drivers.
-   - Centralized Configuration Management: Dynamically injects environment variables at runtime, guaranteeing zero drift between dev, staging, and production.
-3. **Replacing Single Points of Failure (SPOFs):**
-   - Migrating away from Jenkins bottlenecks to a purpose-built High-Availability Operation Dispatcher (Django + Celery) running ephemeral container tasks via Kubernetes Jobs.
-   - Zero-downtime RESTful API bridge between F5 load balancers and OpenStack when the vendor deprecated native drivers.
-4. **Deterministic Operational AI:**
-   - Orion AI (PoC validada): LangGraph + ReAct + Qwen 131k context under deterministic guardrails (strict Pydantic schemas, read-only MCP contracts) cutting MTTR from hours to seconds.
 
 ---
 
@@ -74,7 +72,7 @@ Whenever reviewing or writing CV content, ground every point in these 4 architec
 - Keep contact information on a clean single line with direct clickable links (`[github.com/oredondo](https://github.com/oredondo)`).
 - Use standard bullet lists (`- `) for work experience; never enclose job duties inside nested layout tables.
 - Keep tables strictly reserved for structured summaries: *Selected Systems*, *Technical Skills*, and *Certifications*.
-- Ensure all text is 100% extractable vector Unicode (no image-based CVs, no canvas rendering).
+- Ensure all text is 100% extractable vector Unicode.
 
 ### B. Print-to-PDF Guidelines
 The web CV is optimized for browser printing via `window.print()` and CSS media queries in `docs/stylesheets/extra.css`:

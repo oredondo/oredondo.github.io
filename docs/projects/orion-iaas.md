@@ -1,117 +1,109 @@
 ---
-title: "Case Study: Orion IaaS Platform & Driver Pipeline"
+title: "Case Study: Orion IaaS Platform & Universal Driver Pipeline"
 description: >-
-  High-level architecture of BBVA's central IaaS platform — a Python/Django control plane governing tens of thousands of nodes across AWS, OpenStack, OpenShift, and bare metal.
+  Architecture of BBVA's central IaaS control plane — a Python/Django platform governing 30,000+ machines across AWS, OpenStack, OpenShift, and bare metal with comprehensive auditability, layered Ansible operations (Ground + User), and API-driven scheduled automation.
 ---
 
 # Orion: Central IaaS Platform & Universal Driver Pipeline
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Sole Architect & Platform Owner |
-| **Organization** | BBVA Technology (Core Banking Infrastructure) · 2017 – Present |
+| **Role** | Architect & Platform Lead |
+| **Organization** | BBVA (Core Banking Infrastructure) |
 | **Scale** | 30,000+ governed machines · 40,000+ daily operations · 500+ engineers |
-| **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift, F5, Infoblox |
+| **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, Ansible, AWS, OpenStack, OpenShift, Infoblox |
 
 !!! abstract "Architectural summary"
 
-    Orion is the central control plane for infrastructure governance, auditing, and self-service deployment across BBVA's hybrid cloud. It hides four distinct infrastructure substrates (**AWS, OpenStack, OpenShift, and physical bare-metal**) behind a single OpenAPI-documented REST interface, combining a **universal driver deployment pipeline**, a **hybrid relational/document data tier**, and **automated compliance export pipelines**.
+    Orion is the central control plane for infrastructure governance, comprehensive auditing, and self-service deployment across BBVA's hybrid cloud. It abstracts four technological substrates (**AWS, OpenStack, OpenShift, and physical bare-metal**) behind an OpenAPI-documented REST interface, web self-service forms, and **automation schedulers**, combining a **universal driver provisioning pipeline**, **two-layer Ansible configuration (corporate Ground + User workloads)**, and an **end-to-end machine traceability audit engine**.
 
 ---
 
-## 1. Context & Problem Statement
+## 1. The Evolution of Orion: From On-Premises NextGen to a Hybrid HA Dispatcher
 
-Operating infrastructure at banking scale across public cloud, private cloud, container clusters, and legacy data centers created three structural bottlenecks:
+In 2017, BBVA launched a historic architectural transformation with **NextGen**: a modern internal cloud platform designed to offload mission-critical core banking workloads from the legacy **mainframe**. The initiative began in internal on-premises datacenters (OpenStack and bare-metal nodes) and evolved into a fully hybridized infrastructure integrating private and public clouds (AWS, OpenStack, OpenShift, and bare-metal).
 
-1. **Siloed provisioning:** Every target environment (AWS, OpenStack, OpenShift, physical hardware) required its own specialized tooling, credentials, and manual ticket handoffs — turning simple provisioning requests into multi-day waits.
-2. **Heterogeneous asset auditing:** Regulatory and internal audit teams require continuous, verifiable snapshots of ownership, security baselines, and machine state across tens of thousands of assets whose underlying metadata schemas look nothing alike.
-3. **Vendor integration fragility:** Infrastructure platforms depend on upstream vendor integrations (such as F5 load balancers with OpenStack) that can be deprecated mid-lifecycle without warning.
+To govern this scale without fragmentation, Orion evolved through four key phases:
+
+- **Phase 1 · On-Premises Origin (NextGen & API-First Inventory):** A centralized control plane to inventory and provision compute resources in local datacenters, laying the foundation to migrate workloads off the mainframe via hybrid persistence (PostgreSQL + MongoDB + Redis) and an RBAC REST catalog.
+- **Phase 2 · The Jenkins Bottleneck:** Execution initially relied on a centralized Jenkins cluster that lacked native high availability (critical SPOF), had a rigid UI for operational workflows, and introduced high maintenance overhead.
+- **Phase 3 · Emergence of the Integrated HA Dispatcher:** Orion absorbed the execution plane by developing an **in-house HA Dispatcher (Django + Celery + Kubernetes Jobs)**, decoupling runtime variables and structuring provisioning into cloud drivers and layered Ansible pipelines.
+- **Phase 4 · Declarative Extension & AI (Blueprint & Orion AI):** Unification with declarative orchestration via **Blueprint** (YAML engine with DAGs) and agentic CI/CD failure diagnostics with **Orion AI** (LangGraph).
 
 ---
 
-## 2. Abstract System Topology
+## 2. Context & Problem Statement
 
-Orion was architected from scratch to make the underlying cloud provider effectively invisible to the 500+ engineers consuming it, while centralizing permissions, product catalogs, remediation workflows, and audit trails.
+Amidst the rollout of the **NextGen** transformation to offload banking operations from the mainframe onto distributed systems, enterprise infrastructure rapidly shifted from isolated on-premises servers into a massive hybrid ecosystem. Operating tens of thousands of banking workloads across public cloud, private cloud, and on-premises data centers created three critical challenges:
+
+1. **Siloed provisioning:** Target environments required isolated tools and credentials, turning simple requests into multi-day manual handoffs.
+2. **Audit blindness & dispersed tracking:** Strict regulatory banking mandates (such as **DORA** resilience frameworks and ECB/EBA guidelines) require knowing at any moment who authorized an asset, exactly what software packages are installed, and its full historical event log.
+3. **Configuration drift & baseline vulnerabilities:** Without an enforced separation between the bank's operational baseline (security, monitoring) and user applications, systems drifted from corporate compliance.
+
+---
+
+## 3. Abstract System Topology: Operation Lifecycle
+
+Orion centralizes the banking infrastructure lifecycle through a strict sequential pipeline:
 
 ```mermaid
-flowchart TD
-    subgraph Consumers["Platform Consumers (500+ Engineers)"]
-        Portal["Self-Service Portal & CLI"]
-        BP["Blueprint Declarative Engine"]
-        Systems["Core Bank Systems & CI/CD"]
-    end
-
-    subgraph ControlPlane["Orion Control Plane (Python / Django / DRF)"]
-        API["OpenAPI / Swagger REST Gateway"]
-        RBAC["Centralized RBAC & Product Catalog"]
-        Audit["Automated Audit Export Pipelines (CSV / Reports)"]
-        Coord["Async Operation Coordinator (Celery)"]
-        API --> RBAC --> Coord
-        RBAC --> Audit
-    end
-
-    subgraph DataTier["Hybrid Persistence & Messaging Tier"]
-        PG[("PostgreSQL<br/>Transactional state, RBAC & immutable audit trail")]
-        Mongo[("MongoDB<br/>Polymorphic multi-cloud asset inventory")]
-        Redis[("Redis<br/>Hot query cache & Celery broker")]
-    end
-
-    subgraph DriverLayer["Universal Driver Deployment Pipeline"]
-        AWS_D["AWS Driver"]
-        OS_D["OpenStack Driver"]
-        F5_B["Custom F5 ↔ OpenStack REST Bridge"]
-        OSH_D["OpenShift Driver"]
-        BM_D["Bare-Metal / On-Prem Driver"]
-    end
-
-    Consumers --> API
-    Coord <--> PG & Mongo & Redis
-    Audit <-- "High-volume analytical queries" --- PG & Mongo
-    Coord --> AWS_D & OS_D & OSH_D & BM_D
-    OS_D <--> F5_B
+flowchart LR
+    Trig["Trigger<br/><b>(Web UI · API · Scheduler)</b>"] --> Disp["HA Dispatcher<br/><b>(RBAC & Celery)</b>"]
+    Disp --> Prov["1. Provisioning<br/><b>(Cloud Drivers)</b>"]
+    Prov --> Conf["2. Configuration<br/><b>(Ansible Ground + User)</b>"]
+    Conf --> Audit[("3. Audit Engine<br/><b>(Software & History)</b>")]
 ```
 
----
+### Step-by-Step Execution Pipeline
 
-## 3. Core Architectural Decisions
-
-### A. Hybrid Persistence Tier (PostgreSQL + MongoDB + Redis)
-A single database engine could not cleanly serve both strict banking compliance and massive multi-cloud inventory queries:
-
-- **PostgreSQL** stores relational entities requiring transactional integrity: permissions (RBAC), product catalogs, operation state transitions, and immutable audit records.
-- **MongoDB** ingests polymorphic asset documents across tens of thousands of machines (where an AWS EC2 instance, an OpenStack VM, an OpenShift namespace, and a physical server have completely different attribute trees) and indexes them for high-volume cross-estate querying.
-- **Redis** absorbs hot read paths and backs the asynchronous Celery task queues so HTTP endpoints respond immediately while long-running infrastructure workflows execute in the background.
-
-### B. Universal Driver Deployment Pipeline
-Instead of maintaining separate deployment pipelines per cloud provider, the deployment engine is built around an **abstract driver interface**:
-
-- **Single contract, swappable backends:** Every infrastructure flavor (AWS, OpenStack, OpenShift, bare-metal) implements a common lifecycle contract. The core platform dispatches the same normalized payload regardless of target environment.
-- **Organization-wide deployment standards:** Beyond the software layer, this pattern established the bank's standard deployment philosophy — enabling application teams to ship artifacts to production autonomously without manual intervention from infrastructure teams.
-
-### C. Zero-Downtime Vendor Deprecation Shield (F5 / OpenStack Bridge)
-When the official native integration between **F5 Load Balancers** and **OpenStack** was deprecated upstream, relying directly on vendor plugins would have forced a disruptive migration across production environments. Because Orion's driver layer already isolated downstream calls, I engineered a **custom RESTful API bridge** between F5 and OpenStack and slotted it behind the driver boundary — restoring full automated load-balancing interoperability with **zero banking downtime**.
-
-### D. Automated Compliance & Audit Pipelines
-Rather than treating compliance as an ad-hoc manual data gathering exercise before inspections, Orion runs automated export pipelines that aggregate operational state across MongoDB and PostgreSQL into structured reports (CSV pipelines) consumed directly by internal auditors and governance stakeholders.
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. Trigger** | Web UI Form / REST API / Schedulers (Celery Beat) | Self-service web form submission, direct REST API call, or recurring scheduled job. | Asynchronous, non-blocking ingestion with immediate HTTP response. |
+| **2. Authorization** | RBAC Engine & PostgreSQL | Strict validation of requester permissions, team quotas, and immutable logging of the operation request. | Zero anonymous or untracked operational requests. |
+| **3. Provisioning** | Multi-Cloud Driver Layer | Downstream call to target provider (**AWS, OpenStack, OpenShift, or Bare-Metal**) to create the compute instance and assign IP/DNS. | Consistent abstraction without vendor lock-in to proprietary APIs. |
+| **4. Ground Ops** | Ansible Core (Banking Baseline) | **Mandatory pre-user baseline:** CIS operating system hardening, corporate TLS certificates, firewall policies, and monitoring agent deployment. | **100% compliance guarantee:** if Ground validation fails, provisioning is aborted immediately. |
+| **5. User Ops** | Ansible Runner (User Workload) | Dynamic runtime variable injection and execution of user-defined playbooks (middleware, databases, microservices). | Strict isolation between corporate infrastructure baseline and app logic. |
+| **6. Audit** | Audit Engine (PostgreSQL + MongoDB) | Collection of final forensic telemetry: exact versions of all installed packages on the node, open ports, and execution event logs. | Instant forensic compliance reports for internal auditors and regulators. |
 
 ---
 
-## 4. Architectural Trade-Offs
+## 4. Key Architectural Decisions
 
-| Decision | Alternative Considered | Rationale |
+### A. Hybrid Persistence: Relational Integrity vs. Document Flexibility
+A single database engine could not simultaneously satisfy strict banking compliance and multi-cloud inventory scale:
+- **PostgreSQL** handles relational models requiring strict ACID transactions: RBAC permissions, product catalogs, state machines, and the immutable audit log.
+- **MongoDB** stores polymorphic documents detailing multi-cloud assets across tens of thousands of machines (where AWS instances, OpenStack VMs, and bare-metal nodes have completely disparate attribute trees), indexing the complete software tree for high-volume cross-estate querying.
+- **Redis** provides hot caching for frequent queries and serves as the high-throughput task queue broker for Celery workers.
+
+### B. Separation of Concerns: Two-Layer Ansible Pipeline
+To eliminate configuration drift without bottlenecking development autonomy, automation is divided into two sequential layers:
+- **Ground Layer (Corporate Guarantee):** CIS operating system hardening, firewall rules, corporate TLS certificates, and monitoring agents. No compute instance progresses to user workload provisioning without a successful Ground check.
+- **User Operation Layer (Application Autonomy):** Isolated runtime variable injection to deploy application middleware, databases, and service configurations.
+
+### C. End-to-End Auditability & Lifecycle Traceability
+Orion avoids delegating audit compliance to ephemeral pipeline logs. It maintains an immutable lifecycle ledger for each node: who authorized it, what configuration changes occurred over time, exact package and library versions installed, and full incident history. This establishes Orion as the technical foundation for complying with **DORA** (Regulation EU 2022/2554) ICT risk management and asset inventory mandates.
+
+---
+
+## 5. Architectural Trade-Offs
+
+| Decision | Alternative Considered | Trade-Off Rationale |
 | :--- | :--- | :--- |
-| **Hybrid PostgreSQL + MongoDB** | Single relational DB with JSONB | Kept strict relational integrity for permissions and audit trails while allowing high-speed indexing across deeply heterogeneous cloud metadata schemas. |
-| **In-house Python driver abstraction** | Separate provider-native pipelines per cloud | Unified RBAC, product catalog, and audit trail in one control plane; new infrastructure targets are additive modules. |
-| **Custom F5/OpenStack REST bridge** | Full load-balancer platform migration | Preserved operational continuity and delivered zero downtime when the vendor deprecated native integration. |
+| **Two-layer Ansible pipeline (Ground + User)** | Monolithic user-managed playbook | Guarantees 100% compliance with corporate security, hardening, and monitoring standards without relying on individual team discipline. |
+| **Centralized audit engine in Orion** | Traceability delegated to ephemeral pipeline logs | Enables immediate responses to regulatory audits with complete forensic histories for every machine and its installed packages. |
+| **Hybrid PostgreSQL + MongoDB** | Single relational DB with JSONB | Retains strict relational integrity for RBAC and audit logs while providing high-performance indexing across heterogeneous cloud metadata and package inventories. |
+| **In-house Python driver abstraction** | Separate cloud-specific tooling stacks | Unifies permissions, operation catalogs, and governance in a vendor-neutral control plane. |
 
 ---
 
-## 5. Operational Impact
+## 6. Operational & Business Impact
 
-- **Self-service at scale:** Enabled **500+ engineers** to provision, govern, and remediate infrastructure autonomously across **tens of thousands of nodes**, reducing provisioning lead times from days of ticket handoffs to minutes.
-- **Continuous auditability:** Replaced manual compliance evidence gathering with automated, verifiable audit pipelines consumed directly by governance teams.
-- **International adoption:** Rolled out across engineering organizations in **Spain, Mexico, and Turkey**, including cross-team onboarding and targeted platform extensions for regional workflows.
+- **Cost efficiency & technology sovereignty:** Consolidating an in-house control plane and HA dispatcher with native layered Ansible execution eliminated the need for commercial node-licensed automation suites (such as Red Hat Ansible Automation Platform), generating an **estimated cumulative cost avoidance exceeding €6M** in enterprise licensing fees for the organization.
+- **Auditability & complete traceability (DORA Compliance):** Reduced audit preparation from weeks of manual data compilation to instant queries covering any machine: who authorized it, what is installed, and its full historical event log — natively fulfilling ICT asset tracking requirements under **DORA** and European Central Bank inspections.
+- **Enforced security & observability baseline (Ground):** 100% of the **30,000+ managed machines** run verified corporate security policies and monitoring agents from the moment of provisioning.
+- **Self-service at banking scale:** Over **500 engineers** govern infrastructure autonomously, executing **40,000+ daily operations** via web forms, REST APIs, and scheduled automations.
+- **International adoption:** Successfully deployed across multiple international banking divisions (**Spain, Mexico, and Turkey**).
 
 ---
 
-[:octicons-arrow-right-24: Next: Blueprint — Declarative lifecycle orchestration built on top of Orion](blueprint.md)
+[:octicons-arrow-right-24: Next: Blueprint — Declarative Lifecycle Engine](blueprint.md)

@@ -12,6 +12,16 @@ Use this skill to publish thoughtful, production-grade technical articles across
 
 ---
 
+## Portfolio Architectural & Alignment Rules
+1. **Consistency with Platform Systems:**
+   - Refer to **Orion** as the central IaaS platform and control plane (replacing commercial suites like Red Hat Automation Platform) and **Blueprint** as its declarative YAML specification layer interpreted and executed natively by Orion.
+   - When discussing failure triage with AI, refer to **Orion AI** (validated PoC in LangGraph + ReAct) analyzing Orion logs in the **Dispatcher**.
+   - Refer to **`BBVA Technology`** as the employer engineering company and **`BBVA`** as the banking organization for which systems are deployed.
+   - Highlight practical trade-offs: cost avoidance (€6M+ saved by avoiding commercial node-licensed suites like Red Hat Automation Platform), operational resilience (DORA), and zero single points of failure (replacing Jenkins controllers with HA Dispatcher + ephemeral K8s Jobs).
+2. **Confidentiality:** Never publish proprietary banking code or internal hostnames; use high-level architecture diagrams and clean illustrative Python patterns.
+
+---
+
 ## File Naming & Slug Convention
 Create articles following the ISO date pattern in both trees:
 - English: `docs/blog/posts/YYYY-MM-DD-<slug>.md`
@@ -30,17 +40,6 @@ date: YYYY-MM-DD
 slug: my-article-slug
 description: >-
   Concise 1-2 sentence synopsis for SEO and social preview cards.
-authors:
-  - oredondo
-categories:
-  - Platform Engineering
-  - Applied AI
-  - Architecture
-tags:
-  - Python
-  - LangGraph
-  - DevOps
-  - Kubernetes
 ---
 
 # Title of the Article
@@ -59,7 +58,7 @@ Brief hook paragraph introducing the technical problem, why it matters, and what
 1. **The Excerpt Marker:** Always insert `<!-- more -->` after the introductory paragraph. This controls what appears on the blog index and RSS feed.
 2. **Explicit Slug & Description:** Always include `slug:` and `description:` in frontmatter for clean URLs and SEO.
 3. **Code Blocks with Syntax Highlighting:** Always specify language (`python`, `yaml`, `bash`, `groovy`, `dockerfile`).
-4. **Architecture Visualizations:** Use Mermaid diagrams wherever describing multi-step systems, state machines, or distributed data flows.
+4. **Architecture Visualizations:** Use Mermaid diagrams wherever describing multi-step systems, state machines, or distributed data flows. Prefer clean horizontal pipelines (`flowchart LR`) or focused state diagrams.
 5. **Dogfooding & Real-World Anchors:** Connect abstract theory back to real-world operational challenges (e.g., MTTR, idempotency, API versioning).
 6. **Cross-Links to Case Studies:** Include a footer note linking to the corresponding architectural case study (e.g. `[Blueprint case study](../../projects/blueprint.md)`).
 7. **Bilingual 1:1 Parity:** Every post in English must have its Spanish mirror in `docs_es/blog/posts/` with translated text and Mermaid labels, keeping code blocks, tags and slugs aligned.

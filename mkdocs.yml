@@ -139,7 +139,7 @@ nav:
   - Projects:
       - "Platform Ecosystem": projects/index.md
       - "Orion — IaaS Platform": projects/orion-iaas.md
-      - "Blueprint — Declarative Engine": projects/blueprint.md
+      - "Blueprint — Declarative YAML Layer": projects/blueprint.md
       - "HA Dispatcher & K8s Execution": projects/dispatcher-migration.md
       - "Orion AI — CI/CD Diagnostics (PoC)": projects/orion-ai.md
       - "OmniLecture Studio (Open Source)": projects/omni-lecture.md

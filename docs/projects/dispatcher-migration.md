@@ -8,99 +8,81 @@ description: >-
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Lead Platform Architect |
-| **Organization** | BBVA Technology (Core Banking Infrastructure) |
+| **Role** | Architect & Platform Lead |
+| **Organization** | BBVA (Core Banking Infrastructure) |
 | **Scope** | Replaced Jenkins as the infrastructure execution backbone; unified configuration management and ephemeral Kubernetes execution |
 | **Stack** | Python, Django, DRF, Celery, Redis, PostgreSQL, Kubernetes Jobs, Ansible, Groovy |
 
 !!! abstract "Architectural summary"
 
-    Before an internal platform can scale to tens of thousands of daily operations, its underlying execution engine must be reliable, API-driven, and stateless at the worker tier. This case study covers a four-part architectural evolution: standardizing pipelines with **Jenkins Shared Libraries**, outgrowing Jenkins and migrating to a purpose-built **High-Availability Operation Dispatcher (Django + Celery)**, decoupling environment state via a **Centralized Configuration Management System**, and running workloads as isolated **Kubernetes Jobs**.
+    Before an internal platform can scale to tens of thousands of daily operations, its underlying execution engine must be reliable, API-driven, and stateless. This case study covers an architectural evolution: standardizing pipelines with **Jenkins Shared Libraries**, overcoming the monolith's bottlenecks by migrating to an **in-house HA Dispatcher (Django + Celery)**, decoupling variables via a **Centralized Configuration Service**, and isolating execution in **Kubernetes Jobs**.
 
 ---
 
-## 1. The Evolution: Why Jenkins Shared Libraries Were Necessary — and Why We Outgrew Them
+## 1. The Operational Bottlenecks of Jenkins
 
-### Stage 1: Standardizing with Jenkins Shared Libraries
-Initially, different infrastructure teams maintained duplicated, ad-hoc Jenkinsfiles across repositories. I designed a modular **Jenkins Shared Libraries framework in Groovy** that became the CI/CD standard across multiple infrastructure teams — drastically cutting pipeline duplication and onboarding time.
+We initially standardized enterprise automation using a modular **Jenkins Shared Libraries framework in Groovy**. While it slashed duplication across teams, operating at banking scale revealed structural ceilings within Jenkins:
 
-However, centralizing onto a shared framework also gave us the observability to see **where Jenkins itself became the bottleneck** when used as an infrastructure operation runner at banking scale:
-
-- **Single-controller fragility:** Heavy concurrent infrastructure runs strained the central Jenkins controller and its groovy CPS state serialization.
-- **Opaque programmatic control:** Triggering, retrying, and auditing thousands of daily infrastructure operations through Jenkins APIs lacked clean relational state tracking and granular back-pressure.
-- **Long-lived worker drift:** Static agent nodes accumulated state and dependency conflicts across runs.
+1. **Master controller fragility (SPOF):** Massive concurrent infrastructure executions strained the JVM master process and Groovy CPS serialization, threatening platform availability and compromising business continuity mandates under **DORA**.
+2. **Deficient programmatic control:** Managing thousands of daily infrastructure workflows via Jenkins' web-centric APIs lacked a relational state model and granular back-pressure controls.
+3. **Static agent drift:** Long-lived worker nodes accumulated residual state, dependency clashes, and noisy-neighbor resource contention.
 
 ---
 
-## 2. Target Architecture: HA Dispatcher + Config Management + K8s Jobs
+## 2. Abstract System Topology: Decoupling Execution from State
 
-To eliminate Jenkins as an operational bottleneck, we decoupled **scheduling & state** (HA Dispatcher), **environment variables** (Configuration Management System), and **compute isolation** (Kubernetes Job Execution Engine):
+The architecture decouples the execution lifecycle into five distinct stages:
 
 ```mermaid
 flowchart LR
-    subgraph Callers["Platform Callers"]
-        Orion["Orion Control Plane"]
-        BP["Blueprint Orchestrator"]
-        Engineers["CI/CD & Engineers"]
-    end
-
-    subgraph Dispatcher["HA Operation Dispatcher (Django + Celery)"]
-        API["OpenAPI REST Interface"]
-        State[("Durable Operation State<br/>(PostgreSQL + Redis)")]
-        Sched["HA Worker Pools & Retry Engine"]
-        API --> State --> Sched
-    end
-
-    subgraph Config["Centralized Config Management"]
-        VarStore["Environment Variable Store<br/>(Dev · Staging · Prod)"]
-        Injector["Runtime Variable Resolver"]
-        VarStore --> Injector
-    end
-
-    subgraph Execution["Ephemeral Execution Plane"]
-        K8s["Kubernetes Job Execution Engine<br/>(Isolated ephemeral pods)"]
-        Ansible["Environment-Agnostic Ansible Roles<br/>(GitLab · Artifactory · Core Services)"]
-    end
-
-    Callers -->|"Programmatic trigger & status"| API
-    Sched -->|"Dispatch operation"| K8s
-    Injector -->|"Inject target env vars at runtime"| K8s
-    K8s -->|"Run immutable payload"| Ansible
-    K8s -.->|"Stream logs & exit status"| State
+    Callers["Callers<br/><b>(Orion · Blueprint · CI/CD)</b>"] --> Disp["1. HA Dispatcher<br/><b>(Django + Celery)</b>"]
+    Disp --> Config["2. Config Service<br/><b>(Runtime Injection)</b>"]
+    Config --> K8s["3. K8s Jobs<br/><b>(Ephemeral Pods)</b>"]
+    K8s --> Playbook["4. Ansible Core<br/><b>(Agnostic Roles)</b>"]
+    Playbook --> State[("5. Telemetry<br/><b>(PostgreSQL + Redis)</b>")]
 ```
+
+### Step-by-Step Execution Pipeline
+
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. Async Dispatch** | OpenAPI REST Gateway & Celery Workers | Reception of the operation trigger from Orion, Blueprint, or CI/CD; initial state persistence in PostgreSQL. | High-availability, non-blocking ingestion (zero SPOF). |
+| **2. Config Injection** | Centralized Configuration Service | Detects target environment (Dev/Staging/Prod) and dynamically injects secrets and parameters into memory at runtime. | Total eradication of configuration drift across environments. |
+| **3. Ephemeral Launch** | Kubernetes Job Controller | Spawns a dedicated, short-lived container pod with the exact image and dependencies required for the job. | Strict compute isolation and guaranteed clean dependencies. |
+| **4. Agnostic Execution** | Containerized Ansible Runner | Executes 100% environment-agnostic roles (GitLab, Artifactory, core banking services) against target nodes. | Exact same tested automation code runs across dev, staging, and production. |
+| **5. Streaming & Teardown** | Redis Broker & PostgreSQL State Store | Continuously streams execution logs, captures exit codes, seals final state, and destroys the pod. | Zero residual state on workers and complete audit history. |
 
 ---
 
-## 3. Core Architectural Pillars
+## 3. Key Architectural Decisions
 
-### A. Purpose-Built High-Availability Operation Dispatcher (Django + Celery)
-We replaced the Jenkins shared-library execution model entirely with an in-house **Operation Dispatcher** running in High Availability:
+### A. Custom Django/Celery Dispatcher vs. Scaling Jenkins Controllers
+Scaling out Jenkins controllers multiplied plugin maintenance overhead and did not solve state coupling. Building a lightweight Python dispatcher with Celery and PostgreSQL provided native REST API control, prioritized queues, and a durable relational state machine, allowing seamless workload migration from Shared Libraries without downtime.
 
-- **OpenAPI-first design:** Every operation is triggered, inspected, and monitored through a versioned Swagger/OpenAPI REST contract rather than web-UI-centric build jobs.
-- **Full control over execution & retry semantics:** Decoupling scheduling from worker execution allowed custom retry policies, queue prioritization, and granular observability per step.
-- **Zero-downtime transition:** Because we already controlled the shared library interface used by teams, we migrated workloads progressively from Jenkins to the Django/Celery dispatcher without interrupting banking operations.
+### B. Dynamic Runtime Configuration Injection vs. Duplicated Repositories
+To eradicate the practice of duplicating playbooks across `dev`, `staging`, and `prod` branches, we built a service that decouples configuration from automation: Ansible roles are 100% environment-agnostic, and variables are resolved and injected into memory at runtime, guaranteeing the exact same tested artifact reaches production.
 
-### B. Centralized Configuration Management System
-A major source of infrastructure incidents is copying playbooks across `dev`, `staging`, and `prod` branches and editing variables by hand.
-
-- **Strict separation of logic and config:** We built a centralized Configuration Management System that completely decouples variable management from playbook and automation logic.
-- **Runtime resolution:** Engineers write **100% environment-agnostic Ansible roles** (including the automation governing BBVA's internal **GitLab, Artifactory, and Jenkins** clusters). At deploy time, the system resolves the target environment and injects the exact validated variable set dynamically — eliminating duplicated repositories and preventing configuration drift.
-
-### C. Kubernetes Job Execution Engine
-Instead of running infrastructure automations as long-running processes on shared static servers, we extended the deployment pipeline to execute operations via **Kubernetes Jobs**:
-
-- **Ephemeral isolation:** Every automation run spawns as an isolated, short-lived container inside the cluster with its exact runtime dependencies and injected configuration variables.
-- **Clean lifecycle:** Once the operation finishes and streams its telemetry and audit status back to the platform, the pod is destroyed — guaranteeing zero leftover state between runs.
+### C. Ephemeral Kubernetes Jobs vs. Long-Lived Static Workers
+Traditional shared worker VMs accumulated leftover files and colliding dependencies. Migrating execution to Kubernetes Jobs turned every task into an ephemeral pod that provisions on demand, executes in isolation, and terminates immediately after emitting telemetry, completely removing worker host maintenance.
 
 ---
 
 ## 4. Architectural Trade-Offs
 
-| Decision | Alternative Considered | Rationale |
+| Decision | Alternative Considered | Trade-Off Rationale |
 | :--- | :--- | :--- |
-| **Migrate from Jenkins to custom Django/Celery HA Dispatcher** | Scale out multi-controller Jenkins | Eliminated JVM controller bottlenecks, groovy CPS serialization limits, and plugin fragility; gave native Python API control and relational state tracking. |
-| **Runtime variable injection via central Config Service** | Per-environment Git branches / inventory folders | Removed duplicated configuration sets across repositories and guaranteed that the exact same tested role runs in dev, staging, and production. |
-| **Ephemeral Kubernetes Jobs per operation** | Static worker VMs | Eliminated environment drift, dependency clashes, and noisy-neighbor contention across concurrent runs. |
+| **In-house Django/Celery HA Dispatcher** | Scale out multi-controller Jenkins | Eliminated the JVM master SPOF, fulfilling operational resilience and business continuity requirements under DORA with native REST API control. |
+| **Runtime variable injection** | Per-environment Git branches / inventories | Removed duplicated configuration sets across repositories and guaranteed the exact same tested role runs in dev, staging, and production. |
+| **Ephemeral Kubernetes Jobs** | Static worker VMs | Eliminated environment drift, dependency clashes, and noisy-neighbor contention across concurrent runs. |
+
+---
+
+## 5. Operational & Business Impact
+
+- **Zero SPOF & DORA Operational Resilience (100% HA):** Eliminated the fragility of Jenkins' monolithic master controller for infrastructure workflows, eradicating single points of failure (SPOF) and ensuring business continuity mandated by financial digital resilience frameworks during host outages.
+- **Zero Configuration Drift:** Dynamic runtime variable injection from a centralized service into environment-agnostic Ansible roles completely eradicated configuration divergences across `dev`, `staging`, and `production`.
+- **Compute Isolation & Efficiency:** Replaced static long-lived worker agents with **ephemeral Kubernetes Jobs**, running tasks in isolated containers that release resources immediately upon completion with zero residual state.
+- **Proven Banking Scale:** Governed and dispatched **40,000+ daily operations** with real-time state tracking in PostgreSQL and Redis.
 
 ---
 

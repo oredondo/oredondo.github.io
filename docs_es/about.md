@@ -17,8 +17,8 @@ Mi respuesta consiste en tratar la infraestructura interna como un producto de s
 ## Trayectoria Arquitectónica
 
 - **Desde el almacenamiento y los hipervisores hacia arriba:** Me formé en Ingeniería Electrónica de Comunicaciones en la **Universidad Politécnica de Madrid** y comencé mi carrera en **Oesia** administrando una nube privada en producción con **OpenStack y Ceph** y desarrollando una plataforma de almacenamiento sobre **OpenStack Swift**. Empezar cerca de los clusters de almacenamiento, hipervisores y redes marcó mi forma de diseñar abstracciones de alto nivel.
-- **Construyendo la plataforma cloud interna de un banco capa por capa:** Desde 2017 en **BBVA Technology**, soy el arquitecto único y responsable de la suite central de plataforma IaaS (**Orion** y **Blueprint**). Cada vez que una herramienta estándar se convertía en un cuello de botella de escala o licenciamiento, diseñé un reemplazo en Python — migrando de Jenkins a un **Dispatcher HA en Django/Celery**, desacoplando la configuración en runtime, ejecutando cargas en **Kubernetes Jobs**, conectando **F5 y OpenStack** sin tiempo de inactividad y desarrollando **Orion AI (PoC)** con LangGraph y ReAct.
-- **Ingeniería open-source:** Fuera del ámbito corporativo, diseño y mantengo proyectos open-source de IA y backend en GitHub — como **[OmniLecture Studio](https://github.com/oredondo/omnilecture-studio)** (suite multimodal nativa en Linux Wayland/GTK 3) y **[WrenchBuddy](https://github.com/oredondo/WrenchBuddy)** (plataforma de ciclo de vida de vehículos con Django 6, Celery y RAG sobre `pgvector`).
+- **Construyendo la plataforma cloud interna de un banco capa por capa:** Me incorporé en 2017 a **BBVA Technology** en plena transformación hacia **NextGen**, la plataforma cloud concebida por el banco para desacoplar y liberar cargas transaccionales críticas del *mainframe*. Como arquitecto y responsable de la plataforma IaaS (**Orion**) para **BBVA**, lideré la evolución de la infraestructura, comenzando en centros de datos *on-premises* (OpenStack y servidores físicos) y evolucionando hacia una arquitectura completamente hibridada que hoy integra nube pública (AWS) y privada (OpenShift, OpenStack, bare-metal). Cada vez que una herramienta estándar se convertía en un cuello de botella de escala o licenciamiento, diseñé un reemplazo en Python — migrando de Jenkins a un **Dispatcher HA en Django/Celery**, desacoplando la configuración en runtime, ejecutando cargas en **Kubernetes Jobs**, conectando **F5 y OpenStack** sin tiempo de inactividad y desarrollando **Orion AI (PoC)** con LangGraph y ReAct.
+- **Proyectos personales open-source:** Fuera del ámbito corporativo, desarrollo proyectos personales de IA y backend en GitHub — como **[OmniLecture Studio](https://github.com/oredondo/omnilecture-studio)** (suite multimodal nativa en Linux Wayland/GTK 3) y **[WrenchBuddy](https://github.com/oredondo/WrenchBuddy)** (idea en fase temprana de mantenimiento y RAG sobre `pgvector`).
 
 ## Principios de Ingeniería
 
@@ -59,3 +59,9 @@ Fuera de los entornos de infraestructura y software distribuido, la mecánica pr
 - :fontawesome-brands-linkedin: **LinkedIn:** [linkedin.com/in/oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
 - :fontawesome-brands-github: **GitHub:** [github.com/oredondo](https://github.com/oredondo)
 - :material-email-outline: **Email:** [o.redondo91@gmail.com](mailto:o.redondo91@gmail.com)
+
+---
+
+[:material-sitemap-outline: Explorar casos de estudio](projects/index.md){ .md-button .md-button--primary }
+[:material-file-account-outline: Ver mi CV](cv/index.md){ .md-button }
+[:material-newspaper-variant-outline: Leer el blog](blog/index.md){ .md-button }
