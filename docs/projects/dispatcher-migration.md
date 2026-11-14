@@ -23,7 +23,7 @@ description: >-
 
 We initially standardized enterprise automation using a modular **Jenkins Shared Libraries framework in Groovy**. While it slashed duplication across teams, operating at banking scale revealed structural ceilings within Jenkins:
 
-1. **Master controller fragility (SPOF):** Massive concurrent infrastructure executions strained the JVM master process and Groovy CPS serialization, threatening platform availability.
+1. **Master controller fragility (SPOF):** Massive concurrent infrastructure executions strained the JVM master process and Groovy CPS serialization, threatening platform availability and compromising business continuity mandates under **DORA**.
 2. **Deficient programmatic control:** Managing thousands of daily infrastructure workflows via Jenkins' web-centric APIs lacked a relational state model and granular back-pressure controls.
 3. **Static agent drift:** Long-lived worker nodes accumulated residual state, dependency clashes, and noisy-neighbor resource contention.
 
@@ -71,7 +71,7 @@ Traditional shared worker VMs accumulated leftover files and colliding dependenc
 
 | Decision | Alternative Considered | Trade-Off Rationale |
 | :--- | :--- | :--- |
-| **In-house Django/Celery HA Dispatcher** | Scale out multi-controller Jenkins | Eliminated the JVM master SPOF, Groovy CPS serialization bottlenecks, and plugin fragility; provided native REST API control. |
+| **In-house Django/Celery HA Dispatcher** | Scale out multi-controller Jenkins | Eliminated the JVM master SPOF, fulfilling operational resilience and business continuity requirements under DORA with native REST API control. |
 | **Runtime variable injection** | Per-environment Git branches / inventories | Removed duplicated configuration sets across repositories and guaranteed the exact same tested role runs in dev, staging, and production. |
 | **Ephemeral Kubernetes Jobs** | Static worker VMs | Eliminated environment drift, dependency clashes, and noisy-neighbor contention across concurrent runs. |
 
@@ -79,7 +79,7 @@ Traditional shared worker VMs accumulated leftover files and colliding dependenc
 
 ## 5. Operational & Business Impact
 
-- **Zero Single Points of Failure (100% HA):** Eliminated the vulnerability of Jenkins' monolithic master controller for infrastructure workflows, ensuring high availability and seamless worker failover.
+- **Zero SPOF & DORA Operational Resilience (100% HA):** Eliminated the fragility of Jenkins' monolithic master controller for infrastructure workflows, eradicating single points of failure (SPOF) and ensuring business continuity mandated by financial digital resilience frameworks during host outages.
 - **Zero Configuration Drift:** Dynamic runtime variable injection from a centralized service into environment-agnostic Ansible roles completely eradicated configuration divergences across `dev`, `staging`, and `production`.
 - **Compute Isolation & Efficiency:** Replaced static long-lived worker agents with **ephemeral Kubernetes Jobs**, running tasks in isolated containers that release resources immediately upon completion with zero residual state.
 - **Proven Banking Scale:** Governed and dispatched **40,000+ daily operations** with real-time state tracking in PostgreSQL and Redis.

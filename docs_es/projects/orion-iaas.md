@@ -35,7 +35,7 @@ Orion no nació como un producto monolítico estático, sino como una respuesta 
 Operar decenas de miles de activos bancarios entre nube pública, nube privada y centros de datos físicos generaba tres desafíos críticos:
 
 1. **Aprovisionamiento en silos:** Cada entorno destino requería herramientas y credenciales aisladas, convirtiendo peticiones sencillas en traspasos manuales de varios días.
-2. **Ceguera de auditoría y dispersión de datos:** Exigencia regulatoria bancaria estricta de conocer en cualquier instante qué usuario autorizó un recurso, qué software exacto tiene instalado y qué eventos han ocurrido a lo largo de su vida útil.
+2. **Ceguera de auditoría y dispersión de datos:** Exigencia regulatoria bancaria estricta (marcos de resiliencia como **DORA** y directrices BCE/EBA) de conocer en cualquier instante qué usuario autorizó un recurso, qué software exacto tiene instalado y qué eventos han ocurrido a lo largo de su vida útil.
 3. **Deriva de configuración y brechas de seguridad:** Sin una separación forzosa entre la línea base del banco (seguridad, monitorización) y las aplicaciones, proliferaban máquinas desalineadas con la normativa corporativa.
 
 ---
@@ -79,7 +79,7 @@ Para erradicar la deriva de configuración sin frenar la autonomía de los equip
 - **Capa de Usuario (Autonomía de Aplicación):** Inyección aislada de variables en tiempo de ejecución para desplegar middleware y lógica de negocio específica.
 
 ### C. Auditoría Integral y Trazabilidad del Ciclo de Vida
-Orion no delega la auditoría en logs efímeros de pipelines. Registra de forma inmutable cada evento en la vida de cada nodo: qué usuario autorizó la creación, qué cambios se han aplicado a lo largo del tiempo, qué versiones exactas de librerías tiene instaladas y su historial completo de incidencias, permitiendo generar informes forenses completos en cuestión de segundos.
+Orion no delega la auditoría en logs efímeros de pipelines. Registra de forma inmutable cada evento en la vida de cada nodo: qué usuario autorizó la creación, qué cambios se han aplicado a lo largo del tiempo, qué versiones exactas de librerías tiene instaladas y su historial completo de incidencias. Esto convierte a Orion en la pieza clave para responder a los mandatos de gestión de riesgos e inventario de activos TIC de **DORA** (Reglamento UE 2022/2554).
 
 ---
 
@@ -97,7 +97,7 @@ Orion no delega la auditoría en logs efímeros de pipelines. Registra de forma 
 ## 6. Impacto Operativo y de Negocio
 
 - **Eficiencia de costes y soberanía tecnológica:** La consolidación de este plano de control propio y su motor de ejecución en alta disponibilidad permitió prescindir por completo de suites comerciales de automatización licenciadas por nodo (como Red Hat Ansible Automation Platform), generando un **ahorro acumulado estimado superior a 6 millones de euros** en licencias e intermediarios para la organización.
-- **Auditoría y trazabilidad completa:** Transformó la preparación de auditorías bancarias de semanas de recopilación manual a consultas automatizadas e instantáneas de cualquier máquina: quién la creó, qué paquetes tiene instalados y su histórico completo de eventos.
+- **Auditoría y trazabilidad completa (Cumplimiento DORA):** Transformó la preparación de auditorías bancarias de semanas de recopilación manual a consultas automatizadas e instantáneas de cualquier máquina: quién la creó, qué paquetes tiene instalados y su histórico completo de eventos, respondiendo de forma nativa a las exigencias de inventario TIC de **DORA** y del Banco Central Europeo.
 - **Seguridad y observabilidad garantizada (Ground):** El 100% de las más de **30.000 máquinas** cuentan con agentes de seguridad y monitorización desplegados y verificados automáticamente desde el momento de su aprovisionamiento.
 - **Autoservicio y operaciones masivas:** Más de **500 ingenieros** gestionan su ciclo de vida de infraestructura de forma autónoma, procesando más de **40.000 operaciones diarias** mediante API REST, formularios web y Schedulers programados.
 - **Adopción internacional:** Plataforma implantada y operativa en múltiples geografías del grupo bancario (**España, México y Turquía**).

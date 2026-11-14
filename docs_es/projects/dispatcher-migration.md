@@ -23,7 +23,7 @@ description: >-
 
 Inicialmente estandarizamos la automatización corporativa mediante un framework modular de **Jenkins Shared Libraries en Groovy**. Aunque redujo la duplicación entre equipos, a escala bancaria destapó limitaciones insalvables en Jenkins:
 
-1. **Fragilidad del controlador central (SPOF):** Las ejecuciones masivas concurrentes saturaban el proceso JVM maestro y la serialización CPS de Groovy, amenazando la disponibilidad de la plataforma.
+1. **Fragilidad del controlador central (SPOF):** Las ejecuciones masivas concurrentes saturaban el proceso JVM maestro y la serialización CPS de Groovy, amenazando la disponibilidad de la plataforma y comprometiendo los requisitos de resiliencia operativa y continuidad de negocio (**DORA**).
 2. **Control programático deficiente:** Gestionar miles de operaciones de infraestructura mediante la API web de Jenkins carecía de un modelo relacional de estados y de políticas avanzadas de contrapresión (*back-pressure*).
 3. **Deriva en agentes estáticos:** Los workers de larga duración acumulaban estado residual, colisiones de librerías y contención de recursos.
 
@@ -71,7 +71,7 @@ Los agentes tradicionales compartidos acumulaban archivos residuales y dependenc
 
 | Decisión | Alternativa Evaluada | Justificación |
 | :--- | :--- | :--- |
-| **Dispatcher HA propio en Django/Celery** | Escalar múltiples controladores Jenkins | Eliminó el SPOF del controlador JVM, los cuellos de botella de serialización en Groovy y la fragilidad de plugins; aportó control nativo por API REST. |
+| **Dispatcher HA propio en Django/Celery** | Escalar múltiples controladores Jenkins | Eliminó el SPOF del controlador JVM, garantizando la resiliencia operativa y continuidad exigida en banca (DORA) con control nativo por API REST. |
 | **Inyección de variables en runtime** | Ramas Git o inventarios por entorno | Evitó duplicar configuraciones entre repositorios y garantizó que exactamente el mismo rol probado se ejecute en dev, staging y producción. |
 | **Kubernetes Jobs efímeros** | Máquinas virtuales trabajadoras estáticas | Eliminó la deriva de entorno, los conflictos de librerías y la contención de recursos entre ejecuciones concurrentes. |
 
@@ -79,7 +79,7 @@ Los agentes tradicionales compartidos acumulaban archivos residuales y dependenc
 
 ## 5. Impacto Operativo y de Negocio
 
-- **Alta Disponibilidad sin Puntos Únicos de Fallo (100% HA):** Eliminó la fragilidad del controlador monolítico de Jenkins para operaciones de infraestructura, garantizando continuidad de servicio y resiliencia ante caídas de nodos.
+- **Alta Disponibilidad y Resiliencia Operativa DORA (100% HA):** Eliminó la fragilidad del controlador monolítico de Jenkins para operaciones de infraestructura, erradicando puntos únicos de fallo (SPOF) y garantizando la continuidad de negocio exigida por las directivas de resiliencia digital ante caídas de nodos.
 - **Cero Deriva de Configuración:** La inyección dinámica de variables en runtime desde un servicio centralizado sobre roles de Ansible agnósticos erradicó la dispersión y desincronización entre entornos de `dev`, `staging` y `prod`.
 - **Aislamiento y Eficiencia de Cómputo:** Sustitución de agentes estáticos de larga duración por **Kubernetes Jobs efímeros**, que consumen recursos únicamente durante la ejecución y se destruyen inmediatamente al terminar con cero residuos.
 - **Escala de Ejecución Masiva:** Capaz de despachar y supervisar **más de 40.000 operaciones diarias** con trazabilidad completa de estado en PostgreSQL y Redis.

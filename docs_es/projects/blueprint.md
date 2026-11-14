@@ -25,7 +25,7 @@ Una vez que **Orion** unificó las APIs de AWS, OpenStack, OpenShift y bare-meta
 
 Depender de suites comerciales como **Red Hat Ansible Automation Platform / Tower** presentaba tres barreras insalvables:
 
-1. **Coste de licenciamiento por nodo:** Penalizaba el crecimiento sobre decenas de miles de servidores.
+1. **Coste y riesgo de concentración de terceros (DORA):** El licenciamiento por nodo penalizaba el crecimiento e incrementaba la dependencia cautiva (*vendor lock-in*) en componentes críticos de automatización.
 2. **Opacidad ante fallos a mitad de ejecución:** Si un script procedimental de 40 pasos fallaba en el paso 27, reconstruir el estado o desmontar de forma segura el entorno parcial requería intervención manual.
 3. **Desajuste con la arquitectura de Orion:** Orion ya era la fuente única de verdad. Se requería un motor que hablara de forma nativa su modelo de Job IDs, permisos RBAC y reportes de cumplimiento.
 
@@ -82,7 +82,7 @@ En lugar de depender de ficheros de estado locales o remotos susceptibles de cor
 
 | Decisión | Alternativa Evaluada | Justificación |
 | :--- | :--- | :--- |
-| **Motor propio en Python** | Red Hat Automation Platform / Terraform | Eliminó costes recurrentes de licencias comerciales, se integró de forma nativa con el modelo de trabajos y auditoría de Orion y evitó bloqueos de archivos de estado externos. |
+| **Motor propio en Python** | Red Hat Automation Platform / Terraform | Eliminó costes recurrentes de licencias comerciales, mitigó el riesgo de concentración de terceros (DORA) y se integró de forma nativa con el modelo de trabajos y auditoría de Orion. |
 | **Orion como fuente única de verdad en vivo** | Archivos locales de estado (equivalente a `tfstate`) | Orion ya mantiene el inventario multi-cloud en tiempo real; consultar Orion evita deriva de estado (*drift*) y bloqueos concurrentes. |
 | **Concurrencia con AsyncIO** | Ejecutores multi-hilo o multi-proceso | Alta concurrencia para cientos de esperas de API simultáneas con una huella de memoria mínima. |
 
@@ -93,7 +93,7 @@ En lugar de depender de ficheros de estado locales o remotos susceptibles de cor
 - **Eliminación de licencias comerciales:** Al diseñar un motor declarativo propio e integrado con Orion, se prescindió por completo de herramientas comerciales licenciadas por nodo (como Red Hat Ansible Automation Platform / Tower), contribuyendo decisivamente al ahorro acumulado superior a 6 millones de euros para la organización.
 - **Desmontajes idempotentes y reanudables:** 100% de éxito en desmantelamientos parciales o reanudados tras incidencias, eliminando recursos huérfanos y mitigando cualquier riesgo de deriva manual.
 - **Concurrencia asíncrona masiva:** Aceleró los tiempos de aprovisionamiento de entornos complejos en más de un 60% gracias a la resolución de dependencias por olas concurrentes sobre el bucle `AsyncIO` de Python.
-- **Trazabilidad y auditoría por Job ID:** Evidencia inmutable generada automáticamente para cada despliegue, vinculando los manifiestos YAML con los identificadores de trabajo de Orion para auditorías regulatorias bancarias.
+- **Trazabilidad y auditoría por Job ID (Conformidad DORA):** Evidencia inmutable generada automáticamente para cada despliegue o desmantelamiento, vinculando manifiestos Git con identificadores de trabajo en Orion para auditorías regulatorias bancarias y control del riesgo de cambio.
 
 ---
 

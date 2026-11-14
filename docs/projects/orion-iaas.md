@@ -35,7 +35,7 @@ Orion was not built as a static monolithic tool, but as an evolving architectura
 Operating tens of thousands of banking workloads across public cloud, private cloud, and on-premises data centers created three critical challenges:
 
 1. **Siloed provisioning:** Target environments required isolated tools and credentials, turning simple requests into multi-day manual handoffs.
-2. **Audit blindness & dispersed tracking:** Regulatory banking compliance requires knowing at any moment who authorized an asset, exactly what software packages are installed, and its full historical event log.
+2. **Audit blindness & dispersed tracking:** Strict regulatory banking mandates (such as **DORA** resilience frameworks and ECB/EBA guidelines) require knowing at any moment who authorized an asset, exactly what software packages are installed, and its full historical event log.
 3. **Configuration drift & baseline vulnerabilities:** Without an enforced separation between the bank's operational baseline (security, monitoring) and user applications, systems drifted from corporate compliance.
 
 ---
@@ -79,7 +79,7 @@ To eliminate configuration drift without bottlenecking development autonomy, aut
 - **User Operation Layer (Application Autonomy):** Isolated runtime variable injection to deploy application middleware, databases, and service configurations.
 
 ### C. End-to-End Auditability & Lifecycle Traceability
-Orion avoids delegating audit compliance to ephemeral pipeline logs. It maintains an immutable lifecycle ledger for each node: who authorized it, what configuration changes occurred over time, exact package and library versions installed, and full incident history — generating comprehensive audit reports in seconds.
+Orion avoids delegating audit compliance to ephemeral pipeline logs. It maintains an immutable lifecycle ledger for each node: who authorized it, what configuration changes occurred over time, exact package and library versions installed, and full incident history. This establishes Orion as the technical foundation for complying with **DORA** (Regulation EU 2022/2554) ICT risk management and asset inventory mandates.
 
 ---
 
@@ -97,7 +97,7 @@ Orion avoids delegating audit compliance to ephemeral pipeline logs. It maintain
 ## 6. Operational & Business Impact
 
 - **Cost efficiency & technology sovereignty:** Consolidating an in-house control plane and HA dispatcher with native layered Ansible execution eliminated the need for commercial node-licensed automation suites (such as Red Hat Ansible Automation Platform), generating an **estimated cumulative cost avoidance exceeding €6M** in enterprise licensing fees for the organization.
-- **Auditability & complete traceability:** Reduced audit preparation from weeks of manual data compilation to instant queries covering any machine: who authorized it, what is installed, and its full historical event log.
+- **Auditability & complete traceability (DORA Compliance):** Reduced audit preparation from weeks of manual data compilation to instant queries covering any machine: who authorized it, what is installed, and its full historical event log — natively fulfilling ICT asset tracking requirements under **DORA** and European Central Bank inspections.
 - **Enforced security & observability baseline (Ground):** 100% of the **30,000+ managed machines** run verified corporate security policies and monitoring agents from the moment of provisioning.
 - **Self-service at banking scale:** Over **500 engineers** govern infrastructure autonomously, executing **40,000+ daily operations** via web forms, REST APIs, and scheduled automations.
 - **International adoption:** Successfully deployed across multiple international banking divisions (**Spain, Mexico, and Turkey**).

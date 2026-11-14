@@ -21,7 +21,7 @@ description: >-
 
 ## 1. Planteamiento del Problema Operativo
 
-Cuando los pipelines o despliegues de infraestructura fallan a escala corporativa, el **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto:
+Cuando los pipelines o despliegues de infraestructura fallan a escala corporativa, el **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto. En un entorno bancario sujeto a normativas como **DORA**, la rápida detección y mitigación de incidencias TIC operativas es un requerimiento esencial:
 1. Rastrear logs de ejecución interminables en Jenkins o el dispatcher para aislar el error raíz.
 2. Buscar manualmente en wikis y tickets históricos patrones de fallo conocidos.
 3. Inspeccionar diffs recientes en GitLab para correlacionar cambios de código o configuración.
@@ -93,7 +93,7 @@ El prototipo técnico fue construido íntegramente, probado sobre escenarios rea
 
 ## 6. Impacto y Validación Operativa
 
-- **Reducción radical de MTTR en validación:** Redujo el tiempo necesario para aislar la causa raíz de un fallo complejo de CI/CD de más de 2 horas de rastreo manual a menos de 15 segundos.
+- **Reducción radical de MTTR (Alineado con DORA):** Redujo el tiempo necesario para aislar la causa raíz de un fallo complejo de CI/CD de más de 2 horas de rastreo manual a menos de 15 segundos, respaldando los umbrales de respuesta ante incidentes TIC exigidos por la directiva DORA.
 - **Correlación multi-fuente sin alucinaciones:** Demostró la viabilidad de cruzar logs de ejecución, manuales en caché Redis y diffs de GitLab bajo esquemas estrictos de evidencia verificable.
 - **Pionero de arquitectura agéntica:** Estableció los patrones de referencia de orquestación en grafos con estado, contratos de herramientas MCP y guardarraíles tipados para futuras iniciativas de IA operativa en la organización.
 

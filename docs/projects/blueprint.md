@@ -25,7 +25,7 @@ Once **Orion** unified the APIs of AWS, OpenStack, OpenShift, and bare metal, en
 
 Relying on commercial orchestration suites such as **Red Hat Ansible Automation Platform / Tower** presented three prohibitive roadblocks:
 
-1. **Per-node licensing overhead:** Heavily penalized fleet growth across tens of thousands of banking nodes.
+1. **Per-node licensing & third-party concentration risk (DORA):** Commercial node-based licensing penalized fleet growth and increased critical vendor lock-in contrary to financial resilience mandates.
 2. **Mid-run failure opacity:** When a 40-step procedural workflow failed at step 27, reconstructing exact state or safely tearing down the partial environment required manual intervention.
 3. **Impedance mismatch with Orion:** Orion was already the established source of truth. We needed an engine that natively understood its Job IDs, async polling contracts, RBAC model, and compliance reports.
 
@@ -82,7 +82,7 @@ Rather than relying on local or remote state files susceptible to corruption and
 
 | Decision | Alternative Considered | Trade-Off Rationale |
 | :--- | :--- | :--- |
-| **Purpose-built Python engine** | Red Hat Automation Platform / Terraform | Eliminated recurring commercial licensing, integrated natively with Orion's job/audit model, and avoided external state-file locking issues. |
+| **Purpose-built Python engine** | Red Hat Automation Platform / Terraform | Eliminated recurring commercial licensing, mitigated third-party concentration risk (DORA), and integrated natively with Orion's job/audit model. |
 | **Orion as live source of truth** | Local state files (`tfstate` equivalent) | Orion already tracks live multi-cloud inventory; querying Orion directly prevents state-file drift and split-brain locks. |
 | **AsyncIO concurrency** | Multi-threaded / multi-process runners | High concurrency for hundreds of simultaneous API waits with minimal memory footprint. |
 
@@ -93,7 +93,7 @@ Rather than relying on local or remote state files susceptible to corruption and
 - **Commercial license elimination:** Architecting an in-house declarative engine natively integrated with Orion eliminated reliance on commercial node-licensed suites (such as Red Hat Ansible Automation Platform / Tower), contributing directly to the €6M+ cumulative cost avoidance across the platform.
 - **Idempotent & resumable teardowns:** 100% success rate on interrupted or re-executed environment destructions without leaving orphaned resources or requiring manual database interventions.
 - **High-throughput asynchronous concurrency:** Reduced multi-tier environment provisioning time by over 60% through DAG wave concurrency executed on Python's `AsyncIO` event loop.
-- **Job ID audit trail:** Automatically generated, immutable audit evidence tying every YAML resource to Orion's internal execution Job IDs for regulatory banking compliance.
+- **Job ID audit trail (DORA Alignment):** Automatically generated, immutable audit evidence tying every Git-versioned manifest to Orion's internal execution Job IDs for regulatory banking compliance and change risk governance.
 
 ---
 

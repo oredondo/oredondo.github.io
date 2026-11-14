@@ -21,7 +21,7 @@ description: >-
 
 ## 1. Operational Problem Statement
 
-When enterprise CI/CD pipelines or infrastructure deployments fail, **Mean Time to Resolution (MTTR)** is overwhelmingly dominated by manual context gathering:
+When enterprise CI/CD pipelines or infrastructure deployments fail, **Mean Time to Resolution (MTTR)** is overwhelmingly dominated by manual context gathering. In a banking environment subject to frameworks like **DORA**, rapid ICT incident detection and triage is a critical regulatory priority:
 1. Sifting through endless Jenkins or dispatcher execution logs to locate the first genuine error trace.
 2. Searching internal wikis and historical incident tickets for known failure patterns.
 3. Inspecting recent GitLab repository diffs to correlate code or configuration changes.
@@ -93,7 +93,7 @@ The technical prototype was fully built, tested against real failure scenarios, 
 
 ## 6. Operational Impact & Validation
 
-- **Radical MTTR reduction in validation:** Reduced root cause isolation time for complex CI/CD pipeline failures from hours of manual digging to under 15 seconds.
+- **Radical MTTR reduction (DORA Alignment):** Reduced root cause isolation time for complex CI/CD pipeline failures from hours of manual digging to under 15 seconds, supporting rapid ICT incident response thresholds mandated by DORA.
 - **Zero-hallucination multi-source correlation:** Proved the capability to synthesize runtime logs, Redis-cached runbooks, and GitLab diffs concurrently under strict evidence schemas.
 - **Agentic architecture blueprint:** Established reference patterns for graph-based multi-agent orchestration, MCP contracts, and deterministic guardrails for operational AI across the bank.
 
