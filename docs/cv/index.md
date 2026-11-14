@@ -63,7 +63,7 @@ At the intersection of infrastructure engineering and applied AI, I conceived an
 | **[HA Dispatcher, Config Mgmt & K8s Jobs](../projects/dispatcher-migration.md)** *(BBVA)* | Migration from Jenkins Shared Libraries to a High-Availability Django/Celery operation dispatcher, runtime variable injection, and ephemeral Kubernetes Job execution. |
 | **F5 / OpenStack API Bridge & Core Ansible** *(BBVA)* | Zero-downtime REST API bridge restoring F5 load balancer interoperability with OpenStack; environment-agnostic Ansible automation for GitLab, Artifactory, and Jenkins. |
 | **[Orion AI — CI/CD Auto-Diagnostics](../projects/orion-ai.md)** *(BBVA PoC)* | Validated multi-agent LangGraph + ReAct prototype correlating pipeline logs, Redis-indexed runbooks, and GitLab diffs under deterministic guardrails. |
-| **[OmniLecture Studio](../projects/omni-lecture.md)** *([GitHub](https://github.com/oredondo/omnilecture-studio))* | Native Linux (Wayland/GNOME, GTK 3) screen/audio capture and LangGraph pipeline with dual Whisper (`faster-whisper` `int8` + API) and OpenCV CLAHE + Tesseract OCR. |
+| **[OmniLecture Studio](../projects/omni-lecture.md)** *([GitHub](https://github.com/oredondo/omnilecture-studio))* | Native Linux suite (Wayland, GTK 3) with an optimized FFmpeg multimedia pipeline (H.264 stillimage, afftdn audio filtering, PTS sync), LangGraph workflows, dual Whisper (int8 + API), and OpenCV CLAHE + Tesseract OCR. |
 | **[WrenchBuddy](../projects/wrenchbuddy.md)** *([GitHub](https://github.com/oredondo/WrenchBuddy))* | Full-stack vehicle lifecycle platform in Django 6, DRF, PostgreSQL (`pgvector` 768-dim RAG), Celery, Redis, S3/MinIO, LangChain Vision OCR, and TypeScript. |
 
 ## Technical Skills

@@ -62,10 +62,11 @@ flowchart TD
 
 ## 2. Key Engineering Highlights
 
-### A. Linux-Native Capture & Slide-Optimized Compression
-- **Wayland D-Bus & GStreamer:** Captures screen video via GNOME Shell's D-Bus Screencast API and mixes system/microphone audio via GStreamer pipelines over PipeWire/PulseAudio.
-- **Tuned for typography, not 60 FPS gaming:** Encodes H.264 video at 10 FPS with `--tune stillimage` and CRF 24 — keeping code and slide text razor-sharp while cutting disk usage by up to 70%.
-- **Crash recovery (`recover.py`):** Recovers and merges uncommitted media chunks in `.temp/` if a session is interrupted by a system crash or power loss.
+### A. Advanced FFmpeg Multimedia Pipeline & Native Capture
+- **Tuned FFmpeg compression for text and code:** The media processor (`processor.py`) implements custom H.264 encoding at 10 FPS with `-tune stillimage` and CRF 24. Unlike standard 30/60 FPS screen recorders, this profile preserves razor-sharp edges on typography and code blocks while reducing disk footprint by up to 70% with zero compression artifacts.
+- **Audio conditioning and speech filtering for inference (`dictation_notes.py`):** Before feeding audio into Whisper engines, the pipeline applies an FFmpeg FFT spectral noise reduction filter (`afftdn`), human-voice bandpass filtering (100 Hz–4000 Hz), and 48 kHz AAC normalization—eliminating background hiss and dead silence to minimize LLM hallucination triggers and prevent memory pressure.
+- **Hardware PTS multi-track clock synchronization:** Merges display screencast streams and microphone inputs aligned by host hardware Presentation Time Stamps (PTS), while simultaneously outputting a lightweight companion MP3 track for rapid auditory review.
+- **Crash recovery engine (`recover.py`):** An inspection routine detects recordings interrupted by power outages or crashes and reconstructs valid MP4/AAC containers from `.temp/` stream segments.
 
 ### B. Low-CPU Slide OCR & Dual-Engine Whisper
 - **16×16 perceptual frame diffing (`pipeline/ocr.py`):** Downscales frames to 16×16 thumbnails to detect slide transitions before invoking Tesseract OCR, skipping static frames and cropping out the rightmost 25% of the frame to ignore webinar chat sidebars.

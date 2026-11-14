@@ -88,7 +88,7 @@ flowchart TB
 
     [:octicons-arrow-right-24: Arquitectura y trade-offs](dispatcher-migration.md)
 
--   :material-stethoscope:{ .lg .middle } __[Orion AI — Diagnóstico Agéntico CI/CD (PoC Validada)](orion-ai.md)__
+-   :material-radar:{ .lg .middle } __[Orion AI — Diagnóstico Agéntico CI/CD (PoC Validada)](orion-ai.md)__
 
     ---
 
@@ -158,11 +158,11 @@ Sistemas públicos construidos fuera de las restricciones bancarias — con cód
 
 <div class="grid cards two-col" markdown>
 
--   :material-school-outline:{ .lg .middle } __[OmniLecture Studio — Suite Multimodal de IA para Linux](omni-lecture.md)__
+-   :material-waveform:{ .lg .middle } __[OmniLecture Studio — Suite Multimodal de IA para Linux](omni-lecture.md)__
 
     ---
 
-    Grabador nativo de pantalla/audio para Linux (Wayland/GNOME, GTK 3) y pipeline de estudio con LangGraph. Combina Whisper de doble motor (`faster-whisper` CPU `int8` + API cloud), OCR de diapositivas y manuscritos con OpenCV CLAHE + Tesseract y guardarraíles anti-alucinación para generar apuntes Markdown, documentos `.docx` y mazos Anki.
+    Grabador nativo de pantalla/audio para Linux (Wayland/GNOME, GTK 3) con pipeline multimedia en FFmpeg (compresión H.264 a 10 FPS con `-tune stillimage` que ahorra hasta un 70% de espacio en disco, sincronización de reloj PTS y filtrado espectral `afftdn`) y flujos en LangGraph. Combina Whisper de doble motor (`faster-whisper` CPU `int8` + API cloud), OCR de diapositivas y manuscritos con OpenCV CLAHE + Tesseract y guardarraíles anti-alucinación para generar apuntes Markdown, documentos `.docx` y mazos Anki.
 
     [:octicons-arrow-right-24: Caso de estudio](omni-lecture.md) · [:fontawesome-brands-github: Repositorio GitHub](https://github.com/oredondo/omnilecture-studio)
 

@@ -62,10 +62,11 @@ flowchart TD
 
 ## 2. Decisiones Técnicas Destacadas
 
-### A. Captura Nativa en Linux y Compresión Optimizada para Diapositivas
-- **Wayland D-Bus y GStreamer:** Captura vídeo de pantalla mediante la API D-Bus Screencast de GNOME Shell y mezcla audio del sistema y micrófono mediante tuberías GStreamer sobre PipeWire/PulseAudio.
-- **Compresión ajustada a tipografía y código:** Codifica vídeo H.264 a 10 FPS con `--tune stillimage` y CRF 24 — manteniendo el texto de diapositivas y código completamente nítido mientras ahorra hasta un 70% de espacio en disco frente a grabadores a 30/60 FPS.
-- **Recuperación ante caídas (`recover.py`):** Recupera y ensambla fragmentos temporales en `.temp/` si una grabación se interrumpe por un reinicio o corte eléctrico.
+### A. Pipeline Multimedia Avanzado en FFmpeg y Captura Nativa
+- **Compresión sintonizada para texto y código en FFmpeg:** El procesador (`processor.py`) implementa una codificación H.264 optimizada a 10 FPS con `-tune stillimage` y CRF 24. A diferencia de los grabadores estándar a 30/60 FPS, este perfil prioriza la nitidez de bordes en tipografías y bloques de código, reduciendo el tamaño del archivo final hasta un 70% sin artefactos de compresión.
+- **Acondicionamiento y filtrado de audio para inferencia (`dictation_notes.py`):** Antes de enviar el audio a los modelos Whisper, el pipeline aplica un filtro espectral de reducción de ruido FFT en FFmpeg (`afftdn`), seguido de un paso banda para voz humana (100 Hz–4000 Hz) y normalización AAC a 48 kHz, eliminando ruidos de fondo y silencios muertos para mitigar alucinaciones en el LLM y prevenir errores de memoria.
+- **Sincronización multi-pista por hardware (PTS):** Sincroniza pistas de pantalla y micrófonos mediante marcas de tiempo de reloj de host (*Presentation Time Stamp*), generando simultáneamente una pista MP3 complementaria optimizada para repaso rápido.
+- **Recuperación ante caídas (`recover.py`):** Un demonio de inspección detecta grabaciones interrumpidas por fallos de alimentación y reconstruye los contenedores MP4/AAC a partir de los segmentos temporales en `.temp/`.
 
 ### B. OCR de Bajo Consumo en CPU y Whisper de Doble Motor
 - **Detección perceptual de cambio de diapositiva 16×16 (`pipeline/ocr.py`):** Reduce cada fotograma a una miniatura de 16×16 para detectar cambios reales de diapositiva antes de invocar Tesseract OCR, ignorando fotogramas estáticos y recortando el 25% derecho de la imagen para excluir paneles laterales de chat.

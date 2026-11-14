@@ -50,9 +50,9 @@ Mi respuesta consiste en tratar la infraestructura interna como un producto de s
 
 </div>
 
-## Fuera de la Terminal
+## Más Allá de la Pantalla: Mecánica e Inspiración
 
-Cuando no estoy frente al código, suelo estar rodando o haciendo mantenimiento a mi moto (la inspiración real detrás de [WrenchBuddy](projects/wrenchbuddy.md)), haciendo snowboard, de ruta por la montaña o escuchando música.
+Fuera de los entornos de infraestructura y software distribuido, la mecánica práctica es una de mis grandes aficiones. El mantenimiento, diagnosis y puesta a punto de mi moto fue precisamente el origen técnico detrás de [WrenchBuddy](projects/wrenchbuddy.md) — donde aplico visión artificial sobre facturas de taller y RAG vectorial sobre manuales de servicio oficiales. En mi tiempo libre también disfruto del snowboard, las rutas por la montaña y la música.
 
 ## Contacto
 

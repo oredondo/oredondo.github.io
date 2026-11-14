@@ -50,11 +50,11 @@ My answer is to treat internal infrastructure as a software product — paving *
 
 </div>
 
-## Outside of Engineering
+## Beyond the Terminal: Mechanics & System Inspiration
 
-When I'm away from the terminal, you'll usually find me riding or wrenching on my motorbike (the real-world inspiration behind [WrenchBuddy](projects/wrenchbuddy.md)), snowboarding, hiking in the mountains, or listening to music.
+Outside of distributed systems and infrastructure platforms, hands-on mechanical work is one of my primary passions. Maintaining, troubleshooting, and tuning my own motorcycle was the direct technical spark behind [WrenchBuddy](projects/wrenchbuddy.md) — combining computer vision on workshop repair invoices with vector RAG over official service manuals. In my downtime, I also enjoy snowboarding, mountain hiking, and music.
 
-## Let's Connect
+## Contact & Links
 
 - :fontawesome-brands-linkedin: **LinkedIn:** [linkedin.com/in/oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
 - :fontawesome-brands-github: **GitHub:** [github.com/oredondo](https://github.com/oredondo)

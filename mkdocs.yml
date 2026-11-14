@@ -13,7 +13,7 @@ repo_url: https://github.com/oredondo/oredondo.github.io
 edit_uri: ""
 
 copyright: >-
-  &copy; 2026 Oscar Redondo · Built with Python, Zensical &amp; uv
+  &copy; 2026 Oscar Redondo · Platform Architecture &amp; Infrastructure Engineering
 
 theme:
   name: material

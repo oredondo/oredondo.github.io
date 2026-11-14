@@ -96,7 +96,7 @@ flowchart LR
 
     [:octicons-arrow-right-24: Leer caso de estudio](projects/dispatcher-migration.md)
 
--   :material-stethoscope:{ .lg .middle } __[Orion AI — Auto-Diagnóstico CI/CD (PoC Validada)](projects/orion-ai.md)__
+-   :material-radar:{ .lg .middle } __[Orion AI — Auto-Diagnóstico CI/CD (PoC Validada)](projects/orion-ai.md)__
 
     ---
 
@@ -108,19 +108,17 @@ flowchart LR
 
 </div>
 
-## Sistemas Open-Source Públicos en GitHub
-
-*Bases de código completas y ejecutables desarrolladas fuera del ámbito bancario:*
+## Sistemas Open-Source en GitHub
 
 <div class="grid cards two-col" markdown>
 
--   :material-school-outline:{ .lg .middle } __[OmniLecture Studio — Suite IA Multimodal para Linux](projects/omni-lecture.md)__
+-   :material-waveform:{ .lg .middle } __[OmniLecture Studio — Suite IA Multimodal para Linux](projects/omni-lecture.md)__
 
     ---
 
-    Suite nativa para Linux (Wayland/GNOME, GTK 3) de captura de pantalla/audio y pipeline en LangGraph que combina doble motor Whisper (`faster-whisper` CPU `int8` + API cloud), detección 16×16 de cambio de diapositiva y OCR con OpenCV CLAHE + Tesseract.
+    Suite nativa para Linux (Wayland/GNOME, GTK 3) con pipeline multimedia en FFmpeg (compresión H.264 a 10 FPS con `-tune stillimage` que ahorra hasta un 70% de espacio, sincronización PTS y filtros de audio `afftdn`), combinada con transcripción dual Whisper, OCR CLAHE en OpenCV y grafos en LangGraph.
 
-    <span class="tech-tag">Python</span><span class="tech-tag">GTK 3 / Wayland</span><span class="tech-tag">LangGraph</span><span class="tech-tag">Whisper int8</span><span class="tech-tag">OpenCV / OCR</span>
+    <span class="tech-tag">Python</span><span class="tech-tag">FFmpeg</span><span class="tech-tag">GTK 3 / Wayland</span><span class="tech-tag">LangGraph</span><span class="tech-tag">Whisper int8</span><span class="tech-tag">OpenCV / OCR</span>
 
     [:octicons-arrow-right-24: Caso de estudio](projects/omni-lecture.md) · [:fontawesome-brands-github: Código en GitHub](https://github.com/oredondo/omnilecture-studio)
 
@@ -162,9 +160,9 @@ flowchart LR
 
 <div class="cta-banner" markdown>
 
-### Hablemos de arquitectura de plataformas
+### Colaboración y Debate Técnico
 
-Me encanta conversar sobre plataformas de despliegue de infraestructura, filosofía propia de Infrastructure as Code, sistemas distribuidos en Python, abstracciones multi-cloud e integración segura de agentes de IA en operaciones reales.
+Abierto a debatir sobre arquitectura de plataformas de despliegue, diseño de motores declarativos de IaC, sistemas distribuidos en Python y adopción de agentes de IA en producción.
 
 [:material-linkedin: Conectar en LinkedIn](https://linkedin.com/in/oscarredondodjangopython){ .md-button .md-button--primary }
 [:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }

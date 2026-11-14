@@ -96,7 +96,7 @@ flowchart LR
 
     [:octicons-arrow-right-24: Read architecture case study](projects/dispatcher-migration.md)
 
--   :material-stethoscope:{ .lg .middle } __[Orion AI — CI/CD Auto-Diagnostics (Validated PoC)](projects/orion-ai.md)__
+-   :material-radar:{ .lg .middle } __[Orion AI — CI/CD Auto-Diagnostics (Validated PoC)](projects/orion-ai.md)__
 
     ---
 
@@ -108,19 +108,17 @@ flowchart LR
 
 </div>
 
-## Public Open-Source Systems on GitHub
-
-*Complete, runnable Python codebases built outside enterprise boundaries:*
+## Open-Source Systems on GitHub
 
 <div class="grid cards two-col" markdown>
 
--   :material-school-outline:{ .lg .middle } __[OmniLecture Studio — Linux Multimodal AI Suite](projects/omni-lecture.md)__
+-   :material-waveform:{ .lg .middle } __[OmniLecture Studio — Linux Multimodal AI Suite](projects/omni-lecture.md)__
 
     ---
 
-    Native Linux (Wayland/GNOME, GTK 3) screen/audio capture and LangGraph study pipeline combining dual Whisper (`faster-whisper` CPU `int8` + cloud API), 16×16 slide diffing, and OpenCV CLAHE + Tesseract OCR.
+    Native Linux (Wayland/GNOME, GTK 3) suite with an optimized FFmpeg multimedia pipeline (tuned H.264 10 FPS stillimage encoding cutting file size by 70%, hardware PTS clock sync, and afftdn spectral audio filtering) paired with dual Whisper transcription, 16×16 slide diffing, and LangGraph workflows.
 
-    <span class="tech-tag">Python</span><span class="tech-tag">GTK 3 / Wayland</span><span class="tech-tag">LangGraph</span><span class="tech-tag">Whisper int8</span><span class="tech-tag">OpenCV / OCR</span>
+    <span class="tech-tag">Python</span><span class="tech-tag">FFmpeg</span><span class="tech-tag">GTK 3 / Wayland</span><span class="tech-tag">LangGraph</span><span class="tech-tag">Whisper int8</span><span class="tech-tag">OpenCV / OCR</span>
 
     [:octicons-arrow-right-24: Case study](projects/omni-lecture.md) · [:fontawesome-brands-github: Source on GitHub](https://github.com/oredondo/omnilecture-studio)
 
@@ -162,9 +160,9 @@ flowchart LR
 
 <div class="cta-banner" markdown>
 
-### Let's talk platform architecture
+### Technical Discussion & Collaboration
 
-I enjoy discussing infrastructure deployment platforms, custom Infrastructure as Code design, distributed Python systems, cloud-agnostic abstractions, and bringing AI safely into production operations.
+Open to discussions on infrastructure deployment architecture, custom declarative IaC engines, distributed Python systems, and production-grade operational AI.
 
 [:material-linkedin: Connect on LinkedIn](https://linkedin.com/in/oscarredondodjangopython){ .md-button .md-button--primary }
 [:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }

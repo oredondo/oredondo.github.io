@@ -88,7 +88,7 @@ flowchart TB
 
     [:octicons-arrow-right-24: Architecture & trade-offs](dispatcher-migration.md)
 
--   :material-stethoscope:{ .lg .middle } __[Orion AI — Agentic CI/CD Diagnostics (Validated PoC)](orion-ai.md)__
+-   :material-radar:{ .lg .middle } __[Orion AI — Agentic CI/CD Diagnostics (Validated PoC)](orion-ai.md)__
 
     ---
 
@@ -158,11 +158,11 @@ Public systems built outside enterprise constraints — with complete source cod
 
 <div class="grid cards two-col" markdown>
 
--   :material-school-outline:{ .lg .middle } __[OmniLecture Studio — Linux Multimodal AI Suite](omni-lecture.md)__
+-   :material-waveform:{ .lg .middle } __[OmniLecture Studio — Linux Multimodal AI Suite](omni-lecture.md)__
 
     ---
 
-    Native Linux (Wayland/GNOME, GTK 3) screen/audio recorder and LangGraph study pipeline. Combines dual-engine Whisper (`faster-whisper` CPU `int8` + cloud API), OpenCV CLAHE + Tesseract slide/handwriting OCR, and anti-hallucination guardrails to generate Markdown notes, `.docx` documents, and Anki decks.
+    Native Linux (Wayland/GNOME, GTK 3) screen/audio recorder with an optimized FFmpeg multimedia pipeline (tuned H.264 10 FPS stillimage encoding cutting file size by 70%, hardware PTS clock sync, and afftdn spectral filtering) paired with LangGraph workflows. Combines dual-engine Whisper (`faster-whisper` CPU `int8` + cloud API), OpenCV CLAHE + Tesseract slide/handwriting OCR, and anti-hallucination guardrails to generate Markdown notes, `.docx` documents, and Anki decks.
 
     [:octicons-arrow-right-24: Case study](omni-lecture.md) · [:fontawesome-brands-github: GitHub repo](https://github.com/oredondo/omnilecture-studio)
 
