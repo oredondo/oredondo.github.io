@@ -22,7 +22,7 @@ tags:
 
 La mayoría de los artículos técnicos sobre agentes de IA terminan en el instante en que el prototipo funciona sobre un conjunto de pruebas. En una gran empresa regulada, ahí es exactamente donde empieza la parte más difícil.
 
-Cuando diseñamos y validamos la Prueba de Concepto (PoC) de **Orion AI** en BBVA — un sistema multi-agente construido con **LangGraph** y bucles **ReAct** para automatizar el análisis de causa raíz en fallos de CI/CD — el objetivo técnico era evidente: evitar que los ingenieros perdieran horas revisando megabytes de logs de ejecución, manuales internos de soporte (*runbooks*) y diffs de commits en GitLab cada vez que fallaba un pipeline.
+Cuando diseñamos y validamos la Prueba de Concepto (PoC) de **Orion AI** en BBVA — un sistema multi-agente construido con **LangGraph** y bucles **ReAct** para automatizar el análisis de causa raíz en fallos de CI/CD — el objetivo técnico era evidente: evitar que los ingenieros perdieran horas buceando entre logs interminables, manuales internos de soporte (*runbooks*) y diffs de commits en GitLab cada vez que fallaba un pipeline.
 
 El prototipo cumplió su objetivo: redujo el triaje de horas de correlación manual a segundos. Sin embargo, su estado actual — **prototipo validado y preparado, a la espera de directrices de integración con la infraestructura central de IA** — me enseñó tanto sobre arquitectura de plataformas corporativas como el propio diseño de los nodos en LangGraph.
 

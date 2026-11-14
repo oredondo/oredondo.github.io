@@ -22,7 +22,7 @@ tags:
 
 Most engineering posts about AI agents end at the moment the prototype works on a benchmark dataset. In a regulated enterprise, that is actually where the hardest part begins.
 
-When we designed and validated the **Orion AI** Proof of Concept (PoC) at BBVA — a multi-agent system built with **LangGraph** and **ReAct** loops to automate CI/CD root-cause failure analysis — the technical goal was clear: stop engineers from spending hours digging through megabytes of execution logs, internal runbooks, and GitLab commit diffs every time a pipeline failed.
+When we designed and validated the **Orion AI** Proof of Concept (PoC) at BBVA — a multi-agent system built with **LangGraph** and **ReAct** loops to automate CI/CD root-cause failure analysis — the technical goal was clear: stop engineers from spending hours digging through endless execution logs, internal runbooks, and GitLab commit diffs every time a pipeline failed.
 
 The prototype worked: it slashed triage from hours of manual log correlation to seconds. Yet its current status — **validated and prepared, awaiting integration guidelines for central AI infrastructure** — taught me just as much about enterprise platform architecture as writing the LangGraph nodes themselves.
 

@@ -23,7 +23,7 @@ description: >-
 
 When CI/CD pipelines or infrastructure deployments fail at enterprise scale, the fix is rarely what consumes the most engineering time. Instead, **Mean Time to Resolution (MTTR)** is dominated by manual context gathering:
 
-1. Opening massive Jenkins or dispatcher execution logs to locate the first true failure trace.
+1. Digging through endless Jenkins or dispatcher execution logs to locate the first true failure trace.
 2. Searching internal runbooks and historical incident tickets for known infrastructure errors.
 3. Inspecting recent GitLab repository commits and diffs to check whether a code or configuration change triggered the failure.
 

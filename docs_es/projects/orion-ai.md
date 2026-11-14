@@ -23,7 +23,7 @@ description: >-
 
 Cuando los pipelines de CI/CD o los despliegues de infraestructura fallan a escala corporativa, la corrección en sí rara vez es lo que consume más tiempo de ingeniería. El **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto:
 
-1. Abrir logs masivos de ejecución en Jenkins o en el dispatcher para localizar la primera traza real del error.
+1. Bucear entre logs interminables de ejecución en Jenkins o en el dispatcher para localizar la primera traza real del error.
 2. Buscar en la documentación interna de soporte e incidencias previas errores conocidos de infraestructura.
 3. Inspeccionar los commits y diffs recientes en GitLab para comprobar si un cambio de código o configuración provocó el fallo.
 
