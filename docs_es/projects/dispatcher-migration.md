@@ -32,42 +32,28 @@ Sin embargo, unificar la ejecución sobre un framework común también nos dio l
 
 ---
 
-## 2. Arquitectura Objetivo: Dispatcher HA + Gestión de Configuración + Kubernetes Jobs
+## 2. Topología Abstracta del Sistema: Desacoplamiento de Ejecución y Estado
 
-Para eliminar a Jenkins como cuello de botella operativo, separamos **planificación y estado** (Dispatcher HA), **variables de entorno** (Sistema de Gestión de Configuración) y **aislamiento de cómputo** (Motor de Ejecución sobre Kubernetes Jobs):
+Para eliminar a Jenkins como cuello de botella operativo, la arquitectura desacopla el flujo en cinco etapas bien definidas: recepción API, persistencia de estado, resolución de variables, ejecución efímera en Kubernetes y recolección de telemetría.
 
 ```mermaid
 flowchart LR
-    subgraph Callers["Consumidores de Plataforma"]
-        Orion["Plano de Control Orion"]
-        BP["Orquestador Blueprint"]
-        Engineers["CI/CD e Ingenieros"]
-    end
-
-    subgraph Dispatcher["Dispatcher HA de Operaciones (Django + Celery)"]
-        API["Interfaz REST OpenAPI"]
-        State[("Estado Duradero de Operaciones<br/>(PostgreSQL + Redis)")]
-        Sched["Pools de Workers HA y Motor de Reintentos"]
-        API --> State --> Sched
-    end
-
-    subgraph Config["Gestión Centralizada de Configuración"]
-        VarStore["Almacén de Variables por Entorno<br/>(Dev · Staging · Prod)"]
-        Injector["Resolvedor Dinámico en Runtime"]
-        VarStore --> Injector
-    end
-
-    subgraph Execution["Plano de Ejecución Efímera"]
-        K8s["Motor de Ejecución en Kubernetes Jobs<br/>(Pods efímeros aislados)"]
-        Ansible["Roles Ansible Agnósticos de Entorno<br/>(GitLab · Artifactory · Servicios Core)"]
-    end
-
-    Callers -->|"Disparo programático y consulta"| API
-    Sched -->|"Despacha operación"| K8s
-    Injector -->|"Inyecta variables del entorno en runtime"| K8s
-    K8s -->|"Ejecuta carga inmutable"| Ansible
-    K8s -.->|"Transmite logs y estado final"| State
+    Callers["Invocación<br/><b>(Orion · Blueprint · CI/CD)</b>"] --> Disp["1. Dispatcher HA<br/><b>(Django + Celery)</b>"]
+    Disp --> Config["2. Config Service<br/><b>(Inyección Runtime)</b>"]
+    Config --> K8s["3. K8s Jobs<br/><b>(Pods Efímeros)</b>"]
+    K8s --> Playbook["4. Ansible Core<br/><b>(Roles Agnósticos)</b>"]
+    Playbook --> State[("5. Telemetría<br/><b>(PostgreSQL + Redis)</b>")]
 ```
+
+### Pipeline de Ejecución Paso a Paso
+
+| Fase | Componente Responsable | Qué se ejecuta exactamente | Garantía de Ingeniería |
+| :--- | :--- | :--- | :--- |
+| **1. Despacho Asíncrono** | API OpenAPI & Workers Celery | Recepción de la orden de operación desde Orion, Blueprint o CI/CD; registro del estado inicial en PostgreSQL. | Ingesta no bloqueante en alta disponibilidad (cero SPOF). |
+| **2. Inyección de Configuración** | Servicio Centralizado de Configuración | Detección del entorno destino (Dev/Staging/Prod) e inyección dinámica de credenciales y variables en memoria. | Erradicación de la deriva de configuración (*zero drift*). |
+| **3. Lanzamiento Efímero** | Controlador de Kubernetes Jobs | Creación de un pod efímero de corta duración con la imagen y dependencias exactas del trabajo. | Aislamiento estricto de recursos y dependencias limpias. |
+| **4. Ejecución Agnóstica** | Ansible Runner en Contenedor | Ejecución de roles 100% reutilizables (GitLab, Artifactory, servicios base) sobre la infraestructura destino. | Idéntico código probado en todas las fases del ciclo de vida. |
+| **5. Transmisión y Cierre** | Broker Redis & PostgreSQL | Envío continuo de logs de ejecución, captura del código de salida, actualización del estado final y destrucción del pod. | Cero estado residual en workers e historial auditable. |
 
 ---
 

@@ -31,33 +31,27 @@ Relying on commercial orchestration suites such as **Red Hat Automation Platform
 
 ---
 
-## 2. Abstract Execution & Teardown Flow
+## 2. Abstract System Topology: Orchestration Lifecycle
+
+Blueprint processes declarative manifests through a strict asynchronous pipeline: from static YAML validation, through DAG dependency resolution and concurrent execution against Orion, down to the issuance of an immutable audit trace.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Team as Engineering Team (GitOps)
-    participant Engine as Blueprint Engine (Python AsyncIO)
-    participant Orion as Orion IaaS API (Source of Truth)
-    participant Report as Structured Audit Report
-
-    Team->>Engine: Submit versioned YAML blueprint (provision or destroy)
-    Engine->>Engine: Validate schema & build dependency DAG (execution waves)
-    Engine->>Orion: Query live state of declared resources
-
-    alt Resource already matches target state (or already destroyed)
-        Orion-->>Engine: State satisfied → mark step as NO-OP
-    else Delta detected
-        par Concurrent execution within current DAG wave
-            Engine->>Orion: Trigger async operation A (receive Orion Job ID)
-            Engine->>Orion: Trigger async operation B (receive Orion Job ID)
-        end
-        Orion-->>Engine: Poll / stream completion status per Job ID
-    end
-
-    Engine->>Report: Emit structured execution trace with all Orion Job IDs
-    Report-->>Team: Deterministic outcome (safe to re-run on partial failure)
+flowchart LR
+    Plan["1. Declarative Plan<br/><b>(YAML Manifest in Git)</b>"] --> DAG["2. Blueprint Engine<br/><b>(Validation & DAG Waves)</b>"]
+    DAG --> Orion["3. Orion IaaS API<br/><b>(AsyncIO Execution)</b>"]
+    Orion --> Teardown["4. Lifecycle<br/><b>(Idempotent Teardowns)</b>"]
+    Teardown --> Audit[("5. Audit Trace<br/><b>(Job ID Ledger)</b>")]
 ```
+
+### Step-by-Step Execution Pipeline
+
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. Pre-Flight Validation** | JSON Schema Validator (Python) | Type checking, syntax constraints, and circular dependency detection in YAML before touching production. | Immediate rejection of invalid manifests without firing downstream API calls. |
+| **2. DAG Scheduling** | Dependency Scheduler | Construction of the directed acyclic graph and task partitioning into concurrent execution waves. Automatically inverts dependency order for teardowns. | Maximum parallelism strictly respecting network and service topology. |
+| **3. Live State Inspection** | Orion REST Connector | Queries real resource state against Orion's live inventory to calculate the execution delta. | Clean omission of already satisfied steps (NO-OP), eliminating redundant operations. |
+| **4. Asynchronous Execution** | AsyncIO Engine | Dispatches concurrent API calls against Orion for all resources within the active wave, tracking each returned Job ID. | High concurrency without thread blocking and with minimal memory footprint. |
+| **5. Audit Report** | Forensic Trace Generator | Emits a structured audit trace linking every declared resource to its exact Orion Job IDs, timestamps, and state transitions. | Immutable, 100% auditable evidence for regulatory banking compliance. |
 
 ---
 
@@ -89,15 +83,10 @@ In a regulated bank, "the pipeline went green" is not sufficient audit evidence.
 ## 4. Failure Modes & Resilience Design
 
 ```mermaid
-stateDiagram-v2
-    [*] --> SchemaValidation
-    SchemaValidation --> AbortedPreFlight: Invalid schema or cycle
-    SchemaValidation --> StateInspection: Valid DAG
-    StateInspection --> WaveExecution: Compute delta vs. Orion live state
-    WaveExecution --> Completed: All waves succeed
-    WaveExecution --> PartialFailure: Transient API / provider error
-    PartialFailure --> StateInspection: Re-run blueprint (completed steps become NO-OP)
-    Completed --> [*]
+flowchart LR
+    Val["1. DAG Validation"] --> Wave["2. Execution Waves"]
+    Wave -->|"Transient failure"| Res["3. Safe Resumption<br/>(Completed steps = NO-OP)"]
+    Res --> Done[("4. Consistent State")]
 ```
 
 | Failure Scenario | Traditional Procedural Playbook | Blueprint Engine Behavior |

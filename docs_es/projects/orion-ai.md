@@ -31,29 +31,32 @@ Cuando los pipelines de CI/CD o los despliegues de infraestructura fallan a esca
 
 ---
 
-## 2. Topología Abstracta Multi-Agente
+## 2. Topología Abstracta del Sistema: Pipeline Multi-Agente de Diagnóstico
+
+Orion AI estructura el análisis de causa raíz como un flujo secuencial con bucles reflexivos: desde la captura del evento de fallo, pasando por la agregación paralela de evidencia y el razonamiento ReAct, hasta el filtrado por guardarraíles deterministas.
 
 ```mermaid
-flowchart TD
-    Trigger["Evento de Fallo en CI/CD o Infraestructura"] --> Orchestrator["Supervisor con Estado en LangGraph"]
-
-    subgraph ParallelEvidence["Recopilación Concurrente de Contexto"]
-        Orchestrator --> LogNode["Analizador de Logs de Ejecución<br/>(Trazas de Jenkins / Dispatcher)"]
-        Orchestrator --> DocNode["Recuperador de Base de Conocimiento<br/>(Runbooks operativos en caché Redis)"]
-        Orchestrator --> GitNode["Inspector de Repositorio<br/>(Historial de commits y diffs en GitLab)"]
-    end
-
-    LogNode & DocNode & GitNode --> ReAct["Bucle de Razonamiento ReAct<br/>(Qwen 131k Context LLM + Herramientas MCP)"]
-
-    Guardrails{"Guardarraíles Deterministas<br/>(Validación de Esquema y Evidencia)"}
-    ReAct --> Guardrails
-    Guardrails -- "Traza ambigua → inspeccionar diff en detalle" --> GitNode
-    Guardrails -- "Salida validada" --> Report["Diagnóstico Estructurado de Causa Raíz"]
+flowchart LR
+    Fail["Fallo CI/CD<br/><b>(Jenkins · Dispatcher)</b>"] --> Sup["1. LangGraph<br/><b>(Supervisor con Estado)</b>"]
+    Sup --> Evid["2. Evidencias<br/><b>(Logs · Redis · GitLab)</b>"]
+    Evid --> ReAct["3. Bucle ReAct<br/><b>(Qwen 131k + MCP)</b>"]
+    ReAct --> Guard["4. Guardarraíles<br/><b>(Pydantic Estricto)</b>"]
+    Guard --> Report[("5. Diagnóstico<br/><b>(Causa Raíz Verificada)</b>")]
 ```
+
+### Pipeline de Diagnóstico Paso a Paso
+
+| Fase | Componente Responsable | Qué se ejecuta exactamente | Garantía de Ingeniería |
+| :--- | :--- | :--- | :--- |
+| **1. Ingesta de Fallo** | Webhook / API Listener | Recepción del evento de error desde Jenkins o el Dispatcher con el Job ID y código de salida inicial. | Inicio inmediato del triaje sin intervención humana. |
+| **2. Recopilación Concurrente** | Nodos Paralelos de LangGraph | Recuperación en paralelo de trazas de log completas, manuales de soporte en caché Redis y últimos diffs de GitLab. | Consolidación de contexto en milisegundos sin bloqueos en serie. |
+| **3. Razonamiento Multimodal** | Bucle ReAct (Qwen 131k) | Procesamiento conjunto del contexto dentro de la ventana de 131k tokens para rastrear la causa raíz del fallo. | Capacidad para detectar dependencias rotas o cambios sutiles en Git. |
+| **4. Validación Determinista** | Guardarraíles Pydantic & Esquema | Verificación estricta de que cada afirmación del diagnóstico está respaldada por un log real o diff existente. | **Cero alucinaciones:** rechazo de hipótesis no verificables. |
+| **5. Emisión de Diagnóstico** | Generador de Informes de Incidencia | Publicación de un resumen estructurado con la línea exacta del fallo, commit causante y acción de remediación sugerida. | Reducción del MTTR de horas a segundos para los equipos de operaciones. |
 
 ---
 
-## 3. Decisiones Clave de Diseño
+## 3. Decisiones Clave de Arquitectura
 
 ### A. Orquestación Cíclica en Grafo (LangGraph) frente a Prompts Lineales
 Los fallos en pipelines rara vez pueden diagnosticarse en una única pasada secuencial. Cuando un log solo muestra un código de salida genérico, el agente necesita retroceder e inspeccionar los diffs recientes del repositorio o cambios de configuración antes de emitir una conclusión. **LangGraph** mantiene un estado tipado entre nodos, permitiendo bifurcaciones condicionales y bucles ReAct acotados en lugar de prompts frágiles de un solo paso.

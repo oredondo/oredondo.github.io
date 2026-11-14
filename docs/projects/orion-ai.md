@@ -31,25 +31,28 @@ When CI/CD pipelines or infrastructure deployments fail at enterprise scale, the
 
 ---
 
-## 2. Abstract Multi-Agent Topology
+## 2. Abstract System Topology: Multi-Agent Diagnostic Pipeline
+
+Orion AI models root-cause analysis as a sequential workflow with reflective loops: from failure ingestion, through parallel evidence gathering and ReAct reasoning, down to strict deterministic guardrail validation.
 
 ```mermaid
-flowchart TD
-    Trigger["CI/CD or Infrastructure Failure Event"] --> Orchestrator["LangGraph Stateful Supervisor"]
-
-    subgraph ParallelEvidence["Concurrent Context Gathering"]
-        Orchestrator --> LogNode["Execution Log Parser<br/>(Jenkins / Dispatcher traces)"]
-        Orchestrator --> DocNode["Knowledge Base Retriever<br/>(Operational runbooks in Redis cache)"]
-        Orchestrator --> GitNode["Repository Inspector<br/>(GitLab commit history & diffs)"]
-    end
-
-    LogNode & DocNode & GitNode --> ReAct["ReAct Reasoning Loop<br/>(Qwen 131k Context LLM + MCP Tools)"]
-
-    Guardrails{"Deterministic Guardrails<br/>(Schema & Evidence Check)"}
-    ReAct --> Guardrails
-    Guardrails -- "Ambiguous trace → inspect deeper diff" --> GitNode
-    Guardrails -- "Validated output" --> Report["Structured Root-Cause Diagnosis"]
+flowchart LR
+    Fail["Failure Event<br/><b>(CI/CD Pipeline)</b>"] --> Sup["1. LangGraph<br/><b>(Stateful Supervisor)</b>"]
+    Sup --> Evid["2. Evidence<br/><b>(Logs · Redis · GitLab)</b>"]
+    Evid --> ReAct["3. ReAct Loop<br/><b>(Qwen 131k + MCP)</b>"]
+    ReAct --> Guard["4. Guardrails<br/><b>(Strict Pydantic)</b>"]
+    Guard --> Report[("5. Diagnosis<br/><b>(Grounded Root Cause)</b>")]
 ```
+
+### Step-by-Step Diagnostic Pipeline
+
+| Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
+| :--- | :--- | :--- | :--- |
+| **1. Failure Ingestion** | Webhook / API Listener | Ingests pipeline error event from Jenkins or the Dispatcher with the initial Job ID and exit code. | Instant diagnostic trigger without manual developer intervention. |
+| **2. Concurrent Gathering** | LangGraph Parallel Nodes | Fetches full execution logs, operational runbooks from Redis cache, and recent GitLab commit diffs in parallel. | Millisecond context aggregation without serial I/O bottlenecks. |
+| **3. Multimodal Reasoning** | ReAct Loop (Qwen 131k) | Evaluates consolidated evidence across the 131k token window to isolate the failure's root cause. | Detects broken dependencies, environment drift, or subtle Git changes. |
+| **4. Deterministic Check** | Pydantic Schema Guardrails | Verifies that every assertion in the diagnostic output maps directly to actual logs, runbooks, or diffs. | **Zero hallucination:** outright rejection of ungrounded hypotheses. |
+| **5. Diagnostic Emission** | Incident Report Generator | Emits a structured summary containing the exact failure line, culprit commit, and recommended remediation action. | Drops MTTR from hours to seconds for on-call operations teams. |
 
 ---
 

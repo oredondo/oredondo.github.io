@@ -31,33 +31,27 @@ Depender de suites comerciales de orquestación como **Red Hat Automation Platfo
 
 ---
 
-## 2. Flujo Abstracto de Ejecución y Desmontaje
+## 2. Topología Abstracta del Sistema: Ciclo de Vida de una Orquestación
+
+Blueprint procesa planos declarativos mediante un pipeline asíncrono estricto: desde la validación estática del manifiesto YAML, pasando por la resolución del grafo DAG y la ejecución concurrente sobre Orion, hasta la emisión del informe inmutable de auditoría.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Team as Equipo de Ingeniería (GitOps)
-    participant Engine as Motor Blueprint (Python AsyncIO)
-    participant Orion as API IaaS Orion (Fuente de Verdad)
-    participant Report as Informe Estructurado de Auditoría
-
-    Team->>Engine: Envía plano YAML versionado (aprovisionar o destruir)
-    Engine->>Engine: Valida esquema y construye DAG de dependencias (olas de ejecución)
-    Engine->>Orion: Consulta estado en vivo de los recursos declarados
-
-    alt El recurso ya cumple el estado objetivo (o ya fue destruido)
-        Orion-->>Engine: Estado satisfecho → marca el paso como NO-OP
-    else Diferencial detectado
-        par Ejecución concurrente dentro de la ola actual del DAG
-            Engine->>Orion: Lanza operación asíncrona A (recibe Job ID de Orion)
-            Engine->>Orion: Lanza operación asíncrona B (recibe Job ID de Orion)
-        end
-        Orion-->>Engine: Sondea / recibe estado de finalización por Job ID
-    end
-
-    Engine->>Report: Emite traza estructurada con todos los Job IDs de Orion
-    Report-->>Team: Resultado determinista (seguro de relanzar ante fallo parcial)
+flowchart LR
+    Plan["1. Plano Declarativo<br/><b>(Manifiesto YAML en Git)</b>"] --> DAG["2. Motor Blueprint<br/><b>(Validación & Olas DAG)</b>"]
+    DAG --> Orion["3. API Orion IaaS<br/><b>(Ejecución AsyncIO)</b>"]
+    Orion --> Teardown["4. Ciclo de Vida<br/><b>(Desmontaje Idempotente)</b>"]
+    Teardown --> Audit[("5. Auditoría<br/><b>(Trazabilidad por Job ID)</b>")]
 ```
+
+### Pipeline de Ejecución Paso a Paso
+
+| Fase | Componente Responsable | Qué se ejecuta exactamente | Garantía de Ingeniería |
+| :--- | :--- | :--- | :--- |
+| **1. Validación Pre-Flight** | Validador JSON Schema (Python) | Comprobación de tipos, restricciones de sintaxis y detección de dependencias circulares en el YAML antes de tocar producción. | Rechazo inmediato de manifiestos erróneos sin llamadas a la API. |
+| **2. Construcción del DAG** | Programador de Dependencias | Cálculo del árbol dirigido acíclico y partición de tareas en olas concurrentes (*waves*). En destrucciones, invierte el orden automáticamente. | Paralelismo máximo respetando la topología de red y servicios. |
+| **3. Inspección en Vivo** | Conector REST con Orion | Consulta del estado real de los recursos contra el inventario vivo de Orion para calcular el diferencial (*delta*). | Omisión limpia de pasos ya satisfechos (NO-OP), evitando re-trabajo. |
+| **4. Ejecución Asíncrona** | Motor AsyncIO | Despacho de llamadas concurrentes contra Orion para todos los recursos de la ola actual, monitorizando cada Job ID devuelto. | Alta concurrencia sin bloqueo de hilos y huella mínima de memoria. |
+| **5. Informe de Auditoría** | Generador de Trazas Forenses | Emisión de un documento estructurado que asocia cada recurso declarado con sus Job IDs exactos, marcas de tiempo y transiciones de estado. | Trazabilidad inmutable 100% auditable ante organismos reguladores. |
 
 ---
 
@@ -89,15 +83,10 @@ En un entorno bancario regulado, que un pipeline termine en verde no basta como 
 ## 4. Modos de Fallo y Diseño de Resiliencia
 
 ```mermaid
-stateDiagram-v2
-    [*] --> ValidacionEsquema
-    ValidacionEsquema --> AbortadoPreFlight: Esquema inválido o dependencia circular
-    ValidacionEsquema --> InspeccionEstado: DAG válido
-    InspeccionEstado --> EjecucionPorOlas: Calcula delta frente al estado en vivo en Orion
-    EjecucionPorOlas --> Completado: Todas las olas finalizan con éxito
-    EjecucionPorOlas --> FalloParcial: Error transitorio de red o proveedor
-    FalloParcial --> InspeccionEstado: Relanzar plano (pasos ya hechos pasan a NO-OP)
-    Completado --> [*]
+flowchart LR
+    Val["1. Validación DAG"] --> Wave["2. Olas de Ejecución"]
+    Wave -->|"Fallo transitorio"| Res["3. Reanudación Segura<br/>(Pasos hechos = NO-OP)"]
+    Res --> Done[("4. Estado Objetivo Consistente")]
 ```
 
 | Escenario de Fallo | Playbook Procedimental Tradicional | Comportamiento del Motor Blueprint |
