@@ -1,7 +1,7 @@
 ---
 title: Engineering Notes & Architecture Essays
 description: >-
-  First-person architectural essays on internal developer platforms, distributed execution engines, declarative lifecycle design, and operational AI in regulated environments.
+  First-person architectural essays on infrastructure deployment platforms, custom declarative IaC design, distributed execution engines, and operational AI in regulated environments.
 ---
 
 # Engineering Notes & Architecture Essays

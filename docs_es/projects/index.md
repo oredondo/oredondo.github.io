@@ -12,9 +12,9 @@ Esta sección muestra cómo los sistemas que he diseñado durante la última dé
 
 ---
 
-## 1. Nueve Años de Evolución de una Plataforma Interna de Desarrollo
+## 1. Nueve Años de Evolución: De la Estandarización CI/CD a una Plataforma Propia de IaC y Despliegue
 
-En **BBVA Technology** (2017 – Presente), lo que comenzó como la estandarización de pipelines CI/CD entre equipos de infraestructura evolucionó hasta convertirse en una plataforma cloud interna completa que gobierna **decenas de miles de nodos** en **AWS, OpenStack, OpenShift y servidores físicos** para **más de 500 ingenieros**:
+En **BBVA Technology** (2017 – Presente), lo que comenzó como la estandarización de pipelines CI/CD entre equipos de infraestructura evolucionó hasta convertirse en una plataforma de despliegue y gobierno de infraestructura que administra **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y servidores físicos**, procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
 
 ```mermaid
 flowchart TB
@@ -68,7 +68,7 @@ flowchart TB
 
     ---
 
-    Arquitecto único del plano de control IaaS central: una sola interfaz OpenAPI sobre AWS, OpenStack, OpenShift y bare-metal, respaldada por una capa híbrida PostgreSQL + MongoDB + Redis y canalizaciones automáticas de auditoría.
+    Arquitecto único del plano de control IaaS y despliegue: una sola interfaz OpenAPI que gobierna 30.000+ máquinas en AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por una capa híbrida PostgreSQL + MongoDB + Redis y canalizaciones automáticas de auditoría.
 
     [:octicons-arrow-right-24: Arquitectura y trade-offs](orion-iaas.md)
 

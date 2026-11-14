@@ -17,7 +17,7 @@ hide:
 # Oscar Redondo { .hero__title }
 
 <p class="hero__lead">
-I design and build <strong>internal developer platforms that make complex distributed infrastructure invisible</strong> — turning hybrid cloud operations across AWS, OpenStack, OpenShift, and bare metal into clean self-service APIs, declarative lifecycle engines, and deterministic automation.
+I design and build <strong>infrastructure deployment and provisioning platforms rooted in a custom Infrastructure as Code philosophy</strong> — abstracting the distributed complexity of hybrid cloud across AWS, OpenStack, OpenShift, and bare metal into clean self-service APIs, declarative lifecycle engines, and deterministic automation.
 </p>
 
 [:material-sitemap-outline: Explore the platform ecosystem](projects/index.md){ .md-button .md-button--primary }
@@ -28,11 +28,11 @@ I design and build <strong>internal developer platforms that make complex distri
 
 <div class="kpi-grid">
   <div class="kpi-card">
-    <span class="kpi-value">10,000s</span>
-    <span class="kpi-label">Nodes governed</span>
+    <span class="kpi-value">30,000+</span>
+    <span class="kpi-label">Machines governed</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-value">High-Throughput</span>
+    <span class="kpi-value">40,000+</span>
     <span class="kpi-label">Daily operations</span>
   </div>
   <div class="kpi-card">
@@ -47,7 +47,7 @@ I design and build <strong>internal developer platforms that make complex distri
 
 ## How my work connects: one platform built layer by layer
 
-Over the last nine years at **BBVA Technology**, my work has not been a collection of isolated tools — it is a single **Internal Developer Platform** that evolved layer by layer as each architectural bottleneck was solved:
+Over the last nine years at **BBVA Technology**, my work has not been a collection of isolated tools — it is a **central infrastructure deployment and governance platform** that evolved layer by layer under a custom Infrastructure as Code philosophy as each architectural bottleneck was solved:
 
 ```mermaid
 flowchart LR
@@ -70,7 +70,7 @@ flowchart LR
 
     ---
 
-    Sole architect of the central IaaS platform powering BBVA's Core Banking Infrastructure: one OpenAPI interface over AWS, OpenStack, OpenShift, and bare metal, backed by PostgreSQL, MongoDB, Redis, automated audit exports, and a zero-downtime F5/OpenStack API bridge.
+    Sole architect of BBVA's central IaaS and deployment platform: one OpenAPI interface governing 30,000+ machines across AWS, OpenStack, OpenShift, and bare metal (40,000+ daily ops), backed by PostgreSQL, MongoDB, Redis, and automated compliance pipelines.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 
@@ -164,7 +164,7 @@ flowchart LR
 
 ### Let's talk platform architecture
 
-I enjoy discussing internal developer platforms, distributed Python systems, cloud-agnostic abstractions, and bringing AI safely into production operations.
+I enjoy discussing infrastructure deployment platforms, custom Infrastructure as Code design, distributed Python systems, cloud-agnostic abstractions, and bringing AI safely into production operations.
 
 [:material-linkedin: Connect on LinkedIn](https://linkedin.com/in/oscarredondodjangopython){ .md-button .md-button--primary }
 [:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }

@@ -17,7 +17,7 @@ hide:
 # Oscar Redondo { .hero__title }
 
 <p class="hero__lead">
-Diseño y construyo <strong>plataformas internas de desarrollo que hacen invisible la complejidad de la infraestructura distribuida</strong> — transformando operaciones de nube híbrida en AWS, OpenStack, OpenShift y bare-metal en APIs limpias en autoservicio, motores declarativos de ciclo de vida y automatización determinista.
+Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de infraestructura impulsadas por una filosofía propia de Infrastructure as Code</strong> — haciendo invisible la complejidad distribuida de AWS, OpenStack, OpenShift y bare-metal mediante APIs en autoservicio, motores declarativos de ciclo de vida y automatización determinista.
 </p>
 
 [:material-sitemap-outline: Explorar el ecosistema de plataforma](projects/index.md){ .md-button .md-button--primary }
@@ -28,11 +28,11 @@ Diseño y construyo <strong>plataformas internas de desarrollo que hacen invisib
 
 <div class="kpi-grid">
   <div class="kpi-card">
-    <span class="kpi-value">10.000s</span>
-    <span class="kpi-label">Nodos gobernados</span>
+    <span class="kpi-value">30.000+</span>
+    <span class="kpi-label">Máquinas gobernadas</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-value">Alto Volumen</span>
+    <span class="kpi-value">40.000+</span>
     <span class="kpi-label">Operaciones diarias</span>
   </div>
   <div class="kpi-card">
@@ -47,7 +47,7 @@ Diseño y construyo <strong>plataformas internas de desarrollo que hacen invisib
 
 ## Cómo se conecta todo: una plataforma construida capa por capa
 
-Durante los últimos nueve años en **BBVA Technology**, mi trabajo no ha consistido en herramientas aisladas, sino en una única **Plataforma Interna de Desarrollo** que ha evolucionado capa por capa a medida que resolvíamos cada cuello de botella de escala:
+Durante los últimos nueve años en **BBVA Technology**, mi trabajo no ha consistido en herramientas aisladas, sino en una **plataforma central de despliegue y gobierno de infraestructura** que ha evolucionado capa por capa bajo una filosofía propia de Infrastructure as Code a medida que resolvíamos cada cuello de botella de escala:
 
 ```mermaid
 flowchart LR
@@ -70,7 +70,7 @@ flowchart LR
 
     ---
 
-    Arquitecto único de la plataforma IaaS central para la Infraestructura Core Banking de BBVA: una sola interfaz OpenAPI sobre AWS, OpenStack, OpenShift y bare-metal, respaldada por PostgreSQL, MongoDB, Redis, auditorías automáticas y un puente API sin downtime entre F5 y OpenStack.
+    Arquitecto único de la plataforma IaaS central y despliegue para BBVA: una sola interfaz OpenAPI gobernando 30.000+ máquinas sobre AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por PostgreSQL, MongoDB, Redis y auditorías automáticas.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 
@@ -164,7 +164,7 @@ flowchart LR
 
 ### Hablemos de arquitectura de plataformas
 
-Me encanta conversar sobre plataformas internas de desarrollo, sistemas distribuidos en Python, abstracciones multi-cloud e integración segura de agentes de IA en operaciones reales.
+Me encanta conversar sobre plataformas de despliegue de infraestructura, filosofía propia de Infrastructure as Code, sistemas distribuidos en Python, abstracciones multi-cloud e integración segura de agentes de IA en operaciones reales.
 
 [:material-linkedin: Conectar en LinkedIn](https://linkedin.com/in/oscarredondodjangopython){ .md-button .md-button--primary }
 [:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }

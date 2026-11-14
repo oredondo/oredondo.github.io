@@ -12,9 +12,9 @@ This section maps how the systems I architected over the last decade connect int
 
 ---
 
-## 1. The Nine-Year Evolution of an Internal Developer Platform
+## 1. Nine Years of Evolution: From CI/CD Standardization to a Custom IaC & Deployment Platform
 
-At **BBVA Technology** (2017 – Present), what started as standardizing CI/CD pipelines across infrastructure teams grew into a full internal cloud platform governing **tens of thousands of nodes** across **AWS, OpenStack, OpenShift, and bare metal** for **500+ engineers**:
+At **BBVA Technology** (2017 – Present), what started as standardizing CI/CD pipelines across infrastructure teams grew into a comprehensive infrastructure deployment and governance platform managing **30,000+ machines** across **AWS, OpenStack, OpenShift, and bare metal**, processing **40,000+ daily operations** for **500+ engineers**:
 
 ```mermaid
 flowchart TB
@@ -68,7 +68,7 @@ flowchart TB
 
     ---
 
-    Sole architect of the central IaaS control plane: one OpenAPI interface over AWS, OpenStack, OpenShift, and bare metal, backed by a hybrid PostgreSQL + MongoDB + Redis data tier and automated compliance audit pipelines.
+    Sole architect of the central IaaS and deployment control plane: one OpenAPI interface governing 30,000+ machines across AWS, OpenStack, OpenShift, and bare metal (40,000+ daily ops), backed by a hybrid PostgreSQL + MongoDB + Redis tier and automated compliance audit pipelines.
 
     [:octicons-arrow-right-24: Architecture & trade-offs](orion-iaas.md)
 

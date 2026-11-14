@@ -1,7 +1,7 @@
 ---
 title: Notas de Ingeniería y Ensayos de Arquitectura
 description: >-
-  Ensayos de arquitectura en primera persona sobre plataformas internas de desarrollo, motores de ejecución distribuida, diseño declarativo de ciclo de vida e IA operativa en entornos regulados.
+  Ensayos de arquitectura en primera persona sobre plataformas de despliegue de infraestructura, diseño declarativo de IaC, motores de ejecución distribuida e IA operativa en entornos regulados.
 ---
 
 # Notas de Ingeniería y Ensayos de Arquitectura

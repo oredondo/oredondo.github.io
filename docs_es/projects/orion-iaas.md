@@ -10,7 +10,7 @@ description: >-
 | :--- | :--- |
 | **Rol** | Arquitecto Único y Responsable de Plataforma |
 | **Organización** | BBVA Technology (Infraestructura Core Banking) · 2017 – Presente |
-| **Escala** | Decenas de miles de nodos · Operaciones diarias de alto rendimiento · 500+ ingenieros |
+| **Escala** | 30.000+ máquinas gobernadas · 40.000+ operaciones diarias · 500+ ingenieros |
 | **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift, F5, Infoblox |
 
 !!! abstract "Resumen de arquitectura"
