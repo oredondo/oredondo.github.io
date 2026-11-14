@@ -54,11 +54,11 @@ Operar infraestructura a escala bancaria entre nube pública, nube privada, plat
 
 ## 3. Topología Abstracta del Sistema: Ciclo de Vida de una Operación
 
-Orion centraliza el ciclo de vida de la infraestructura bancaria mediante un flujo secuencial estricto: desde la llamada API o el scheduler programado, pasando por el aprovisionamiento cloud y la configuración en dos capas con Ansible, hasta el sellado final en el motor de auditoría.
+Orion centraliza el ciclo de vida de la infraestructura bancaria mediante un flujo secuencial estricto: desde el formulario del usuario en el frontal web, la llamada API REST o el scheduler programado, pasando por el aprovisionamiento cloud y la configuración en dos capas con Ansible, hasta el sellado final en el motor de auditoría.
 
 ```mermaid
 flowchart LR
-    Trig["Disparo<br/><b>(API / Scheduler)</b>"] --> Disp["Dispatcher HA<br/><b>(RBAC & Celery)</b>"]
+    Trig["Disparo<br/><b>(Frontal Web · API · Scheduler)</b>"] --> Disp["Dispatcher HA<br/><b>(RBAC & Celery)</b>"]
     Disp --> Prov["1. Provisión<br/><b>(Drivers Cloud)</b>"]
     Prov --> Conf["2. Configuración<br/><b>(Ansible Ground + Usuario)</b>"]
     Conf --> Audit[("3. Auditoría<br/><b>(Software & Histórico)</b>")]
@@ -68,7 +68,7 @@ flowchart LR
 
 | Fase | Componente Responsable | Qué se ejecuta exactamente | Garantía de Ingeniería |
 | :--- | :--- | :--- | :--- |
-| **1. Disparo** | API REST OpenAPI / Schedulers (Celery Beat) | Invocación de autoservicio, pipeline CI/CD o tarea programada periódica (reconciliación/mantenimiento). | Ingesta asíncrona desacoplada con respuesta inmediata. |
+| **1. Disparo** | Frontal Web / API REST / Schedulers (Celery Beat) | Formulario de autoservicio en el frontal web, invocación directa desde pipeline CI/CD o tarea programada periódica (reconciliación/mantenimiento). | Ingesta asíncrona desacoplada con respuesta inmediata. |
 | **2. Autorización** | Motor RBAC & PostgreSQL | Verificación de permisos del usuario solicitante, token corporativo y registro inmutable de la solicitud. | Cero peticiones anónimas o sin trazabilidad de cambio. |
 | **3. Provisión** | Capa de Drivers Multi-Cloud | Llamada al proveedor correspondiente (**AWS, OpenStack, OpenShift o Bare-Metal**) para crear el cómputo y asignar IP/DNS. | Abstracción homogénea sin acoplamiento a APIs propietarias. |
 | **4. Ground Ops** | Ansible Core (Línea Base Bancaria) | **Fase obligatoria y previa al usuario:** bastionado CIS del SO, inyección de certificados TLS corporativos, cortafuegos y despliegue de agentes de monitorización. | **Garantía 100% compliance:** si la fase Ground falla, el despliegue se aborta de inmediato. |
@@ -82,7 +82,7 @@ flowchart LR
 ### A. Auditoría Integral de la Plataforma: Permisos y Trazabilidad de Máquinas
 Orion actúa como la **fuente de verdad indiscutible de auditoría** para toda la plataforma de infraestructura de BBVA:
 
-- **Auditoría de Permisos y Autorizaciones:** Control de acceso basado en roles (RBAC) con trazabilidad estricta. Toda petición —sea invocada vía API REST por un ingeniero o generada automáticamente por un **Scheduler**— queda asociada unívocamente a su identidad, rol, aprobación y justificación operativa.
+- **Auditoría de Permisos y Autorizaciones:** Control de acceso basado en roles (RBAC) con trazabilidad estricta. Toda petición —sea invocada desde el formulario web por un ingeniero, vía API REST o generada automáticamente por un **Scheduler**— queda asociada unívocamente a su identidad, rol, aprobación y justificación operativa.
 - **Trazabilidad Completa del Ciclo de Vida de la Máquina:** Cada nodo cuenta con una línea de tiempo inmutable desde su aprovisionamiento inicial hasta su baja definitiva. El sistema registra qué playbooks se han ejecutado, qué cambios de configuración se han aplicado, incidencias detectadas y quién intervino en cada etapa.
 - **Informes Exhaustivos de Software y Eventos:** La plataforma permite extraer en cualquier instante informes detallados para auditoría interna y reguladores bancarios sobre **qué tiene instalado exactamente cualquier máquina** (versiones de paquetes, parches de seguridad, agentes) y **todo lo que ha sucedido en ella** a lo largo de su historia.
 
@@ -103,10 +103,11 @@ Una vez aprovisionado el recurso computacional a través del driver correspondie
 2. **Capa de Usuario (Operación Específica):**
     - Ejecución de los playbooks y roles solicitados por el equipo solicitante: aprovisionamiento de middleware, bases de datos, microservicios o dependencias de la aplicación final.
 
-### D. Operaciones Apificadas y Automatización vía Schedulers
-La interacción operativa con Orion no depende de intervenciones manuales ni consolas aisladas:
+### D. Canales de Operación: Frontal Web, API REST y Schedulers Programados
+La interacción operativa con Orion no depende de intervenciones manuales en servidores ni consolas aisladas:
 
-- **Operaciones Apificadas (API-First):** Todo el catálogo de operaciones (creación, remediación, parada, escalado, decomiso, informes) está expuesto mediante una API REST OpenAPI/Swagger, permitiendo su invocación desatendida desde portales de autoservicio, pipelines de CI/CD y motores de orquestación como **Blueprint**.
+- **Formularios de Usuario en Frontal Web:** Interfaz gráfica intuitiva de autoservicio donde los ingenieros rellenan formularios guiados y validados en tiempo real contra el catálogo de productos y cuotas de Orion, simplificando la operación sin necesidad de construir manualmente cargas útiles JSON complejas.
+- **Operaciones Apificadas (API-First):** Todo el catálogo de operaciones (creación, remediación, parada, escalado, decomiso, informes) está expuesto mediante una API REST OpenAPI/Swagger, permitiendo su invocación desatendida desde pipelines de CI/CD y motores de orquestación como **Blueprint**.
 - **Schedulers Programados:** Orion integra un planificador asíncrono para automatizar operaciones recurrentes: reconciliación periódica de inventario contra las nubes reales, auditorías nocturnas de cumplimiento de líneas base, rotación programada de credenciales y tareas de saneamiento periódico.
 
 ### E. Persistencia Híbrida (PostgreSQL + MongoDB + Redis)

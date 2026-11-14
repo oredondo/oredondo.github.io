@@ -54,11 +54,11 @@ Operating infrastructure at banking scale across public cloud, private cloud, co
 
 ## 3. Abstract System Topology: Operation Lifecycle
 
-Orion centralizes the banking infrastructure lifecycle through a strict, sequential pipeline: from REST API calls or scheduled jobs, through cloud provisioning and two-layer Ansible configuration, down to the final seal in the audit engine.
+Orion centralizes the banking infrastructure lifecycle through a strict, sequential pipeline: from user self-service forms in the web frontend, REST API calls, or scheduled jobs, through cloud provisioning and two-layer Ansible configuration, down to the final seal in the audit engine.
 
 ```mermaid
 flowchart LR
-    Trig["Trigger<br/><b>(API / Scheduler)</b>"] --> Disp["HA Dispatcher<br/><b>(RBAC & Celery)</b>"]
+    Trig["Trigger<br/><b>(Web UI · API · Scheduler)</b>"] --> Disp["HA Dispatcher<br/><b>(RBAC & Celery)</b>"]
     Disp --> Prov["1. Provisioning<br/><b>(Cloud Drivers)</b>"]
     Prov --> Conf["2. Configuration<br/><b>(Ansible Ground + User)</b>"]
     Conf --> Audit[("3. Audit Engine<br/><b>(Software & History)</b>")]
@@ -68,7 +68,7 @@ flowchart LR
 
 | Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
 | :--- | :--- | :--- | :--- |
-| **1. Trigger** | REST API / Schedulers (Celery Beat) | Invocation via developer self-service, CI/CD pipeline, or recurring scheduled job (reconciliation/maintenance). | Asynchronous, non-blocking ingestion with immediate HTTP response. |
+| **1. Trigger** | Web UI Form / REST API / Schedulers (Celery Beat) | Self-service web frontend form, direct CI/CD pipeline invocation, or recurring scheduled job (reconciliation/maintenance). | Asynchronous, non-blocking ingestion with immediate HTTP response. |
 | **2. Authorization** | RBAC Engine & PostgreSQL | Validation of requester permissions, corporate token, and immutable logging of the operation request. | Zero anonymous or untracked operational requests. |
 | **3. Provisioning** | Multi-Cloud Driver Layer | Downstream call to target provider (**AWS, OpenStack, OpenShift, or Bare-Metal**) to create the compute instance and assign IP/DNS. | Consistent abstraction without vendor lock-in to proprietary APIs. |
 | **4. Ground Ops** | Ansible Core (Banking Baseline) | **Mandatory pre-user baseline:** CIS operating system hardening, corporate TLS certificates, firewall policies, and monitoring agent deployment. | **100% compliance guarantee:** if Ground validation fails, provisioning is aborted immediately. |
@@ -82,7 +82,7 @@ flowchart LR
 ### A. Comprehensive Platform Auditing: Permissions & Machine Traceability
 Orion acts as the **single source of truth for infrastructure auditing** across BBVA:
 
-- **RBAC & Authorization Audit:** Strict role-based access control with complete accountability. Every operation — whether triggered via the REST API or invoked automatically by a **Scheduler** — is tied to a verified identity, role, approval chain, and change ticket.
+- **RBAC & Authorization Audit:** Strict role-based access control with complete accountability. Every operation — whether submitted through the web frontend form by an engineer, triggered via the REST API, or invoked automatically by a **Scheduler** — is tied to a verified identity, role, approval chain, and change ticket.
 - **Full Machine Lifecycle Traceability:** Every compute asset retains an immutable lifecycle ledger from initial bootstrap to decommissioning. The platform tracks every playbook executed, configuration change applied, detected failure, and technician interaction.
 - **Exhaustive Software & Historical Reporting:** Internal compliance teams and banking regulators can instantaneously export complete reports showing **exactly what software packages are installed on any machine** (versions, security patches, agents) and **every operational event that occurred on that node throughout its existence**.
 
@@ -103,10 +103,11 @@ Once raw compute resources are provisioned by cloud drivers, Orion orchestrates 
 2. **User Operation Layer:**
     - Execution of user-defined playbooks and roles: deployment of application middleware, databases, microservices, and workload-specific configuration.
 
-### D. API-Driven Operations & Scheduled Automation
-Operational interactions with Orion avoid manual consoles and ad-hoc scripts:
+### D. Operational Channels: Web Frontend, REST APIs & Schedulers
+Operational interactions with Orion avoid manual console work on servers:
 
-- **API-First Architecture:** The complete catalog of operations (creation, remediation, start/stop, scaling, teardown, reports) is fully exposed via OpenAPI/REST, enabling headless execution from developer self-service portals, CI/CD pipelines, and declarative engines like **Blueprint**.
+- **Self-Service Web Frontend Forms:** Intuitive graphical interface where engineers submit validated dynamic forms aligned in real time with Orion's product catalog and team quotas, simplifying provisioning without requiring manual JSON payload authoring.
+- **API-First Architecture:** The complete catalog of operations (creation, remediation, start/stop, scaling, teardown, reports) is fully exposed via OpenAPI/REST, enabling headless execution from CI/CD pipelines and declarative engines like **Blueprint**.
 - **Integrated Schedulers:** Orion incorporates an asynchronous scheduler (Celery Beat) for recurring workflows: nightly inventory state reconciliation across physical and cloud estates, automated compliance scans, scheduled credential rotation, and maintenance tasks outside core banking hours.
 
 ### E. Hybrid Persistence Tier (PostgreSQL + MongoDB + Redis)
