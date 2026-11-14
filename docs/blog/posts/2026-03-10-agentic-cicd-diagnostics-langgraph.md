@@ -61,7 +61,7 @@ In banking operations, a hallucinated remediation command is worse than no diagn
 
 - **Strict output schemas:** The agent cannot return free-form prose; it must populate a typed diagnostic contract.
 - **Explicit evidence grounding:** Every root-cause claim must point to concrete evidence retrieved during the run (log fragments, runbook entries, or commit diffs).
-- **Isolated tool contracts (MCP):** External systems (Jenkins, Redis runbook cache, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
+- **Isolated tool contracts (MCP):** External systems (Orion Dispatcher, Redis runbook cache, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
 
 ## 3. Why a Validated PoC Still Waits on Enterprise Foundations
 

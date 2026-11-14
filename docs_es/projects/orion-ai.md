@@ -11,7 +11,7 @@ description: >-
 | **Rol** | Arquitecto y Responsable Técnico |
 | **Organización / Fase** | BBVA · **Prueba de Concepto Validada (PoC)** |
 | **Resultado** | Prototipo validado que reduce el triaje de logs de horas a segundos; preparado y a la espera de directrices de infraestructura central de IA |
-| **Stack** | Python, LangGraph, Agentes ReAct, Qwen LLM (131k de contexto), Model Context Protocol (MCP), Redis, APIs de Jenkins y GitLab |
+| **Stack** | Python, LangGraph, Agentes ReAct, Qwen LLM (131k de contexto), Model Context Protocol (MCP), Redis, APIs del Dispatcher y GitLab |
 
 !!! abstract "Resumen de arquitectura"
 
@@ -22,7 +22,7 @@ description: >-
 ## 1. Planteamiento del Problema Operativo
 
 Cuando los pipelines o despliegues de infraestructura fallan a escala corporativa, el **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto. En un entorno bancario sujeto a normativas como **DORA**, la rápida detección y mitigación de incidencias TIC operativas es un requerimiento esencial:
-1. Rastrear logs de ejecución interminables en Jenkins o el dispatcher para aislar el error raíz.
+1. Rastrear extensas trazas de log de Orion en el Dispatcher para aislar el error raíz.
 2. Buscar manualmente en wikis y tickets históricos patrones de fallo conocidos.
 3. Inspeccionar diffs recientes en GitLab para correlacionar cambios de código o configuración.
 
@@ -36,7 +36,7 @@ Orion AI estructura el análisis de causa raíz como un flujo secuencial con buc
 
 ```mermaid
 flowchart LR
-    Fail["Fallo CI/CD<br/><b>(Jenkins · Dispatcher)</b>"] --> Sup["1. LangGraph<br/><b>(Supervisor con Estado)</b>"]
+    Fail["Fallo de Ejecución<br/><b>(Log de Orion en Dispatcher)</b>"] --> Sup["1. LangGraph<br/><b>(Supervisor con Estado)</b>"]
     Sup --> Evid["2. Evidencias<br/><b>(Logs · Redis · GitLab)</b>"]
     Evid --> ReAct["3. Bucle ReAct<br/><b>(Qwen 131k + MCP)</b>"]
     ReAct --> Guard["4. Guardarraíles<br/><b>(Pydantic Estricto)</b>"]
@@ -47,7 +47,7 @@ flowchart LR
 
 | Fase | Componente Responsable | Qué se ejecuta exactamente | Garantía de Ingeniería |
 | :--- | :--- | :--- | :--- |
-| **1. Ingesta de Fallo** | Webhook / API Listener | Recepción del evento de error desde Jenkins o el Dispatcher con el Job ID y código de salida inicial. | Inicio inmediato del triaje sin intervención humana. |
+| **1. Ingesta de Fallo** | Webhook / API Listener | Recepción del evento de error y log de Orion desde el Dispatcher con el Job ID y código de salida inicial. | Inicio inmediato del triaje sin intervención humana. |
 | **2. Recopilación Concurrente** | Nodos Paralelos de LangGraph | Recuperación en paralelo de trazas de log completas, manuales de soporte en caché Redis y últimos diffs de GitLab. | Consolidación de contexto en milisegundos sin bloqueos en serie. |
 | **3. Razonamiento Multimodal** | Bucle ReAct (Qwen 131k) | Procesamiento conjunto del contexto dentro de la ventana de 131k tokens para rastrear la causa raíz del fallo. | Capacidad para detectar dependencias rotas o cambios sutiles en Git. |
 | **4. Validación Determinista** | Guardarraíles Pydantic & Esquema | Verificación estricta de que cada afirmación del diagnóstico está respaldada por un log real o diff existente. | **Cero alucinaciones:** rechazo de hipótesis no verificables. |

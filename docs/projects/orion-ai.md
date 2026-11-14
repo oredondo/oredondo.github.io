@@ -11,7 +11,7 @@ description: >-
 | **Role** | Architect & Technical Lead |
 | **Organization / Stage** | BBVA · **Validated Proof of Concept (PoC)** |
 | **Outcome** | Validated prototype reducing incident log triage from hours to seconds; prepared and awaiting central AI infrastructure integration guidelines |
-| **Stack** | Python, LangGraph, ReAct Agents, Qwen LLM (131k context), Model Context Protocol (MCP), Redis, Jenkins & GitLab APIs |
+| **Stack** | Python, LangGraph, ReAct Agents, Qwen LLM (131k context), Model Context Protocol (MCP), Redis, Dispatcher & GitLab APIs |
 
 !!! abstract "Architectural summary"
 
@@ -22,7 +22,7 @@ description: >-
 ## 1. Operational Problem Statement
 
 When enterprise CI/CD pipelines or infrastructure deployments fail, **Mean Time to Resolution (MTTR)** is overwhelmingly dominated by manual context gathering. In a banking environment subject to frameworks like **DORA**, rapid ICT incident detection and triage is a critical regulatory priority:
-1. Sifting through endless Jenkins or dispatcher execution logs to locate the first genuine error trace.
+1. Sifting through extensive Orion execution logs in the Dispatcher to isolate the first genuine error trace.
 2. Searching internal wikis and historical incident tickets for known failure patterns.
 3. Inspecting recent GitLab repository diffs to correlate code or configuration changes.
 
@@ -36,7 +36,7 @@ Orion AI structures root-cause analysis as a sequential workflow with reflective
 
 ```mermaid
 flowchart LR
-    Fail["Failure Event<br/><b>(CI/CD Pipeline)</b>"] --> Sup["1. LangGraph<br/><b>(Stateful Supervisor)</b>"]
+    Fail["Execution Failure<br/><b>(Orion Log in Dispatcher)</b>"] --> Sup["1. LangGraph<br/><b>(Stateful Supervisor)</b>"]
     Sup --> Evid["2. Evidence<br/><b>(Logs · Redis · GitLab)</b>"]
     Evid --> ReAct["3. ReAct Loop<br/><b>(Qwen 131k + MCP)</b>"]
     ReAct --> Guard["4. Guardrails<br/><b>(Strict Pydantic)</b>"]
@@ -47,7 +47,7 @@ flowchart LR
 
 | Stage | Responsible Component | Exactly What Executes | Engineering Guarantee |
 | :--- | :--- | :--- | :--- |
-| **1. Failure Ingestion** | Webhook / API Listener | Ingests pipeline error event from Jenkins or the Dispatcher with the initial Job ID and exit code. | Instant diagnostic trigger without manual developer intervention. |
+| **1. Failure Ingestion** | Webhook / API Listener | Ingests the failure event and Orion log from the Dispatcher with the Job ID and initial exit code. | Instant diagnostic trigger without manual developer intervention. |
 | **2. Concurrent Gathering** | LangGraph Parallel Nodes | Fetches full execution logs, operational runbooks from Redis cache, and recent GitLab commit diffs in parallel. | Millisecond context aggregation without serial I/O bottlenecks. |
 | **3. Multimodal Reasoning** | ReAct Loop (Qwen 131k) | Evaluates consolidated evidence across the 131k token window to isolate the failure's root cause. | Detects broken dependencies, environment drift, or subtle Git changes. |
 | **4. Deterministic Check** | Pydantic Schema Guardrails | Verifies that every assertion in the diagnostic output maps directly to actual logs, runbooks, or diffs. | **Zero hallucination:** outright rejection of ungrounded hypotheses. |

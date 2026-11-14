@@ -61,7 +61,7 @@ En operaciones bancarias, sugerir un comando de remediación alucinado es peor q
 
 - **Esquemas estrictos de salida:** El agente no devuelve prosa libre; debe completar un contrato de diagnóstico tipado.
 - **Evidencia explícita:** Cada causa raíz señalada debe apoyarse en evidencia concreta recuperada durante la ejecución (fragmentos de log, entradas de documentación o diffs de commits).
-- **Fronteras de herramientas aisladas (MCP):** Los sistemas externos (Jenkins, caché de runbooks en Redis, GitLab) se consultan mediante herramientas tipadas de solo lectura en lugar de otorgar acceso arbitrario a consola.
+- **Fronteras de herramientas aisladas (MCP):** Los sistemas externos (Dispatcher de Orion, caché de runbooks en Redis, GitLab) se consultan mediante herramientas tipadas de solo lectura en lugar de otorgar acceso arbitrario a consola.
 
 ## 3. Por Qué una PoC Validada Espera a los Cimientos Corporativos
 
