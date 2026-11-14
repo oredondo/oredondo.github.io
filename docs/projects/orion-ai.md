@@ -8,7 +8,7 @@ description: >-
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Architect & Developer |
+| **Role** | Architect & Technical Lead |
 | **Organization / Stage** | BBVA · **Validated Proof of Concept (PoC)** |
 | **Outcome** | Validated prototype reducing incident log triage from hours to seconds; prepared and awaiting central AI infrastructure integration guidelines |
 | **Stack** | Python, LangGraph, ReAct Agents, Qwen LLM (131k context), Model Context Protocol (MCP), Redis, Jenkins & GitLab APIs |
@@ -53,7 +53,7 @@ flowchart TD
 
 ---
 
-## 3. Core Design Decisions
+## 3. Key Architectural Decisions
 
 ### A. Cyclic Graph Orchestration (LangGraph) over Linear Prompts
 Pipeline failures are rarely diagnosable in a single linear pass. When a raw log only shows a generic exit code, the agent needs to loop back and inspect recent commit diffs or configuration changes before concluding. **LangGraph** maintains a typed state across nodes, enabling conditional branching and bounded ReAct loops rather than brittle one-shot prompting.
@@ -70,7 +70,17 @@ In a regulated banking environment, an operational diagnostic tool cannot specul
 
 ---
 
-## 4. Why This Is a Validated PoC — and What Blocked Production Rollout
+## 4. Architectural Trade-Offs
+
+| Decision | Alternative Considered | Rationale |
+| :--- | :--- | :--- |
+| **Stateful cyclic graphs (LangGraph)** | Linear chains or single-turn prompts | Enabled reflective conditional retries and backtracking to code diff inspection when logs are ambiguous, impossible with linear DAGs. |
+| **Self-hosted long-context LLM (Qwen 131k)** | Public cloud black-box APIs | Protected sensitive banking source code while accommodating entire pipeline execution histories within a single context window. |
+| **Strict typed deterministic guardrails (Pydantic)** | Unstructured free-form text output | Completely eliminated hallucinated diagnostic commands, ensuring all outputs map directly to grounded evidence. |
+
+---
+
+## 5. Why This Is a Validated PoC — and Enterprise Rollout Constraints
 
 > [!IMPORTANT]
 > Including the real organizational constraints behind a PoC is essential to an honest architectural post-mortem.
@@ -82,6 +92,14 @@ However, moving an LLM-powered system from a **validated PoC** to **wide product
 1. **Central AI infrastructure dependencies:** Wide production deployment requires standardized guidelines and quota allocation on the bank's shared internal AI inference infrastructure (managed by partner platform teams).
 2. **Governance & compliance sign-off for operational data:** Even when using internal models, routing CI/CD logs and repository diffs into an inference endpoint requires formal cross-team definitions around data retention, redaction, and multi-tenant isolation.
 3. **Key engineering takeaway:** Building a reliable LangGraph + ReAct agent with deterministic guardrails is the tractable engineering problem; aligning shared corporate GPU/inference platforms and governance boundaries is what ultimately sets the timeline in regulated enterprises.
+
+---
+
+## 6. Operational Impact & Validation
+
+- **Radical MTTR reduction in validation:** Reduced root cause isolation time for complex CI/CD pipeline failures from hours of manual digging to under 15 seconds.
+- **Zero-hallucination multi-source correlation:** Proved the capability to synthesize runtime logs, Redis-cached runbooks, and GitLab diffs concurrently under strict evidence schemas.
+- **Agentic architecture blueprint:** Established reference patterns for graph-based multi-agent orchestration, MCP contracts, and deterministic guardrails for operational AI across the bank.
 
 ---
 

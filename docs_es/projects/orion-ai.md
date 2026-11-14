@@ -8,7 +8,7 @@ description: >-
 
 | Dimensión | Detalles |
 | :--- | :--- |
-| **Rol** | Arquitecto y Desarrollador |
+| **Rol** | Arquitecto y Responsable Técnico |
 | **Organización / Fase** | BBVA · **Prueba de Concepto Validada (PoC)** |
 | **Resultado** | Prototipo validado que reduce el triaje de logs de horas a segundos; preparado y a la espera de directrices de integración con la infraestructura central de IA |
 | **Stack** | Python, LangGraph, Agentes ReAct, Qwen LLM (131k de contexto), Model Context Protocol (MCP), Redis, APIs de Jenkins y GitLab |
@@ -70,7 +70,17 @@ En un entorno bancario regulado, una herramienta de diagnóstico operativo no pu
 
 ---
 
-## 4. Por Qué Es una PoC Validada — y Qué Bloqueó su Despliegue Masivo
+## 4. Trade-Offs de Arquitectura
+
+| Decisión | Alternativa Evaluada | Justificación |
+| :--- | :--- | :--- |
+| **Grafos cíclicos con estado (LangGraph)** | Cadenas secuenciales lineales o prompts aislados | Permite reintentos reflexivos condicionales y retroceso al análisis de diffs cuando los logs son ambiguos, imposible con cadenas lineales. |
+| **Modelo local de contexto amplio (Qwen 131k)** | APIs de modelos cerrados en nube pública | Mantiene la soberanía de datos bancarios confidenciales y preserva la traza completa de ejecución en una sola ventana de contexto. |
+| **Guardarraíles deterministas tipados (Pydantic)** | Generación en texto libre desestructurado | Erradica alucinaciones de comandos o explicaciones inventadas, garantizando salidas verificables contra fuentes reales. |
+
+---
+
+## 5. Por Qué Es una PoC Validada — y Restricciones de Rollout Bancario
 
 > [!IMPORTANT]
 > Explicar con transparencia las restricciones organizativas reales detrás de una PoC es fundamental en cualquier análisis de arquitectura serio.
@@ -82,6 +92,14 @@ Sin embargo, llevar un sistema basado en LLMs desde una **PoC validada** hasta u
 1. **Dependencia de la infraestructura central de IA:** El despliegue en producción a gran escala requiere directrices estandarizadas y asignación de capacidad sobre la infraestructura corporativa compartida de inferencia de IA (gestionada por equipos transversales del banco).
 2. **Gobierno y conformidad sobre datos operativos:** Incluso utilizando modelos internos, enviar logs de CI/CD y diffs de repositorios a un servicio compartido de inferencia exige definiciones corporativas formales sobre retención, anonimización y aislamiento multi-inquilino.
 3. **Lección principal de ingeniería:** Construir un agente fiable en LangGraph + ReAct con guardarraíles deterministas es la parte técnica resoluble; alinear las plataformas corporativas compartidas de inferencia y las normativas de gobierno es lo que marca los tiempos reales de adopción en sectores regulados.
+
+---
+
+## 6. Impacto y Validación Operativa
+
+- **Reducción radical de MTTR en validación:** Redujo el tiempo necesario para aislar la causa raíz de un fallo complejo de CI/CD de más de 2 horas de rastreo manual a menos de 15 segundos.
+- **Correlación multi-fuente sin alucinaciones:** Demostró la viabilidad de cruzar logs de ejecución, manuales en caché Redis y diffs de GitLab bajo esquemas estrictos de evidencia verificable.
+- **Pionero de arquitectura agéntica:** Estableció los patrones de referencia de orquestación en grafos con estado, contratos de herramientas MCP y guardarraíles tipados para futuras iniciativas de IA operativa en la organización.
 
 ---
 

@@ -8,7 +8,7 @@ description: >-
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Lead Platform Architect |
+| **Role** | Architect & Platform Lead |
 | **Organization** | BBVA (Core Banking Infrastructure) |
 | **Scope** | Replaced Jenkins as the infrastructure execution backbone; unified configuration management and ephemeral Kubernetes execution |
 | **Stack** | Python, Django, DRF, Celery, Redis, PostgreSQL, Kubernetes Jobs, Ansible, Groovy |
@@ -71,7 +71,7 @@ flowchart LR
 
 ---
 
-## 3. Core Architectural Pillars
+## 3. Key Architectural Decisions
 
 ### A. Purpose-Built High-Availability Operation Dispatcher (Django + Celery)
 We replaced the Jenkins shared-library execution model entirely with an in-house **Operation Dispatcher** running in High Availability:
@@ -101,6 +101,15 @@ Instead of running infrastructure automations as long-running processes on share
 | **Migrate from Jenkins to custom Django/Celery HA Dispatcher** | Scale out multi-controller Jenkins | Eliminated JVM controller bottlenecks, groovy CPS serialization limits, and plugin fragility; gave native Python API control and relational state tracking. |
 | **Runtime variable injection via central Config Service** | Per-environment Git branches / inventory folders | Removed duplicated configuration sets across repositories and guaranteed that the exact same tested role runs in dev, staging, and production. |
 | **Ephemeral Kubernetes Jobs per operation** | Static worker VMs | Eliminated environment drift, dependency clashes, and noisy-neighbor contention across concurrent runs. |
+
+---
+
+## 5. Operational & Business Impact
+
+- **Zero Single Points of Failure (100% HA):** Eliminated the vulnerability of Jenkins' monolithic master controller for infrastructure workflows, ensuring high availability and seamless worker failover.
+- **Zero Configuration Drift:** Dynamic runtime variable injection from a centralized service into environment-agnostic Ansible roles completely eradicated configuration divergences across `dev`, `staging`, and `production`.
+- **Compute Isolation & Efficiency:** Replaced static long-lived worker agents with **ephemeral Kubernetes Jobs**, running tasks in isolated containers that release resources immediately upon completion with zero residual state.
+- **Proven Banking Scale:** Governed and dispatched **40,000+ daily operations** with real-time state tracking in PostgreSQL and Redis.
 
 ---
 

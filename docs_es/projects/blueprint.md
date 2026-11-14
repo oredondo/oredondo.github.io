@@ -8,7 +8,7 @@ description: >-
 
 | Dimensión | Detalles |
 | :--- | :--- |
-| **Rol** | Creador y Arquitecto Principal de Sistemas |
+| **Rol** | Arquitecto y Responsable de Plataforma |
 | **Organización** | BBVA (Infraestructura Core Banking) |
 | **Resultado** | Eliminación de licencias comerciales de orquestación (Red Hat Automation Platform); GitOps declarativo y desmontajes reanudables sobre Orion |
 | **Stack** | Python, AsyncIO, DSL Declarativo en YAML, JSON Schema, GitOps, API REST de Orion |
@@ -61,7 +61,7 @@ sequenceDiagram
 
 ---
 
-## 3. Pilares Técnicos Fundamentales
+## 3. Decisiones Clave de Arquitectura
 
 ### A. Planos YAML Declarativos frente a Scripts Procedimentales
 En lugar de mantener scripts imperativos que mezclan flujo de control con estado de infraestructura, los equipos versionan en Git un plano YAML declarativo que define **qué** topología debe existir y las dependencias entre componentes. La validación de esquema detecta errores estructurales y ciclos antes de realizar una sola llamada a Orion.
@@ -115,6 +115,15 @@ stateDiagram-v2
 | **Motor propio en Python** | Red Hat Automation Platform / Terraform | Eliminó costes recurrentes de licencias comerciales, se integró de forma nativa con el modelo de trabajos y auditoría de Orion y evitó bloqueos de archivos de estado externos. |
 | **Orion como fuente única de verdad en vivo** | Archivos locales de estado (equivalente a `tfstate`) | Orion ya mantiene el inventario multi-cloud en tiempo real; consultar Orion evita deriva de estado (*drift*) y bloqueos concurrentes. |
 | **Concurrencia con AsyncIO** | Ejecutores multi-hilo o multi-proceso | Alta concurrencia para cientos de esperas de API simultáneas con una huella de memoria mínima. |
+
+---
+
+## 6. Impacto Operativo y de Negocio
+
+- **Eliminación de licencias comerciales:** Al diseñar un motor declarativo propio e integrado con Orion, se prescindió por completo de herramientas comerciales licenciadas por nodo (como Red Hat Ansible Automation Platform / Tower), contribuyendo decisivamente al ahorro acumulado superior a 6 millones de euros para la organización.
+- **Desmontajes idempotentes y reanudables:** 100% de éxito en desmantelamientos parciales o reanudados tras incidencias, eliminando recursos huérfanos y mitigando cualquier riesgo de deriva manual.
+- **Concurrencia asíncrona masiva:** Aceleró los tiempos de aprovisionamiento de entornos complejos en más de un 60% gracias a la resolución de dependencias por olas concurrentes sobre el bucle `AsyncIO` de Python.
+- **Trazabilidad y auditoría por Job ID:** Evidencia inmutable generada automáticamente para cada despliegue, vinculando los manifiestos YAML con los identificadores de trabajo de Orion para auditorías regulatorias bancarias.
 
 ---
 

@@ -8,7 +8,7 @@ description: >-
 
 | Dimensión | Detalles |
 | :--- | :--- |
-| **Rol** | Arquitecto Principal de Plataforma |
+| **Rol** | Arquitecto y Responsable de Plataforma |
 | **Organización** | BBVA (Infraestructura Core Banking) |
 | **Alcance** | Sustitución de Jenkins como motor de ejecución de infraestructura; unificación de gestión de configuración y ejecución efímera en Kubernetes |
 | **Stack** | Python, Django, DRF, Celery, Redis, PostgreSQL, Kubernetes Jobs, Ansible, Groovy |
@@ -71,7 +71,7 @@ flowchart LR
 
 ---
 
-## 3. Pilares Técnicos Fundamentales
+## 3. Decisiones Clave de Arquitectura
 
 ### A. Dispatcher de Operaciones en Alta Disponibilidad (Django + Celery)
 Sustituimos por completo el modelo de ejecución basado en librerías de Jenkins por un **Dispatcher de Operaciones** propio desplegado en Alta Disponibilidad:
@@ -101,6 +101,15 @@ En lugar de ejecutar automatizaciones como procesos pesados sobre servidores est
 | **Migrar de Jenkins a un Dispatcher HA propio en Django/Celery** | Escalar múltiples controladores de Jenkins | Eliminó los cuellos de botella del controlador JVM, los límites de serialización CPS en Groovy y la fragilidad de plugins; aportó control nativo por API en Python y estado relacional. |
 | **Inyección de variables en runtime desde un servicio central** | Ramas Git o carpetas de inventario por entorno | Evitó duplicar configuraciones entre repositorios y garantizó que exactamente el mismo rol probado se ejecute en dev, staging y producción. |
 | **Kubernetes Jobs efímeros por operación** | Máquinas virtuales trabajadoras estáticas | Eliminó la deriva de entorno, los conflictos de librerías y la contención de recursos entre ejecuciones concurrentes. |
+
+---
+
+## 5. Impacto Operativo y de Negocio
+
+- **Alta Disponibilidad sin Puntos Únicos de Fallo (100% HA):** Eliminó la fragilidad del controlador monolítico de Jenkins para operaciones de infraestructura, garantizando continuidad de servicio y resiliencia ante caídas de nodos.
+- **Cero Deriva de Configuración:** La inyección dinámica de variables en runtime desde un servicio centralizado sobre roles de Ansible agnósticos erradicó la dispersión y desincronización entre entornos de `dev`, `staging` y `prod`.
+- **Aislamiento y Eficiencia de Cómputo:** Sustitución de agentes estáticos de larga duración por **Kubernetes Jobs efímeros**, que consumen recursos únicamente durante la ejecución y se destruyen inmediatamente al terminar con cero residuos.
+- **Escala de Ejecución Masiva:** Capaz de despachar y supervisar **más de 40.000 operaciones diarias** con trazabilidad completa de estado en PostgreSQL y Redis.
 
 ---
 

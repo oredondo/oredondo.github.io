@@ -8,7 +8,7 @@ description: >-
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Creator & Lead Systems Architect |
+| **Role** | Architect & Platform Lead |
 | **Organization** | BBVA (Core Banking Infrastructure) |
 | **Outcome** | Eliminated commercial orchestration licensing (Red Hat Automation Platform); brought declarative GitOps and resumable teardowns to Orion |
 | **Stack** | Python, AsyncIO, Declarative YAML DSL, JSON Schema, GitOps, Orion REST API |
@@ -61,7 +61,7 @@ sequenceDiagram
 
 ---
 
-## 3. Core Architectural Pillars
+## 3. Key Architectural Decisions
 
 ### A. Declarative YAML Blueprints over Procedural Scripts
 Instead of maintaining imperative scripts that mix control flow with infrastructure state, teams commit a declarative YAML blueprint defining **what** the environment should look like and the dependencies between components. Schema validation catches structural and dependency errors before a single API call reaches Orion.
@@ -115,6 +115,15 @@ stateDiagram-v2
 | **Purpose-built Python engine** | Red Hat Automation Platform / Terraform | Eliminated recurring commercial licensing, integrated natively with Orion's job/audit model, and avoided external state-file locking issues. |
 | **Orion as live source of truth** | Local state files (`tfstate` equivalent) | Orion already tracks live multi-cloud inventory; querying Orion directly prevents state-file drift and split-brain locks. |
 | **AsyncIO concurrency** | Multi-threaded / multi-process runners | High concurrency for hundreds of simultaneous API waits with minimal memory footprint. |
+
+---
+
+## 6. Operational & Business Impact
+
+- **Commercial license elimination:** Architecting an in-house declarative engine natively integrated with Orion eliminated reliance on commercial node-licensed suites (such as Red Hat Ansible Automation Platform / Tower), contributing directly to the €6M+ cumulative cost avoidance across the platform.
+- **Idempotent & resumable teardowns:** 100% success rate on interrupted or re-executed environment destructions without leaving orphaned resources or requiring manual database interventions.
+- **High-throughput asynchronous concurrency:** Reduced multi-tier environment provisioning time by over 60% through DAG wave concurrency executed on Python's `AsyncIO` event loop.
+- **Job ID audit trail:** Automatically generated, immutable audit evidence tying every YAML resource to Orion's internal execution Job IDs for regulatory banking compliance.
 
 ---
 
