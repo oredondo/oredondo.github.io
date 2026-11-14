@@ -1,215 +1,87 @@
 ---
-title: "Case Study: Orion AI Auto-Diagnostic Engine"
+title: "Case Study: Orion AI — Agentic CI/CD Diagnostics (Validated PoC)"
 description: >-
-  A multi-agent LangGraph pipeline with ReAct loops and MCP tooling that automates
-  CI/CD root-cause triage under deterministic, citation-checked guardrails.
+  Architecture of a validated multi-agent LangGraph + ReAct diagnostic prototype for CI/CD root-cause analysis at BBVA — and the real-world enterprise constraints of rolling out operational AI in banking.
 ---
 
-# Orion AI: CI/CD Auto-Diagnostic Agentic Engine
+# Orion AI: Operational AI & Auto-Diagnostic Engine for CI/CD (Validated PoC)
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Architect & Lead AI Engineer |
-| **Organization / Scope** | BBVA Core Banking Infrastructure (Autonomous AI Ops) |
-| **Impact** | Initial triage from hours to under 15 seconds; manual log digging eliminated |
-| **Stack** | Python, LangGraph, ReAct, Qwen LLM (131k context), MCP, Redis vector search, GitLab & Jenkins APIs |
+| **Role** | Architect & Developer |
+| **Organization / Stage** | BBVA Technology · **Validated Proof of Concept (PoC)** |
+| **Outcome** | Validated prototype reducing incident log triage from hours to seconds; prepared and awaiting central AI infrastructure integration guidelines |
+| **Stack** | Python, LangGraph, ReAct Agents, Qwen LLM (131k context), Model Context Protocol (MCP), Redis, Jenkins & GitLab APIs |
 
-!!! abstract "TL;DR"
+!!! abstract "Architectural summary"
 
-    When a pipeline fails, Orion AI gathers evidence in parallel (logs, diffs, past
-    incidents), reasons over it with a long-context LLM, and only publishes a report
-    once **every claim is backed by a log line or a commit SHA**. If it can't prove it,
-    it doesn't say it.
+    Orion AI is a functional, validated **Proof of Concept (PoC)** built to evaluate parallel, multi-agent root-cause diagnostics across CI/CD and infrastructure pipelines. Using **LangGraph** state machines and **ReAct** reasoning loops, the system concurrently aggregates execution logs, Redis-cached support documentation, and GitLab commit diffs with high-context LLMs (`Qwen` 131k context) under strict deterministic guardrails — cutting manual triage from hours to seconds during validation.
 
-## 1. The engineering challenge
+---
 
-At enterprise scale, CI/CD pipelines fail every day for many reasons: transient
-infrastructure glitches, configuration drift, broken dependencies or bad commits.
+## 1. Operational Problem Statement
 
-- Engineers spent hours opening multi-megabyte Jenkins logs, hunting the first real
-  stack trace, checking GitLab diffs and searching runbooks.
-- **Mean Time to Resolution (MTTR)** was dominated by human triage, not by the fix.
+When CI/CD pipelines or infrastructure deployments fail at enterprise scale, the fix is rarely what consumes the most engineering time. Instead, **Mean Time to Resolution (MTTR)** is dominated by manual context gathering:
 
-## 2. Multi-agent architecture
+1. Opening massive Jenkins or dispatcher execution logs to locate the first true failure trace.
+2. Searching internal runbooks and historical incident tickets for known infrastructure errors.
+3. Inspecting recent GitLab repository commits and diffs to check whether a code or configuration change triggered the failure.
 
-Orion AI is a stateful, parallel agentic system built with **LangGraph** and
-**ReAct (Reason + Act)** loops.
+**Goal of the PoC:** Prove that an autonomous multi-agent workflow could gather those three sources of evidence concurrently and synthesize an accurate, zero-hallucination root-cause report within seconds of a pipeline failure.
+
+---
+
+## 2. Abstract Multi-Agent Topology
 
 ```mermaid
 flowchart TD
-    Trigger["CI/CD failure<br/>(Jenkins webhook)"] --> Supervisor["Supervisor<br/>(LangGraph state machine)"]
+    Trigger["CI/CD or Infrastructure Failure Event"] --> Orchestrator["LangGraph Stateful Supervisor"]
 
-    subgraph Gather["Concurrent evidence collection"]
-        Supervisor --> Logs["Log agent<br/>traces & timestamps"]
-        Supervisor --> Git["GitLab diff agent<br/>commits & changed files"]
-        Supervisor --> Docs["Runbook agent<br/>vector search over past incidents"]
+    subgraph ParallelEvidence["Concurrent Context Gathering"]
+        Orchestrator --> LogNode["Execution Log Parser<br/>(Jenkins / Dispatcher traces)"]
+        Orchestrator --> DocNode["Knowledge Base Retriever<br/>(Redis-cached support docs & runbooks)"]
+        Orchestrator --> GitNode["Repository Inspector<br/>(GitLab commit history & diffs)"]
     end
 
-    Logs --> Synth["Context synthesizer"]
-    Git --> Synth
-    Docs --> Synth
+    LogNode & DocNode & GitNode --> ReAct["ReAct Reasoning Loop<br/>(Qwen 131k Context LLM + MCP Tools)"]
 
-    subgraph Reason["ReAct inference & guardrails"]
-        Synth --> LLM["Long-context LLM (Qwen 131k)<br/>structured output"]
-        LLM <--> MCP["MCP tool bridge"]
-        LLM --> Check{"Citation & schema<br/>verification"}
-    end
-
-    Check -- "unverified claim" --> Supervisor
-    Check -- "verified" --> Report["Root-cause report<br/>(GitLab MR comment / Slack / Jira)"]
+    ReAct --> Guardrails{"Deterministic Guardrails<br/>(Schema & Evidence Check)"}
+    Guardrails -- "Ambiguous trace → inspect deeper diff" --> GitNode
+    Guardrails -- "Validated output" --> Report["Structured Root-Cause Diagnosis"]
 ```
 
-## 3. Key design decisions
+---
 
-### A. Cyclic, adaptive graph orchestration (LangGraph + ReAct)
+## 3. Core Design Decisions
 
-Linear chains (DAGs without loops) are inherently brittle for incident diagnostics: if early log analysis produces ambiguous signals, a linear pipeline is forced to guess or fail. 
+### A. Cyclic Graph Orchestration (LangGraph) over Linear Prompts
+Pipeline failures are rarely diagnosable in a single linear pass. When a raw log only shows a generic exit code, the agent needs to loop back and inspect recent commit diffs or configuration changes before concluding. **LangGraph** maintains a typed state across nodes, enabling conditional branching and bounded ReAct loops rather than brittle one-shot prompting.
 
-Orion AI uses **LangGraph** to model diagnostic investigation as a stateful, cyclic state machine with an autonomous Supervisor:
+### B. Concurrent Evidence Aggregation with Long-Context Reasoning
+Rather than querying tools sequentially, the graph fetches execution traces, Redis-cached operational documentation, and repository metadata in parallel, feeding the consolidated evidence into a **131k-context LLM (Qwen)** so long dependency chains in build logs are preserved without losing early setup errors.
 
-1. **Initial signal extraction:** The `log_extractor` node isolates stack traces, exit codes, and timestamps.
-2. **Ambiguity detection & adaptive loop-back:** If a failure lacks explicit stack traces (e.g., an opaque container exit code 137 OOM or silent dependency resolution failure), the supervisor evaluates the state and dynamically branches to `git_diff_inspector` to examine recent commits, dependency manifests (`pyproject.toml`, `requirements.txt`), and Dockerfile changes.
-3. **Causal re-evaluation:** Armed with git commit diffs, the graph cycles back into the ReAct reasoning agent with enriched context, enabling the LLM to correlate an obscure error with an exact upstream commit or dependency bump before proposing root cause.
+### C. Strict Deterministic Guardrails
+In a regulated banking environment, an operational diagnostic tool cannot speculate or invent commands:
 
-### B. Model Context Protocol (MCP) for tools
+- **Typed output contracts:** Agent responses are constrained to strict schemas rather than free-form chat.
+- **Grounded evidence:** Every diagnostic finding must correlate directly with retrieved log fragments, known runbook entries, or actual commit diffs.
+- **Standardized tool boundaries (MCP):** External integrations (logs, Redis cache, GitLab APIs) are isolated behind clean tool interfaces so the reasoning layer cannot execute arbitrary side effects.
 
-LLM reasoning is decoupled from integrations through **MCP**: Jenkins artifacts, Redis
-and GitLab endpoints are exposed as uniformly typed tools, so integrations can evolve
-independently of prompts and models.
+---
 
-### C. Deterministic guardrails
+## 4. Why This Is a Validated PoC — and What Blocked Production Rollout
 
-In banking operations an agent must never guess. The model is constrained to a strict
-output schema, and a deterministic verifier checks that **every claim cites a real log
-line or an existing commit SHA** before anything is published.
+> [!IMPORTANT]
+> Including the real organizational constraints behind a PoC is essential to an honest architectural post-mortem.
 
-### Trade-offs
+The technical prototype was fully built, tested against real failure scenarios, and validated — demonstrating that automated multi-agent triage reduces diagnostic time from hours of manual log digging to seconds.
 
-| Decision | Alternative considered | Why this choice |
-| :--- | :--- | :--- |
-| LangGraph state machine | Single prompt / linear chain | Needs branching, loops and verifiable intermediate state |
-| Deterministic verifier after the LLM | Trusting model self-critique | Verification must be reproducible and auditable, not probabilistic |
-| Long-context model (131k) | Aggressive log chunking only | Failures often span distant parts of a log; context preserves causality |
+However, moving an LLM-powered system from a **validated PoC** to **wide production rollout** inside a tier-1 bank depends on platform boundaries outside a single team:
 
-## 4. Python implementation highlights
+1. **Central AI infrastructure dependencies:** Wide production deployment requires standardized guidelines and quota allocation on the bank's shared internal AI inference infrastructure (managed by partner platform teams).
+2. **Governance & compliance sign-off for operational data:** Even when using internal models, routing CI/CD logs and repository diffs into an inference endpoint requires formal cross-team definitions around data retention, redaction, and multi-tenant isolation.
+3. **Key engineering takeaway:** Building a reliable LangGraph + ReAct agent with deterministic guardrails is the tractable engineering problem; aligning shared corporate GPU/inference platforms and governance boundaries is what ultimately sets the timeline in regulated enterprises.
 
-### Cyclic supervisor state machine with adaptive routing
+---
 
-Illustrative implementation of the LangGraph state machine featuring cyclical re-routing between log triage and git diff inspection:
-
-```python title="graph.py (illustrative)"
-from typing import Annotated, Literal
-from operator import add
-from typing_extensions import TypedDict
-from langgraph.graph import END, StateGraph
-from pydantic import BaseModel, Field
-
-
-class Finding(BaseModel):
-    claim: str
-    evidence_log_line: int | None = None
-    evidence_commit: str | None = Field(default=None, pattern=r"^[0-9a-f]{7,40}$")
-
-
-class Diagnosis(BaseModel):
-    category: Literal["infrastructure", "dependency", "code", "configuration"]
-    findings: list[Finding]
-    root_cause: str
-    confidence_score: float = Field(ge=0.0, le=1.0)
-
-
-class TriageState(TypedDict):
-    job_id: str
-    raw_logs: list[str]
-    diff_patches: Annotated[list[str], add]  # Appends evidence across cycles
-    diagnosis: Diagnosis | None
-    investigation_depth: int
-    is_ambiguous: bool
-
-
-def supervisor_router(
-    state: TriageState,
-) -> Literal["inspect_git_diff", "reason_with_llm", "escalate"]:
-    """Evaluate current evidence ambiguity and route cyclically or proceed."""
-    if state["investigation_depth"] > 3:
-        return "escalate"  # Circuit breaker against infinite investigation loops
-
-    if state["is_ambiguous"] and not state["diff_patches"]:
-        return "inspect_git_diff"  # Loop back: fetch code/manifest diffs for context
-
-    return "reason_with_llm"
-
-
-def verify_guardrails(state: TriageState) -> Literal["publish", "retry_deeper", "escalate"]:
-    """Deterministic gate: every claim must cite genuine log lines or verified commit SHAs."""
-    diagnosis = state.get("diagnosis")
-    if not diagnosis or diagnosis.confidence_score < 0.85:
-        return "retry_deeper" if state["investigation_depth"] < 3 else "escalate"
-
-    for finding in diagnosis.findings:
-        valid_line = (
-            finding.evidence_log_line is not None
-            and 0 <= finding.evidence_log_line < len(state["raw_logs"])
-        )
-        valid_commit = bool(finding.evidence_commit and finding.evidence_commit in state.get("diff_patches", ""))
-        if not (valid_line or valid_commit):
-            return "escalate"
-
-    return "publish"
-
-
-# Build the stateful cyclic graph
-graph = StateGraph(TriageState)
-
-graph.add_node("parse_logs", parse_logs_node)
-graph.add_node("inspect_git_diff", fetch_gitlab_diff_node)
-graph.add_node("reason_with_llm", llm_react_reasoning_node)
-graph.add_node("publish", publish_to_mr_and_slack_node)
-graph.add_node("escalate", notify_oncall_engineer_node)
-
-graph.set_entry_point("parse_logs")
-
-# Conditional cyclic branching from supervisor
-graph.add_conditional_edges(
-    "parse_logs",
-    supervisor_router,
-    {
-        "inspect_git_diff": "inspect_git_diff",
-        "reason_with_llm": "reason_with_llm",
-        "escalate": "escalate",
-    },
-)
-
-# After fetching diffs, cycle back into reasoning
-graph.add_edge("inspect_git_diff", "reason_with_llm")
-
-# Post-reasoning verification gate
-graph.add_conditional_edges(
-    "reason_with_llm",
-    verify_guardrails,
-    {
-        "publish": "publish",
-        "retry_deeper": "inspect_git_diff",  # Adaptive feedback loop
-        "escalate": "escalate",
-    },
-)
-
-graph.add_edge("publish", END)
-graph.add_edge("escalate", END)
-
-app = graph.compile()
-```
-
-## 5. Outcomes
-
-<div class="kpi-grid">
-  <div class="kpi-card"><span class="kpi-value">&lt; 15 s</span><span class="kpi-label">Time to diagnosis</span></div>
-  <div class="kpi-card"><span class="kpi-value">94%+</span><span class="kpi-label">Accuracy in validation</span></div>
-  <div class="kpi-card"><span class="kpi-value">~45 min</span><span class="kpi-label">Manual triage replaced</span></div>
-</div>
-
-- :zap: **Immediate triage** — a diagnosis is ready in under 15 seconds after the pipeline ends.
-- :mag: **Precise insights** — distinguishes subtle causes (e.g. DNS timeout pulling from a registry vs. a genuine test failure) with 94%+ accuracy during validation.
-- :building_construction: **Production-ready design** — validated PoC architected to plug into shared enterprise AI inference clusters.
-
-[:octicons-arrow-right-24: Related post: Automating CI/CD root-cause triage with LangGraph](../blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)
+[:octicons-arrow-left-24: Previous: Leaving Jenkins — HA Dispatcher](dispatcher-migration.md) · [:octicons-arrow-right-24: Next: OmniLecture Studio (Open Source)](omni-lecture.md)

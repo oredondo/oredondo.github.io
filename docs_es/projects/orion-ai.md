@@ -1,213 +1,87 @@
 ---
-title: "Caso de Estudio: Motor de Autodiagnóstico Orion AI"
+title: "Caso de Estudio: Orion AI — Diagnóstico Agéntico CI/CD (PoC Validada)"
 description: >-
-  Una canalización multi-agente con LangGraph, bucles ReAct e integración MCP que automatiza
-  el triaje de fallos en CI/CD bajo guardarraíles deterministas basados en evidencias.
+  Arquitectura de un prototipo multi-agente validado en LangGraph + ReAct para análisis de causa raíz en CI/CD en BBVA — y las restricciones reales de llevar IA operativa a producción en banca.
 ---
 
-# Orion AI: Motor de Autodiagnóstico Agéntico para CI/CD
+# Orion AI: IA Operativa y Motor de Auto-Diagnóstico para CI/CD (PoC Validada)
 
 | Dimensión | Detalles |
 | :--- | :--- |
-| **Rol** | Arquitecto e Ingeniero Líder de IA |
-| **Organización / Alcance** | Infraestructura Core Banking de BBVA (AI Ops autónomo) |
-| **Impacto** | Reducción del triaje inicial de horas a menos de 15 segundos; eliminación de inspección manual de logs |
-| **Stack** | Python, LangGraph, ReAct, Qwen LLM (131k contexto), MCP, búsqueda vectorial en Redis, APIs de GitLab y Jenkins |
+| **Rol** | Arquitecto y Desarrollador |
+| **Organización / Fase** | BBVA Technology · **Prueba de Concepto Validada (PoC)** |
+| **Resultado** | Prototipo validado que reduce el triaje de logs de horas a segundos; preparado y a la espera de directrices de integración con la infraestructura central de IA |
+| **Stack** | Python, LangGraph, Agentes ReAct, Qwen LLM (131k de contexto), Model Context Protocol (MCP), Redis, APIs de Jenkins y GitLab |
 
-!!! abstract "Resumen ejecutivo (TL;DR)"
+!!! abstract "Resumen de arquitectura"
 
-    Cuando una tubería de CI/CD falla, Orion AI recopila evidencias en paralelo (logs, diferencias de código,
-    incidentes previos), razona sobre ellas mediante un LLM de contexto extendido y únicamente publica un diagnóstico
-    cuando **cada conclusión está respaldada por una línea de log o un commit SHA verificado**. Si no se puede probar, no se emite.
+    Orion AI es una **Prueba de Concepto (PoC) funcional y validada** diseñada para evaluar un pipeline multi-agente paralelo de análisis de causa raíz sobre fallos en CI/CD e infraestructura. Mediante máquinas de estado en **LangGraph** y bucles de razonamiento **ReAct**, el sistema agrega concurrentemente logs de ejecución, documentación de soporte cacheada en Redis y diffs de commits en GitLab utilizando modelos de contexto amplio (`Qwen` 131k) bajo guardarraíles deterministas estrictos — reduciendo el triaje manual de horas a segundos durante las pruebas de validación.
 
-## 1. El desafío de ingeniería
+---
 
-A escala corporativa, las canalizaciones de CI/CD fallan a diario por múltiples factores: problemas
-transitorios de infraestructura, desvío de configuraciones (*drift*), dependencias rotas o errores de código.
+## 1. Planteamiento del Problema Operativo
 
-- Los ingenieros invertían horas revisando logs gigantescos en Jenkins, localizando la traza real del fallo,
-  comparando diffs en GitLab y consultando runbooks dispersos.
-- El **tiempo medio de resolución (MTTR)** estaba dominado por el triaje manual humano, no por la aplicación de la solución.
+Cuando los pipelines de CI/CD o los despliegues de infraestructura fallan a escala corporativa, la corrección en sí rara vez es lo que consume más tiempo de ingeniería. El **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto:
 
-## 2. Arquitectura multi-agente
+1. Abrir logs masivos de ejecución en Jenkins o en el dispatcher para localizar la primera traza real del error.
+2. Buscar en la documentación interna de soporte e incidencias previas errores conocidos de infraestructura.
+3. Inspeccionar los commits y diffs recientes en GitLab para comprobar si un cambio de código o configuración provocó el fallo.
 
-Orion AI fue diseñado como un sistema agéntico concurrente y con memoria de estado basado en grafos **LangGraph**
-y bucles **ReAct (Reason + Act)**.
+**Objetivo de la PoC:** Demostrar que un flujo multi-agente autónomo podía reunir esas tres fuentes de evidencia en paralelo y sintetizar un diagnóstico preciso y sin alucinaciones en cuestión de segundos tras un fallo.
+
+---
+
+## 2. Topología Abstracta Multi-Agente
 
 ```mermaid
 flowchart TD
-    Trigger["Fallo en CI/CD<br/>(Webhook Jenkins)"] --> Supervisor["Supervisor agéntico<br/>(Máquina de estados LangGraph)"]
+    Trigger["Evento de Fallo en CI/CD o Infraestructura"] --> Orchestrator["Supervisor con Estado en LangGraph"]
 
-    subgraph Gather["Recopilación concurrente de evidencias"]
-        Supervisor --> Logs["Agente de Logs<br/>trazas y marcas temporales"]
-        Supervisor --> Git["Agente de GitLab<br/>commits y archivos modificados"]
-        Supervisor --> Docs["Agente de Runbooks<br/>búsqueda vectorial en incidentes previos"]
+    subgraph ParallelEvidence["Recopilación Concurrente de Contexto"]
+        Orchestrator --> LogNode["Analizador de Logs de Ejecución<br/>(Trazas de Jenkins / Dispatcher)"]
+        Orchestrator --> DocNode["Recuperador de Base de Conocimiento<br/>(Documentación y runbooks en caché Redis)"]
+        Orchestrator --> GitNode["Inspector de Repositorio<br/>(Historial de commits y diffs en GitLab)"]
     end
 
-    Logs --> Synth["Sintetizador de contexto"]
-    Git --> Synth
-    Docs --> Synth
+    LogNode & DocNode & GitNode --> ReAct["Bucle de Razonamiento ReAct<br/>(Qwen 131k Context LLM + Herramientas MCP)"]
 
-    subgraph Reason["Inferencia ReAct y guardarraíles"]
-        Synth --> LLM["LLM de contexto amplio (Qwen 131k)<br/>salida estructurada"]
-        LLM <--> MCP["Puente de herramientas MCP"]
-        LLM --> Check{"Verificación determinista<br/>de citas y esquema"}
-    end
-
-    Check -- "afirmación sin evidencia" --> Supervisor
-    Check -- "verificado" --> Report["Informe de causa raíz<br/>(Comentario GitLab MR / Slack / Jira)"]
+    ReAct --> Guardrails{"Guardarraíles Deterministas<br/>(Validación de Esquema y Evidencia)"}
+    Guardrails -- "Traza ambigua → inspeccionar diff en detalle" --> GitNode
+    Guardrails -- "Salida validada" --> Report["Diagnóstico Estructurado de Causa Raíz"]
 ```
 
-## 3. Decisiones de diseño clave
+---
 
-### A. Orquestación cíclica y adaptativa (LangGraph + ReAct)
+## 3. Decisiones Clave de Diseño
 
-Las cadenas lineales (DAGs estrictamente acíclicos) son frágiles ante el diagnóstico de incidentes: si el análisis inicial de trazas arroja señales ambiguas, un pipeline secuencial se ve forzado a especular o abortar.
+### A. Orquestación Cíclica en Grafo (LangGraph) frente a Prompts Lineales
+Los fallos en pipelines rara vez pueden diagnosticarse en una única pasada secuencial. Cuando un log solo muestra un código de salida genérico, el agente necesita retroceder e inspeccionar los diffs recientes del repositorio o cambios de configuración antes de emitir una conclusión. **LangGraph** mantiene un estado tipado entre nodos, permitiendo bifurcaciones condicionales y bucles ReAct acotados en lugar de prompts frágiles de un solo paso.
 
-Orion AI recurre a **LangGraph** para modelar la investigación de incidentes como una máquina de estados cíclica gobernada por un agente Supervisor:
+### B. Agregación Concurrente de Evidencias con Contexto Amplio
+En lugar de consultar fuentes secuencialmente, el grafo recupera en paralelo las trazas de ejecución, la documentación operativa en Redis y los metadatos de GitLab, inyectando el contexto consolidado en un **LLM de 131k tokens de contexto (Qwen)** para preservar la causalidad desde la inicialización del entorno hasta el error final.
 
-1. **Extracción inicial de señales:** El nodo `parse_logs` aísla trazas de excepción, códigos de salida y marcas de tiempo.
-2. **Detección de ambigüedad y bucle adaptativo:** Si un fallo carece de trazas explícitas (p. ej., un código 137 OOM opaco en un contenedor o un error silencioso en resolución de dependencias), el supervisor evalúa el estado y bifurca dinámicamente hacia `inspect_git_diff` para auditar los últimos commits, manifiestos de dependencias (`pyproject.toml`, `requirements.txt`) y modificaciones en Dockerfiles.
-3. **Re-evaluación causal:** Con los diffs de git integrados en el estado, el grafo retrocede al agente de razonamiento ReAct con contexto enriquecido, permitiendo al LLM correlacionar un error críptico con un cambio de código específico antes de emitir la causa raíz.
+### C. Guardarraíles Deterministas Estrictos
+En un entorno bancario regulado, una herramienta de diagnóstico operativo no puede especular ni inventar comandos:
 
-### B. Adopción de Model Context Protocol (MCP)
+- **Contratos de salida tipados:** Las respuestas se restringen a esquemas estructurados en lugar de texto libre.
+- **Evidencia fundamentada:** Cada hallazgo debe correlacionarse directamente con fragmentos reales del log, entradas existentes en la base de conocimiento o diffs de commits verificados.
+- **Fronteras de herramientas estandarizadas (MCP):** Las integraciones externas (logs, caché Redis, APIs de GitLab) se exponen tras contratos de herramientas limpios para que el modelo no ejecute acciones arbitrarias.
 
-El razonamiento del modelo se desacopló de las integraciones externas mediante **MCP**: los artefactos de Jenkins,
-la base de datos Redis y los endpoints de GitLab se exponen como herramientas formalmente tipadas, permitiendo que
-los servicios evolucionen sin alterar los prompts ni la lógica de los agentes.
+---
 
-### C. Guardarraíles deterministas de tolerancia cero a alucinaciones
+## 4. Por Qué Es una PoC Validada — y Qué Bloqueó su Despliegue Masivo
 
-En operaciones bancarias un agente jamás puede especular. El modelo está restringido a un esquema estricto de salida,
-y un validador algorítmico comprueba que **cada afirmación del diagnóstico cite una línea real del log o un SHA de commit existente** antes de publicar el informe.
+> [!IMPORTANT]
+> Explicar con transparencia las restricciones organizativas reales detrás de una PoC es fundamental en cualquier análisis de arquitectura serio.
 
-### Análisis de trade-offs
+El prototipo técnico fue construido íntegramente, probado sobre escenarios reales de fallo y validado — demostrando que el triaje multi-agente reduce el tiempo de diagnóstico de horas de búsqueda manual a segundos.
 
-| Decisión | Alternativa evaluada | Justificación técnica |
-| :--- | :--- | :--- |
-| Máquina de estados con LangGraph | Prompt único o cadena lineal | Permite bifurcaciones condicionales, ciclos de corrección y verificación de estados intermedios |
-| Validador determinista post-LLM | Confiar en la auto-crítica del modelo | La verificación debe ser reproducible, estricta y matemática, no probabilística |
-| Modelo de contexto largo (131k) | Fragmentación agresiva de logs (*chunking*) | Los fallos suelen estar relacionados con eventos iniciales de inicialización; el contexto amplio preserva la causalidad |
+Sin embargo, llevar un sistema basado en LLMs desde una **PoC validada** hasta un **despliegue generalizado en producción** dentro de un gran banco depende de fronteras de plataforma que exceden a un único equipo:
 
-## 4. Aspectos destacados de la implementación en Python
+1. **Dependencia de la infraestructura central de IA:** El despliegue en producción a gran escala requiere directrices estandarizadas y asignación de capacidad sobre la infraestructura corporativa compartida de inferencia de IA (gestionada por equipos transversales del banco).
+2. **Gobierno y conformidad sobre datos operativos:** Incluso utilizando modelos internos, enviar logs de CI/CD y diffs de repositorios a un servicio compartido de inferencia exige definiciones corporativas formales sobre retención, anonimización y aislamiento multi-inquilino.
+3. **Lección principal de ingeniería:** Construir un agente fiable en LangGraph + ReAct con guardarraíles deterministas es la parte técnica resoluble; alinear las plataformas corporativas compartidas de inferencia y las normativas de gobierno es lo que marca los tiempos reales de adopción en sectores regulados.
 
-### Máquina de estados cíclica con enrutamiento adaptativo
+---
 
-Implementación ilustrativa de la máquina de estados en LangGraph con re-enrutamiento cíclico entre triaje de logs e inspección de diferencias de git:
-
-```python title="graph.py (ilustrativo)"
-from typing import Annotated, Literal
-from operator import add
-from typing_extensions import TypedDict
-from langgraph.graph import END, StateGraph
-from pydantic import BaseModel, Field
-
-
-class Finding(BaseModel):
-    claim: str
-    evidence_log_line: int | None = None
-    evidence_commit: str | None = Field(default=None, pattern=r"^[0-9a-f]{7,40}$")
-
-
-class Diagnosis(BaseModel):
-    category: Literal["infrastructure", "dependency", "code", "configuration"]
-    findings: list[Finding]
-    root_cause: str
-    confidence_score: float = Field(ge=0.0, le=1.0)
-
-
-class TriageState(TypedDict):
-    job_id: str
-    raw_logs: list[str]
-    diff_patches: Annotated[list[str], add]  # Concatena evidencias a lo largo de los ciclos
-    diagnosis: Diagnosis | None
-    investigation_depth: int
-    is_ambiguous: bool
-
-
-def supervisor_router(
-    state: TriageState,
-) -> Literal["inspect_git_diff", "reason_with_llm", "escalate"]:
-    """Evalúa la ambigüedad de la evidencia y enruta cíclicamente o prosigue."""
-    if state["investigation_depth"] > 3:
-        return "escalate"  # Disyuntor (circuit breaker) contra bucles infinitos de investigación
-
-    if state["is_ambiguous"] and not state["diff_patches"]:
-        return "inspect_git_diff"  # Bucle de retroalimentación: recupera diffs de código y manifiestos
-
-    return "reason_with_llm"
-
-
-def verify_guardrails(state: TriageState) -> Literal["publish", "retry_deeper", "escalate"]:
-    """Puerta determinista: cada afirmación debe citar líneas de log reales o commits SHAs válidos."""
-    diagnosis = state.get("diagnosis")
-    if not diagnosis or diagnosis.confidence_score < 0.85:
-        return "retry_deeper" if state["investigation_depth"] < 3 else "escalate"
-
-    for finding in diagnosis.findings:
-        valid_line = (
-            finding.evidence_log_line is not None
-            and 0 <= finding.evidence_log_line < len(state["raw_logs"])
-        )
-        valid_commit = bool(finding.evidence_commit and finding.evidence_commit in state.get("diff_patches", ""))
-        if not (valid_line or valid_commit):
-            return "escalate"
-
-    return "publish"
-
-
-# Construcción del grafo cíclico con estado
-graph = StateGraph(TriageState)
-
-graph.add_node("parse_logs", parse_logs_node)
-graph.add_node("inspect_git_diff", fetch_gitlab_diff_node)
-graph.add_node("reason_with_llm", llm_react_reasoning_node)
-graph.add_node("publish", publish_to_mr_and_slack_node)
-graph.add_node("escalate", notify_oncall_engineer_node)
-
-graph.set_entry_point("parse_logs")
-
-# Bifurcación condicional cíclica del supervisor
-graph.add_conditional_edges(
-    "parse_logs",
-    supervisor_router,
-    {
-        "inspect_git_diff": "inspect_git_diff",
-        "reason_with_llm": "reason_with_llm",
-        "escalate": "escalate",
-    },
-)
-
-# Tras obtener los diffs, vuelve a ciclar hacia el razonamiento
-graph.add_edge("inspect_git_diff", "reason_with_llm")
-
-# Puerta de verificación determinista posterior al LLM
-graph.add_conditional_edges(
-    "reason_with_llm",
-    verify_guardrails,
-    {
-        "publish": "publish",
-        "retry_deeper": "inspect_git_diff",  # Bucle de realimentación adaptativo
-        "escalate": "escalate",
-    },
-)
-
-graph.add_edge("publish", END)
-graph.add_edge("escalate", END)
-
-app = graph.compile()
-```
-
-## 5. Resultados
-
-<div class="kpi-grid">
-  <div class="kpi-card"><span class="kpi-value">&lt; 15 s</span><span class="kpi-label">Tiempo de diagnóstico</span></div>
-  <div class="kpi-card"><span class="kpi-value">94%+</span><span class="kpi-label">Precisión en validación</span></div>
-  <div class="kpi-card"><span class="kpi-value">~45 min</span><span class="kpi-label">Triaje manual sustituido</span></div>
-</div>
-
-- :zap: **Diagnóstico inmediato:** el análisis se completa en menos de 15 segundos tras finalizar la tubería fallida.
-- :mag: **Precisión diagnóstica:** identificó causas sutiles (ej: timeout de DNS al descargar de un registro de contenedores frente a fallo de tests unitarios) con más del 94% de acierto.
-- :building_construction: **Arquitectura para producción:** PoC validada diseñada para conectarse a clusters de inferencia corporativos.
-
-[:octicons-arrow-right-24: Artículo relacionado: Automatización del triaje de CI/CD con LangGraph](../blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)
+[:octicons-arrow-left-24: Anterior: Dejar Jenkins Atrás — Dispatcher HA](dispatcher-migration.md) · [:octicons-arrow-right-24: Siguiente: OmniLecture Studio (Open Source)](omni-lecture.md)

@@ -1,7 +1,7 @@
 site_name: Oscar Redondo
 site_description: >-
-  Senior Python & Platform Engineer — plataformas internas de desarrollo,
-  automatización declarativa de infraestructura e IA agéntica para operaciones.
+  Senior Platform Engineer · Python — plataformas internas de desarrollo, motores de
+  automatización distribuida, infraestructura agnóstica de nube e IA operativa.
 site_author: Oscar Redondo
 site_url: https://oredondo.github.io/es/
 
@@ -133,11 +133,13 @@ extra:
 nav:
   - Inicio: index.md
   - Proyectos:
-      - projects/index.md
+      - "Ecosistema de Plataforma": projects/index.md
       - "Orion — Plataforma IaaS": projects/orion-iaas.md
-      - "Blueprint — Orquestador Declarativo": projects/blueprint.md
-      - "Orion AI — Diagnóstico CI/CD": projects/orion-ai.md
-      - "OmniLecture — Suite IA Multimodal": projects/omni-lecture.md
+      - "Blueprint — Motor Declarativo": projects/blueprint.md
+      - "Dispatcher HA y Ejecución K8s": projects/dispatcher-migration.md
+      - "Orion AI — Diagnóstico CI/CD (PoC)": projects/orion-ai.md
+      - "OmniLecture Studio (Open Source)": projects/omni-lecture.md
+      - "WrenchBuddy (Open Source)": projects/wrenchbuddy.md
   - CV: cv/index.md
   - Blog:
       - blog/index.md

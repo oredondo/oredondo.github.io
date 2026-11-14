@@ -1,59 +1,84 @@
 ---
 draft: false
 description: >-
-  How LangGraph state machines, ReAct loops, MCP tooling and citation-checked outputs cut CI/CD triage from ~45 minutes to under 15 seconds.
+  Why cyclic LangGraph + ReAct loops and deterministic guardrails solved automated CI/CD root-cause triage in our Orion AI PoC — and why enterprise AI governance and shared inference infrastructure are the real bottlenecks to production rollout.
 slug: langgraph-cicd-root-cause-triage
 date: 2026-03-10
 authors:
   - oredondo
 categories:
   - Applied AI
-  - DevOps
+  - Platform Engineering
+  - Architecture
 tags:
   - LangGraph
   - ReAct
-  - AI Agents
+  - MCP
   - CI/CD
-  - MTTR
+  - EnterpriseAI
 ---
 
-# Automating CI/CD Root-Cause Triage with LangGraph & ReAct Agents
+# The PoC Was the Easy Part: Lessons from Building an Agentic CI/CD Diagnostic Engine in Banking
 
-When a CI/CD build breaks, the slowest part of the recovery loop is rarely the fix itself — it is the time an engineer spends opening multi-megabyte log files, searching for the first failure trace, cross-referencing commit diffs, and checking documentation.
+Most engineering posts about AI agents end at the moment the prototype works on a benchmark dataset. In a regulated enterprise, that is actually where the hardest part begins.
 
-Here is how we designed **Orion AI** using **LangGraph state machines** and **ReAct loops** to cut Mean Time to Resolution (MTTR) from hours to seconds.
+When we designed and validated the **Orion AI** Proof of Concept (PoC) at BBVA — a multi-agent system built with **LangGraph** and **ReAct** loops to automate CI/CD root-cause failure analysis — the technical goal was clear: stop engineers from spending hours digging through megabytes of execution logs, Redis-cached runbooks, and GitLab commit diffs every time a pipeline broke.
+
+The prototype worked: it slashed triage from hours of manual log correlation to seconds. Yet its current status — **validated and prepared, awaiting integration guidelines for central AI infrastructure** — taught me just as much about enterprise platform architecture as writing the LangGraph nodes themselves.
 
 <!-- more -->
 
-## The Core Challenge: Zero Tolerance for Hallucinations
+## 1. Why Linear LLM Chains Fail at Incident Triage
 
-In platform and banking operations, an AI agent cannot afford to guess. If a pipeline failure is caused by an expired OIDC token, the agent must not suggest rewriting unit tests.
+Early experiments with LLM-assisted ops usually follow a naive linear recipe: take the tail of a failed build log, paste it into a prompt, and ask the model what went wrong.
 
-To achieve production reliability, we implemented three strict architectural guardrails:
+In real infrastructure pipelines, that fails for two reasons:
+
+1. **The root cause is rarely in the last 50 lines:** A build failure at minute 18 is often caused by an environment variable or network timeout that happened at minute 2.
+2. **Logs tell you *what* broke, not *what changed*:** An exit code in a deployment log is ambiguous until you correlate it with the recent GitLab commit diff or a known operational runbook.
+
+That is why we modeled **Orion AI** as a **stateful, cyclic graph in LangGraph** rather than a linear chain:
 
 ```mermaid
 flowchart TD
-    BuildFail["CI/CD Failure Event"] --> AgentRouter["LangGraph Router Node"]
-    AgentRouter --> ParallelData["Concurrent Fetchers<br/>(Logs + Diff + Runbook)"]
-    ParallelData --> Reasoner["ReAct Loop Node<br/>(Qwen 131k context)"]
-    Reasoner --> GuardrailCheck["Deterministic Verification<br/>(Schema & Citation Check)"]
-    GuardrailCheck --> Output["Actionable Remediation Summary"]
+    Event["Pipeline Failure Event"] --> Supervisor["LangGraph Supervisor"]
+    Supervisor --> Logs["Execution Logs"]
+    Supervisor --> Docs["Redis-Cached Support Docs"]
+    Supervisor --> Diffs["GitLab Commit Diffs"]
+    Logs & Docs & Diffs --> ReAct["ReAct Reasoning (Qwen 131k Context)"]
+    ReAct --> Gate{"Deterministic Guardrails"}
+    Gate -- "Insufficient evidence → inspect deeper diff" --> Diffs
+    Gate -- "Grounded & schema-valid" --> Diagnosis["Actionable Root-Cause Report"]
 ```
 
-## Why LangGraph over Linear Chains?
+- **Concurrent context gathering:** The graph pulls raw execution traces, Redis-cached documentation, and repository metadata in parallel.
+- **Long-context correlation (`Qwen` 131k):** Feeding consolidated evidence into a high-context model preserves the causal chain from initialization to failure.
+- **Bounded ReAct loops:** When a log trace points to a modified configuration file, the agent loops back to inspect the exact commit diff before formulating its diagnosis.
 
-Traditional LLM chains (like linear LangChain pipelines) fail when diagnostic steps require backtracking or loops:
+## 2. Deterministic Guardrails: Treating the LLM as an Untrusted Component
 
-1. **Conditional Branching:** If the raw error trace references a specific configuration file (e.g., `settings.py`), the graph branches to inspect the Git commit diff for that file.
-2. **State Persistence:** LangGraph keeps a typed state dictionary throughout the lifecycle, allowing intermediate verification nodes to confirm facts before producing a final report.
-3. **Deterministic Tooling via MCP:** We adopted the **Model Context Protocol (MCP)** to standardize tool interactions, ensuring the LLM calls external APIs via well-typed JSON contracts rather than unstructured script execution.
+In banking operations, a hallucinated remediation command is worse than no diagnosis at all. To make the PoC trustworthy for engineers, we applied standard distributed-systems discipline to the model's inputs and outputs:
 
-## The Results
+- **Strict output schemas:** The agent cannot return free-form prose; it must populate a typed diagnostic contract.
+- **Explicit evidence grounding:** Every root-cause claim must point to concrete evidence retrieved during the run (log fragments, runbook entries, or commit diffs).
+- **Isolated tool contracts (MCP):** External systems (Jenkins, Redis, GitLab) are queried through strictly typed read-only tool interfaces rather than giving the agent arbitrary shell access.
 
-During validation across hundreds of real-world pipeline failures:
-* **MTTR** for initial triage dropped from an average of ~45 minutes of human digging to under **15 seconds**.
-* Engineers received an immediate summary directly in their workflow (GitLab MR comment or Slack notification) detailing the exact failing line, root-cause classification, and recommended action.
+## 3. Why a Validated PoC Still Waits on Enterprise Foundations
+
+Once the PoC was validated against real failure scenarios, why didn't we immediately wire it into every production pipeline the next morning?
+
+Because in a large financial institution, an operational AI agent sits at the intersection of two separate platform domains: **Infrastructure Operations** (which we own) and **Central Corporate AI Infrastructure** (owned by partner platform teams).
+
+Moving from a validated prototype to organization-wide production requires three cross-team foundations to be in place:
+
+1. **Shared inference capacity & routing standards:** Productionizing high-context (131k token) agent runs across hundreds of daily pipeline failures requires formal capacity allocation and integration standards on the bank's centralized LLM inference clusters.
+2. **Operational data governance:** CI/CD logs and commit diffs inevitably touch internal hostnames, configuration metadata, and repository structures. Formalizing how operational telemetry is redacted, transmitted, and retained by shared internal AI endpoints is a mandatory governance milestone.
+3. **Clear ownership of the evaluation loop:** In production, models and prompts drift as infrastructure evolves. Defining who owns the continuous evaluation dataset and SLOs for diagnostic accuracy is just as important as the code.
+
+## The Takeaway for Platform Engineers
+
+If you are building agentic systems for real-world operations, design your state graph, tool boundaries, and deterministic guardrails so the system is ready for production from day one — and keep your architecture decoupled from any single model endpoint so that when central AI infrastructure guidelines land, integration is a configuration change rather than a rewrite.
 
 ---
 
-*Read the full architecture in the [Orion AI case study](../../projects/orion-ai.md).*
+*Explore the technical architecture in the [Orion AI case study](../../projects/orion-ai.md).*

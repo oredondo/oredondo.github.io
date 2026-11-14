@@ -1,209 +1,121 @@
 ---
-title: "Case Study: Blueprint Declarative Orchestrator"
+title: "Case Study: Blueprint Declarative Lifecycle Engine"
 description: >-
-  An asynchronous, Terraform-style Python orchestration engine driven by versioned
-  YAML blueprints — idempotent, auditable and free of commercial vendor lock-in.
+  An asynchronous Python orchestration engine driven by versioned YAML blueprints — bringing Terraform-like declarative lifecycle management and idempotent teardowns to BBVA's internal cloud.
 ---
 
-# Blueprint: Declarative Async Orchestration Engine
+# Blueprint: Asynchronous Declarative Lifecycle Engine
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Creator & Lead Systems Engineer |
+| **Role** | Creator & Lead Systems Architect |
 | **Organization** | BBVA Technology (Core Banking Infrastructure) |
-| **Impact** | Replaced a commercial automation platform (Red Hat Ansible Automation Platform); brought GitOps reproducibility to banking infrastructure |
-| **Stack** | Python, AsyncIO, PyYAML, JSON Schema, GitOps, Orion API |
+| **Outcome** | Eliminated commercial orchestration licensing (Red Hat Automation Platform); brought declarative GitOps and resumable teardowns to Orion |
+| **Stack** | Python, AsyncIO, Declarative YAML DSL, JSON Schema, GitOps, Orion REST API |
 
-!!! abstract "TL;DR"
+!!! abstract "Architectural summary"
 
-    Engineers declare the **desired state** of an environment in a Git-versioned YAML file.
-    Blueprint validates it, builds a dependency graph, executes independent steps
-    concurrently with AsyncIO, and reconciles against live Orion state so every run —
-    including a failed teardown — is **safe to repeat**.
+    Blueprint is an internal asynchronous orchestration engine in Python — conceptually analogous to Terraform, purpose-built for BBVA's **Orion** platform. Engineering teams declare the desired state of complete environments in versioned YAML blueprints; the engine resolves the dependency graph, executes independent operations in parallel, produces a complete Orion job trace for auditors, and supports **idempotent destroy workflows** that safely resume interrupted teardowns without rework.
 
-## 1. Context & challenge
+---
 
-Enterprise automation depended on a heavy commercial orchestration suite. It brought
-licensing overhead, scaling constraints and poor alignment with internal governance
-workflows — in particular, reconstructing exact state after a mid-run failure was
-painful for audit purposes.
+## 1. Context & Why Commercial Suites Did Not Fit
 
-**Objective:** an in-house declarative engine in Python where teams describe complete
-environments in version-controlled YAML, executed in parallel with full auditability
-and idempotent state safety.
+Once **Orion** exposed a unified REST API over AWS, OpenStack, OpenShift, and bare-metal, teams needed to orchestrate multi-tier environments (networks, load balancers, compute pools, middleware) as a single unit rather than firing individual API calls.
 
-## 2. Workflow & engine architecture
+Relying on commercial orchestration suites such as **Red Hat Automation Platform (Ansible Tower)** introduced three friction points:
+
+1. **Per-node licensing overhead:** Commercial licensing scales with managed hosts, penalizing adoption across tens of thousands of banking nodes.
+2. **Mid-run failure opacity:** When a 40-step procedural workflow fails at step 27 due to a transient network timeout, reconstructing exact state for audit compliance or safely tearing down the partial environment required manual intervention.
+3. **Impedance mismatch with Orion:** We already owned the central source of truth (Orion). We needed an orchestrator that natively understood Orion's job identifiers, async polling contracts, RBAC model, and compliance reports.
+
+---
+
+## 2. Abstract Execution & Teardown Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Dev as Engineer / CI pipeline
-    participant Repo as Git repository (YAML blueprint)
-    participant Engine as Blueprint engine (AsyncIO)
-    participant Orion as Orion IaaS API
-    participant Audit as Immutable audit store
+    actor Team as Engineering Team (GitOps)
+    participant Engine as Blueprint Engine (Python AsyncIO)
+    participant Orion as Orion IaaS API (Source of Truth)
+    participant Report as Structured Audit Report
 
-    Dev->>Repo: git push blueprint.yml
-    Repo->>Engine: Trigger run with target manifest
-    Engine->>Engine: Validate against schema & resolve DAG
-    Engine->>Orion: Read current state (idempotency check)
+    Team->>Engine: Submit versioned YAML blueprint (provision or destroy)
+    Engine->>Engine: Validate schema & build dependency DAG (execution waves)
+    Engine->>Orion: Query live state of declared resources
 
-    par Async parallel provisioning
-        Engine->>Orion: Provision compute
-        Engine->>Orion: Configure networks & subnets
-        Engine->>Orion: Apply firewall / F5 rules
+    alt Resource already matches target state (or already destroyed)
+        Orion-->>Engine: State satisfied → mark step as NO-OP
+    else Delta detected
+        par Concurrent execution within current DAG wave
+            Engine->>Orion: Trigger async operation A (receive Orion Job ID)
+            Engine->>Orion: Trigger async operation B (receive Orion Job ID)
+        end
+        Orion-->>Engine: Poll / stream completion status per Job ID
     end
 
-    Orion-->>Engine: Stream operation status & job IDs
-    Engine->>Audit: Commit full execution trace
-    Engine-->>Dev: Structured result
+    Engine->>Report: Emit structured execution trace with all Orion Job IDs
+    Report-->>Team: Deterministic outcome (safe to re-run on partial failure)
 ```
 
-A blueprint is intentionally boring to write:
+---
 
-```yaml title="payments-stack.yml"
-version: "2.0"
-target_environment: aws-production
+## 3. Core Architectural Pillars
 
-resources:
-  - name: payment-network
-    type: network.subnet
-    cidr: 10.20.0.0/24
+### A. Declarative YAML Blueprints over Procedural Scripts
+Instead of maintaining imperative scripts that mix control flow with infrastructure state, teams commit a declarative YAML blueprint defining **what** the environment should look like and the dependencies between components. Schema validation catches structural and dependency errors before a single API call reaches Orion.
 
-  - name: payment-worker-pool
-    type: compute.instance_group
-    count: 12
-    flavor: m5.xlarge
-    depends_on: [payment-network]
+### B. Asynchronous Wave-Based Concurrency
+Provisioning infrastructure is fundamentally I/O-bound (waiting on cloud APIs, hypervisors, and network appliances). Blueprint organizes the dependency graph into **execution waves**:
 
-  - name: payment-redis-cache
-    type: cache.cluster
-    engine: redis
-    depends_on: [payment-network]
+- Resources with no unmet dependencies run **concurrently** via Python's `AsyncIO` event loop.
+- Downstream resources wait until their upstream wave completes successfully.
+- If a step fails mid-wave, the engine records the exact state of every in-flight Orion job rather than losing track of sibling operations.
+
+### C. Idempotent Destroy & Resumable Partial Teardowns
+Decommissioning complex environments is where most automation breaks. If a destroy run fails halfway through, naive scripts abort on re-run because the first half of the resources no longer exist.
+
+Blueprint manages the **full infrastructure lifecycle**:
+
+- On teardown, the dependency order is reversed so dependent services are removed before shared networks or storage.
+- Before acting on any node, the engine inspects live state in Orion. Steps that completed in a previous interrupted run are skipped cleanly, allowing operators to simply re-run the blueprint until teardown completes — with zero manual database surgery.
+
+### D. End-to-End Orion Job Traceability
+In a regulated bank, "the pipeline went green" is not sufficient audit evidence. Every Blueprint execution emits a structured trace linking each declared resource in the YAML manifest to the exact **Orion Job IDs**, timestamps, and status transitions executed — even when a run halts midway.
+
+---
+
+## 4. Failure Modes & Resilience Design
+
+```mermaid
+stateDiagram-v2
+    [*] --> SchemaValidation
+    SchemaValidation --> AbortedPreFlight: Invalid schema or cycle
+    SchemaValidation --> StateInspection: Valid DAG
+    StateInspection --> WaveExecution: Compute delta vs. Orion live state
+    WaveExecution --> Completed: All waves succeed
+    WaveExecution --> PartialFailure: Transient API / provider error
+    PartialFailure --> StateInspection: Re-run blueprint (completed steps become NO-OP)
+    Completed --> [*]
 ```
 
-## 3. Core technical pillars
-
-### A. DAG dependency resolver
-
-Infrastructure has implicit ordering — a subnet must exist before an instance binds to
-it, yet many instances can be created at once. Blueprint computes **execution waves**
-from the dependency graph: everything inside a wave runs concurrently, waves run in order.
-
-### B. Idempotency, self-reconciliation & crash-resilient teardowns
-
-Traditional scripting and procedural playbooks fail abruptly on re-runs because a resource already exists or has already been deleted. Blueprint enforces a **three-phase reconciliation model**:
-
-1. **Observed state query:** Prior to executing any mutation, Blueprint queries Orion for live reality rather than relying on stale local state files.
-2. **Intent delta evaluation:** Computes a strict diff (`NOOP`, `CREATE`, `UPDATE`, `DELETE`). If the live state already satisfies the target specification, the action is marked as `NOOP` and immediately resolves.
-3. **Resumable teardown with inverted DAG:** Teardowns invert the dependency graph automatically (e.g., instances are terminated before subnets). If a pipeline crashes or times out midway through a teardown, re-running the job safely skips already-deleted resources and resumes right where it left off — eliminating manual database intervention or orphaned cloud resources.
-
-### C. Zero commercial lock-in
-
-Automation is plain, fully owned Python tailored to banking standards — removing a
-recurring licence cost and letting the platform team evolve the engine at its own pace.
-
-### Trade-offs
-
-| Decision | Alternative considered | Why this choice |
+| Failure Scenario | Traditional Procedural Playbook | Blueprint Engine Behavior |
 | :--- | :--- | :--- |
-| Build in-house engine | Keep commercial suite / adopt Terraform | Tight fit with the internal Orion API, custom retry & rollback semantics, audit trail ownership, no per-host licensing |
-| AsyncIO | Threads / process pools | Workload is I/O-bound (API calls, polling); thousands of concurrent waits at negligible cost |
-| Reconcile against live state | Local state file | Orion is already the source of truth; avoids state drift and lock management |
+| **Circular dependency in manifest** | Discovered mid-deployment after mutating production | Rejected during pre-flight DAG resolution before any API call |
+| **Timeout halfway through a 20-node teardown** | Re-run crashes on "resource not found" for nodes 1–10 | Re-run inspects Orion state, skips nodes 1–10, and resumes at node 11 |
+| **Auditor requests proof of a failed change** | Manual correlation across scattered console logs | Structured report maps every step to its immutable Orion Job ID |
 
-## 4. Python implementation highlights
+---
 
-### Wave-based DAG scheduler with dynamic state reconciliation
+## 5. Architectural Trade-Offs
 
-An illustrative core of the scheduler combining `graphlib.TopologicalSorter`, `asyncio.TaskGroup`, and idempotency diffing:
+| Decision | Alternative Considered | Rationale |
+| :--- | :--- | :--- |
+| **Purpose-built Python engine** | Red Hat Automation Platform / Terraform | Eliminated recurring commercial licensing, integrated natively with Orion's job/audit model, and avoided external state-file locking issues. |
+| **Orion as live source of truth** | Local state files (`tfstate` equivalent) | Orion already tracks live multi-cloud inventory; querying Orion directly prevents state-file drift and split-brain locks. |
+| **AsyncIO concurrency** | Multi-threaded / multi-process runners | High concurrency for hundreds of simultaneous API waits with minimal memory footprint. |
 
-```python title="reconciliation.py (illustrative)"
-import asyncio
-from enum import Enum, auto
-from graphlib import TopologicalSorter
-from typing import NamedTuple
+---
 
-
-class DesiredState(NamedTuple):
-    name: str
-    resource_type: str
-    spec: dict
-
-
-class Action(Enum):
-    NOOP = auto()
-    CREATE = auto()
-    UPDATE = auto()
-    DESTROY = auto()
-
-
-class BlueprintReconciler:
-    def __init__(self, client: "OrionClient") -> None:
-        self.client = client
-
-    async def diff(self, desired: DesiredState, is_teardown: bool = False) -> Action:
-        live = await self.client.get_resource(desired.name)
-        if is_teardown:
-            return Action.NOOP if live is None else Action.DESTROY
-
-        if live is None:
-            return Action.CREATE
-        if live.spec == desired.spec:
-            return Action.NOOP
-        return Action.UPDATE
-
-    async def reconcile_resource(self, desired: DesiredState, is_teardown: bool) -> None:
-        action = await self.diff(desired, is_teardown=is_teardown)
-        match action:
-            case Action.NOOP:
-                return  # Safe no-op makes re-runs idempotent
-            case Action.CREATE:
-                await self.client.create_resource(desired.spec)
-            case Action.UPDATE:
-                await self.client.update_resource(desired.name, desired.spec)
-            case Action.DESTROY:
-                await self.client.delete_resource(desired.name)
-
-    async def run(
-        self,
-        manifest: dict[str, DesiredState],
-        dependencies: dict[str, set[str]],
-        teardown: bool = False,
-    ) -> None:
-        """Execute dependencies in concurrent waves.
-
-        If teardown=True, the graph is reversed (dependents torn down before dependencies).
-        """
-        graph_deps = dependencies if not teardown else self._invert_graph(dependencies)
-        sorter = TopologicalSorter(graph_deps)
-        sorter.prepare()  # (1)!
-
-        while sorter.is_active():
-            ready_wave = sorter.get_ready()
-            async with asyncio.TaskGroup() as tg:  # (2)!
-                for name in ready_wave:
-                    tg.create_task(
-                        self.reconcile_resource(manifest[name], is_teardown=teardown)
-                    )
-            sorter.done(*ready_wave)
-
-    @staticmethod
-    def _invert_graph(deps: dict[str, set[str]]) -> dict[str, set[str]]:
-        inverted: dict[str, set[str]] = {k: set() for k in deps}
-        for node, upstream in deps.items():
-            for parent in upstream:
-                inverted.setdefault(parent, set()).add(node)
-        return inverted
-```
-
-1.  `sorter.prepare()` validates the entire graph upfront; circular dependencies immediately trigger a `CycleError` before any infrastructure mutation occurs.
-2.  `asyncio.TaskGroup` runs independent steps in parallel per wave; if any task fails, all concurrent sibling operations are canceled cleanly, preserving a deterministically resumable state.
-
-## 5. Outcome
-
-- :moneybag: **Licence cost removed** — commercial orchestration replaced by owned Python.
-- :repeat: **GitOps reproducibility** — every environment change is a reviewed, versioned commit.
-- :mag: **Full traceability** — each run produces a complete execution trace for auditors.
-- :zap: **Parallel by default** — independent resources provision concurrently instead of sequentially.
-
-[:octicons-arrow-right-24: Related post: Why we built our own declarative YAML engine](../blog/posts/2026-03-01-declarative-infrastructure-python.md)
+[:octicons-arrow-left-24: Previous: Orion IaaS Platform](orion-iaas.md) · [:octicons-arrow-right-24: Next: Leaving Jenkins — HA Dispatcher & K8s Execution](dispatcher-migration.md)

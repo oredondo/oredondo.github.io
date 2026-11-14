@@ -1,7 +1,7 @@
 ---
 draft: false
 description: >-
-  Why an enterprise platform team replaced a commercial orchestration suite with a lean, idempotent AsyncIO engine driven by declarative YAML.
+  Reflections on nine years of building an internal cloud platform: why owning the central control plane changed our build-vs-buy calculus, and why idempotent teardown is the real test of declarative infrastructure.
 slug: declarative-yaml-engine-python
 date: 2026-03-01
 authors:
@@ -17,56 +17,65 @@ tags:
   - PlatformEngineering
 ---
 
-# Why We Built Our Own Declarative YAML Engine in Python
+# Nine Years of Internal Cloud Platforms: Why Declarative YAML Replaced Our Commercial Orchestrator
 
-In enterprise infrastructure, the default answer to orchestration is usually to purchase a commercial platform suite like Red Hat Automation Platform (Ansible Tower) or force an off-the-shelf tool into workflows it was never designed to handle.
+"Never build your own orchestrator" is generally good advice — until you look closely at what your organization already owns and where commercial suites actually spend your engineering budget.
 
-Here is why we decided to engineer **Blueprint** — an in-house asynchronous Python orchestration engine — and how it eliminated vendor lock-in while providing true idempotency across tens of thousands of banking infrastructure nodes.
+When we evaluated how 500+ engineers should orchestrate full infrastructure environments across our hybrid cloud, the default enterprise option on the table was a commercial suite like **Red Hat Automation Platform (Ansible Tower)**. Instead, we built **Blueprint**: an asynchronous, declarative Python lifecycle engine driven by versioned YAML blueprints.
+
+Here is why that trade-off made sense for us, what we chose *not* to build, and why **teardown** — not creation — is the true test of any infrastructure engine.
 
 <!-- more -->
 
-## The Trap of Commercial Platforms
+## 1. Owning the Control Plane Changes the Build-vs-Buy Calculus
 
-Commercial orchestration platforms often suffer from three fatal flaws when applied to custom enterprise architectures:
+Most teams adopt heavy external orchestrators because they have no unified API over their underlying infrastructure.
 
-1. **Restrictive Licensing Models:** License costs scale with managed hosts or operational frequency, penalizing automation growth.
-2. **Opaque Execution & Audit Gaps:** When an automated job fails midway through a 50-step sequence, reconstructing the exact state for audit compliance is notoriously painful.
-3. **Impedance Mismatch:** Enterprise internal APIs (like our proprietary Orion platform) require tailored retry semantics, dynamic variable injection, and custom rollback policies.
+We were in a different position. Over several years, we had already built **Orion**, our central IaaS platform governing tens of thousands of nodes across AWS, OpenStack, OpenShift, and bare-metal behind a single driver-based REST API. Orion already handled:
 
-## The Solution: Declarative Asynchronous Blueprints
+- Authentication, RBAC, and compliance policies.
+- Provider-specific driver translation.
+- Live multi-cloud inventory across PostgreSQL and MongoDB.
+- Job tracking and immutable audit trails.
 
-We conceived **Blueprint** around three design principles:
+Buying a commercial orchestration suite to sit in front of Orion meant paying per-node licensing fees across tens of thousands of machines just to sequence HTTP calls against an API we already owned — while losing native visibility into Orion's job identifiers when a multi-step deployment failed halfway through.
 
-### 1. Declarative YAML Specifications
-Developers should not write procedural execution scripts. They declare the desired end-state of their infrastructure stack in version-controlled YAML files:
+## 2. Why We Avoided Local State Files
 
-```yaml
-version: "2.0"
-target_environment: "aws-production"
+Tools inspired by Terraform often copy its most operationally painful design choice: a separate state file (`tfstate`) that must be stored, locked, and reconciled against reality whenever someone makes an out-of-band change.
 
-resources:
-  - name: "payment-worker-pool"
-    type: "compute.instance_group"
-    count: 12
-    flavor: "m5.xlarge"
-    driver: "aws"
-    
-  - name: "payment-redis-cache"
-    type: "cache.cluster"
-    engine: "redis"
-    depends_on: ["payment-worker-pool"]
+Because **Blueprint** was designed specifically for **Orion**, we made a deliberate architectural decision: **no separate state files**.
+
+```mermaid
+flowchart LR
+    Manifest["Versioned YAML Blueprint<br/>(Desired State in Git)"] --> Engine["Blueprint Async Engine<br/>(DAG & Delta Resolver)"]
+    Orion[("Orion Control Plane<br/>(Live Observed State)")] --> Engine
+    Engine -->|"Execute only the delta<br/>(Concurrent waves)"| Orion
+    Engine --> Report["Structured Audit Report<br/>(Mapped to Orion Job IDs)"]
 ```
 
-### 2. Directed Acyclic Graph (DAG) Execution
-The Python engine parses the YAML manifest, validates it against a JSON Schema, and constructs an in-memory execution DAG. Independent components are provisioned concurrently using Python's `asyncio.gather()`, while strictly serializing dependencies.
+Orion's hybrid database *is* the live source of truth. Before Blueprint executes a wave of operations, it queries Orion directly for the current state of the declared resources and acts only on the delta. There is no state file to corrupt, no stale lock after a crashed CI runner, and no drift between "orchestrator state" and "platform inventory".
 
-### 3. Idempotent Teardowns
-Unlike naive automation scripts that break if an asset is already deleted, Blueprint's destroy operation verifies live state before executing actions, safely resuming interrupted teardowns without manual database manipulation.
+## 3. Creation Is Easy; Idempotent Teardown Is the Real Test
 
-## Conclusion
+Almost any script can provision a greenfield environment when every API returns `200 OK`. Where procedural automation falls apart is **partial failure during teardown**.
 
-Building your own platform engine is not about reinventing the wheel — it is about knowing when an off-the-shelf product costs more in licenses and operational friction than a clean, 2,000-line asynchronous Python engine that fits your exact organizational topology.
+Imagine tearing down a 25-resource environment (compute pools, load balancer rules, storage volumes, networks). Step 14 times out because an upstream cloud API is momentarily degraded. What happens when the engineer re-runs the destroy job five minutes later?
+
+- **In procedural playbooks:** Step 1 tries to delete a resource that was already deleted in the first run, fails with `404 Not Found`, and aborts the entire pipeline — forcing an engineer to manually comment out steps or clean up resources by hand.
+- **In Blueprint:** Every step in a reverse-dependency teardown queries Orion first. Steps 1 through 13 see that their target resources are already gone, record a clean no-op, and the engine resumes immediately at Step 14.
+
+Making teardown **safe to repeat** turned environment decommissioning from a high-stress manual ticket into a routine self-service operation.
+
+## 4. The Honest Cost of Building In-House
+
+Owning your orchestration engine eliminates commercial licensing and gives you a tight fit with internal compliance, but it is not free:
+
+- **You own the edge cases:** Cycle detection in dependency graphs, partial failure reporting, and schema evolution are now your team's responsibility.
+- **Documentation is a first-class engineering deliverable:** A commercial tool comes with public Stack Overflow answers; an internal YAML DSL only succeeds if its error messages, schema validation, and golden-path templates are self-explanatory.
+
+After nine years of evolving this stack, the lesson is straightforward: don't reinvent commodity cloud SDKs — encapsulate them behind drivers. But when the orchestration layer sits directly between your engineers, your auditors, and your core control plane, a lean, well-bounded Python engine can outperform a heavyweight commercial suite in both reliability and cost.
 
 ---
 
-*Read the full architecture in the [Blueprint case study](../../projects/blueprint.md).*
+*See how Orion and Blueprint fit together in the [Orion IaaS](../../projects/orion-iaas.md) and [Blueprint](../../projects/blueprint.md) case studies.*

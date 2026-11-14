@@ -1,72 +1,61 @@
 ---
 title: About
 description: >-
-  About Oscar Redondo — Senior Python & Platform Engineer in Madrid. Engineering
-  principles, background and how to get in touch.
+  About Oscar Redondo — Senior Platform Engineer · Python in Madrid. Engineering philosophy, architectural trajectory, and how to connect.
 hide:
   - navigation
 ---
 
-# About me
+# About Me
 
-I'm **Oscar Redondo**, a Senior Python & Platform Engineer based in Madrid, Spain.
-For more than a decade I've designed and operated high-throughput distributed systems,
-internal developer platforms and automation engines — most recently as the sole architect
-of BBVA's central IaaS platform.
+I'm **Oscar Redondo**, a **Senior Platform Engineer · Python** based in Madrid, Spain.
 
-## My path
+Over the last decade, my work has centered on a single question: **how do you let hundreds of engineers move fast across tens of thousands of heterogeneous servers without losing governance, reliability, or sleep?**
 
-I trained as a telecommunications engineer at the **Universidad Politécnica de Madrid**,
-and started my career operating a production **OpenStack and Ceph** private cloud at
-Oesia — where I also built a storage product on top of OpenStack Swift. That gave me a
-deep, hands-on understanding of how infrastructure actually behaves under load.
+My answer is to treat internal infrastructure as a software product — paving **Golden Paths** through clean APIs, driver abstractions, and declarative engines where security, auditability, and recovery are built in by design rather than enforced through manual tickets.
 
-In 2017 I joined **BBVA Technology**, where I've spent the years since turning that
-understanding into software powering BBVA's Core Banking Infrastructure: **Orion**, a Python
-platform that gives 500+ engineers one self-service API over AWS, OpenStack, OpenShift and bare metal;
-**Blueprint**, a declarative orchestration engine that replaced a commercial automation suite; and more
-recently **Orion AI**, an agentic system that diagnoses CI/CD failures in seconds.
+## Architectural Trajectory
 
-## Engineering principles
+- **From storage and hypervisors up:** I trained in Communications Electronic Engineering at the **Universidad Politécnica de Madrid** and began my career at **Oesia** operating a production **OpenStack and Ceph** private cloud and building a self-hosted cloud storage platform on **OpenStack Swift**. Starting close to storage clusters, hypervisors, and network fabrics shaped how I design higher-level abstractions today.
+- **Building a bank's internal cloud platform layer by layer:** Since 2017 at **BBVA Technology**, I have served as sole architect and owner of the central IaaS platform suite (**Orion** & **Blueprint**). Whenever an off-the-shelf tool became a scaling or licensing bottleneck, I engineered a lean Python replacement — migrating from Jenkins to a custom **High-Availability Django/Celery Dispatcher**, decoupling runtime configuration, executing workloads in **Kubernetes Jobs**, bridging **F5 and OpenStack** with zero downtime, and building **Orion AI (PoC)** with LangGraph and ReAct.
+- **Open-source engineering:** Outside enterprise environments, I build and maintain open-source AI and backend systems on GitHub — including **[OmniLecture Studio](https://github.com/oredondo/omnilecture-studio)** (a native Linux Wayland/GTK 3 multimodal study suite) and **[WrenchBuddy](https://github.com/oredondo/WrenchBuddy)** (a Django 6, Celery, and `pgvector` RAG vehicle lifecycle platform).
+
+## Engineering Principles
 
 <div class="grid cards" markdown>
 
--   :material-account-heart-outline:{ .lg .middle } __Developer experience is the product__
+-   :material-road-variant:{ .lg .middle } __Pave Golden Paths, not ticket queues__
 
     ---
 
-    Platform teams exist to make developers faster, safer and happier. If a tool needs a
-    20-page manual or constant Slack support, the abstraction has failed. Golden paths
-    should be self-documenting and frictionless.
+    If an engineer needs a 20-page manual or a manual approval ticket to provision standard infrastructure, the abstraction has failed. Self-service APIs should make the compliant path the easiest path.
 
--   :material-file-code-outline:{ .lg .middle } __Declarative over imperative__
+-   :material-file-code-outline:{ .lg .middle } __Declarative state & idempotent recovery__
 
     ---
 
-    Imperative scripts hide state and create fragile dependencies. Desired state in Git,
-    reconciled by an idempotent engine, is the only sane way to operate tens of thousands of distributed machines.
+    Creating greenfield resources is easy; recovering from a failure halfway through a 30-step teardown is where systems are tested. Every operation should inspect live state and be safe to re-run.
 
--   :material-shield-check-outline:{ .lg .middle } __Rigorous AI, deterministic guardrails__
-
-    ---
-
-    LLMs and agents transform developer tooling — but only when bounded by typed schemas,
-    spec-driven development and verification loops that refuse to publish unproven claims.
-
--   :material-wrench-clock:{ .lg .middle } __Own it end-to-end__
+-   :material-shield-check-outline:{ .lg .middle } __Deterministic guardrails around AI__
 
     ---
 
-    Design it, build it, deploy it, carry the pager for it. Running what you build in
-    production at banking scale is the fastest teacher of good architecture.
+    LLMs and multi-agent graphs are transformative for operational triage only when treated as untrusted components — bounded by typed schemas, read-only tool contracts (MCP), and strict evidence checks.
+
+-   :material-account-group-outline:{ .lg .middle } __End-to-end ownership & international collaboration__
+
+    ---
+
+    Carrying the on-call pager for what you design keeps architectures honest. Sharing that architecture across teams — from mentoring junior engineers to onboarding hubs in Spain, Mexico, and Turkey — is what makes a platform last.
 
 </div>
 
-## Let's talk
+## Outside of Engineering
 
-I'm always happy to discuss platform engineering, Python architecture, or bringing AI
-agents safely into production operations.
+When I'm away from the terminal, you'll usually find me riding or wrenching on my motorbike (the real-world inspiration behind [WrenchBuddy](projects/wrenchbuddy.md)), snowboarding, hiking in the mountains, or listening to music.
 
-- :fontawesome-brands-linkedin: **LinkedIn:** [oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
-- :fontawesome-brands-github: **GitHub:** [oredondo](https://github.com/oredondo)
+## Let's Connect
+
+- :fontawesome-brands-linkedin: **LinkedIn:** [linkedin.com/in/oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
+- :fontawesome-brands-github: **GitHub:** [github.com/oredondo](https://github.com/oredondo)
 - :material-email-outline: **Email:** [o.redondo91@gmail.com](mailto:o.redondo91@gmail.com)

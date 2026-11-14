@@ -1,76 +1,61 @@
 ---
 title: Sobre mí
 description: >-
-  Sobre Oscar Redondo — Senior Python & Platform Engineer en Madrid. Principios de
-  ingeniería, trayectoria y vías de contacto.
+  Sobre Oscar Redondo — Senior Platform Engineer · Python en Madrid. Filosofía de ingeniería, trayectoria arquitectónica y contacto.
 hide:
   - navigation
 ---
 
 # Sobre mí
 
-I'm **Oscar Redondo**, Senior Python & Platform Engineer afincado en Madrid, España.
-Durante más de una década he diseñado y operado sistemas distribuidos de alto rendimiento,
-plataformas internas de desarrollo (IDP) y motores de automatización, destacando mi labor
-como arquitecto único de la plataforma IaaS central de BBVA.
+Soy **Oscar Redondo**, **Senior Platform Engineer · Python** afincado en Madrid, España.
 
-## Mi trayectoria
+Durante la última década, mi carrera ha girado en torno a una única pregunta: **¿cómo lograr que cientos de ingenieros desplieguen rápido sobre decenas de miles de servidores heterogéneos sin sacrificar el gobierno, la fiabilidad ni el descanso en las guardias?**
 
-Me formé como ingeniero de telecomunicaciones en la **Universidad Politécnica de Madrid**
-y comencé mi carrera operando una nube privada en producción con **OpenStack y Ceph** en
-Oesia, donde también desarrollé un producto de almacenamiento interno sobre OpenStack Swift.
-Esa etapa me aportó una comprensión profunda y práctica del comportamiento real de la
-infraestructura bajo carga y fallos de red.
+Mi respuesta consiste en tratar la infraestructura interna como un producto de software — trazando **Golden Paths** mediante APIs limpias, abstracciones por drivers y motores declarativos donde la seguridad, la auditoría y la recuperación ante fallos vienen integradas por diseño en lugar de imponerse mediante colas de tickets manuales.
 
-En 2017 me incorporé a **BBVA Technology**, donde he dedicado estos años a transformar
-ese conocimiento en software para la infraestructura central de BBVA: **Orion**, una plataforma en Python
-que proporciona a más de 500 ingenieros una única API en autoservicio sobre AWS, OpenStack, OpenShift y bare-metal;
-**Blueprint**, un motor de orquestación declarativa que eliminó suites comerciales de automatización;
-y más recientemente **Orion AI**, un sistema agéntico que diagnostica fallos de CI/CD en segundos.
+## Trayectoria Arquitectónica
 
-## Principios de ingeniería
+- **Desde el almacenamiento y los hipervisores hacia arriba:** Me formé en Ingeniería Electrónica de Comunicaciones en la **Universidad Politécnica de Madrid** y comencé mi carrera en **Oesia** administrando una nube privada en producción con **OpenStack y Ceph** y desarrollando una plataforma de almacenamiento sobre **OpenStack Swift**. Empezar cerca de los clusters de almacenamiento, hipervisores y redes marcó mi forma de diseñar abstracciones de alto nivel.
+- **Construyendo la plataforma cloud interna de un banco capa por capa:** Desde 2017 en **BBVA Technology**, soy el arquitecto único y responsable de la suite central de plataforma IaaS (**Orion** y **Blueprint**). Cada vez que una herramienta estándar se convertía en un cuello de botella de escala o licenciamiento, diseñé un reemplazo en Python — migrando de Jenkins a un **Dispatcher HA en Django/Celery**, desacoplando la configuración en runtime, ejecutando cargas en **Kubernetes Jobs**, conectando **F5 y OpenStack** sin tiempo de inactividad y desarrollando **Orion AI (PoC)** con LangGraph y ReAct.
+- **Ingeniería open-source:** Fuera del ámbito corporativo, diseño y mantengo proyectos open-source de IA y backend en GitHub — como **[OmniLecture Studio](https://github.com/oredondo/omnilecture-studio)** (suite multimodal nativa en Linux Wayland/GTK 3) y **[WrenchBuddy](https://github.com/oredondo/WrenchBuddy)** (plataforma de ciclo de vida de vehículos con Django 6, Celery y RAG sobre `pgvector`).
+
+## Principios de Ingeniería
 
 <div class="grid cards" markdown>
 
--   :material-account-heart-outline:{ .lg .middle } __La experiencia de desarrollo (DevEx) es el producto__
+-   :material-road-variant:{ .lg .middle } __Trazar Golden Paths, no colas de tickets__
 
     ---
 
-    Los equipos de plataforma existen para hacer que los desarrolladores sean más rápidos,
-    trabajen más seguros y con menos fricción. Si una herramienta requiere un manual de 20 páginas
-    o soporte continuo por Slack, la abstracción ha fallado. Los caminos pavimentados (*golden paths*)
-    deben ser intuitivos y fluidos.
+    Si un ingeniero necesita un manual de 20 páginas o un ticket de aprobación manual para aprovisionar infraestructura estándar, la abstracción ha fracasado. Las APIs en autoservicio deben hacer que el camino seguro y auditable sea también el más sencillo.
 
--   :material-file-code-outline:{ .lg .middle } __Declarativo sobre imperativo__
+-   :material-file-code-outline:{ .lg .middle } __Estado declarativo y recuperación idempotente__
 
     ---
 
-    Los scripts imperativos ocultan estado y crean dependencias frágiles. Definir el estado deseado
-    en Git y reconciliarlo mediante un motor idempotente es la única forma sensata de gobernar
-    decenas de miles de máquinas sin perder el control.
+    Crear recursos desde cero es sencillo; recuperarse de un fallo a mitad de un desmontaje de 30 pasos es donde se pone a prueba un sistema. Toda operación debe consultar el estado en vivo y ser segura de relanzar.
 
--   :material-shield-check-outline:{ .lg .middle } __IA rigurosa, guardarraíles deterministas__
+-   :material-shield-check-outline:{ .lg .middle } __Guardarraíles deterministas alrededor de la IA__
 
     ---
 
-    Los LLMs y los agentes transforman las herramientas de desarrollo, pero solo si están acotados
-    por esquemas fuertemente tipados, desarrollo guiado por especificaciones (SDD) y bucles de
-    verificación que se nieguen categóricamente a publicar afirmaciones sin evidencias probadas.
+    Los LLMs y grafos multi-agente transforman el triaje operativo solo cuando se tratan como componentes no confiables — acotados por esquemas tipados, contratos de herramientas de solo lectura (MCP) y verificación estricta de evidencias.
 
--   :material-wrench-clock:{ .lg .middle } __Responsabilidad de extremo a extremo__
+-   :material-account-group-outline:{ .lg .middle } __Responsabilidad extremo a extremo y colaboración internacional__
 
     ---
 
-    Diséñalo, constrúyelo, despliégalo y asume la guardia de producción. Operar lo que construyes
-    a escala bancaria es el mejor y más rápido maestro de buena arquitectura.
+    Llevar el busca de guardia de lo que diseñas mantiene la arquitectura honesta. Compartir esa arquitectura entre equipos — desde formar a ingenieros junior hasta integrar centros de ingeniería en España, México y Turquía — es lo que hace que una plataforma perdure.
 
 </div>
 
-## Conectemos
+## Fuera de la Terminal
 
-Siempre estoy abierto a conversar sobre ingeniería de plataformas, arquitectura en Python o
-integración segura de agentes de IA en operaciones de producción.
+Cuando no estoy frente al código, suelo estar rodando o haciendo mantenimiento a mi moto (la inspiración real detrás de [WrenchBuddy](projects/wrenchbuddy.md)), haciendo snowboard, de ruta por la montaña o escuchando música.
 
-- :fontawesome-brands-linkedin: **LinkedIn:** [oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
-- :fontawesome-brands-github: **GitHub:** [oredondo](https://github.com/oredondo)
-- :material-email-outline: **Correo:** [o.redondo91@gmail.com](mailto:o.redondo91@gmail.com)
+## Contacto
+
+- :fontawesome-brands-linkedin: **LinkedIn:** [linkedin.com/in/oscarredondodjangopython](https://linkedin.com/in/oscarredondodjangopython)
+- :fontawesome-brands-github: **GitHub:** [github.com/oredondo](https://github.com/oredondo)
+- :material-email-outline: **Email:** [o.redondo91@gmail.com](mailto:o.redondo91@gmail.com)

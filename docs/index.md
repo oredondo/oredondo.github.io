@@ -1,9 +1,9 @@
 ---
-title: Senior Python & Platform Engineer
+title: Senior Platform Engineer · Python
 description: >-
-  Oscar Redondo — Senior Python & Platform Engineer with 10+ years building
-  internal developer platforms, declarative automation engines and
-  production-grade agentic AI. Sole architect of BBVA's central IaaS platform.
+  Oscar Redondo — Senior Platform Engineer · Python with 10+ years building
+  internal developer platforms, distributed automation engines, and applied
+  operational AI. Sole architect of BBVA's central IaaS platform.
 hide:
   - navigation
   - toc
@@ -12,19 +12,17 @@ hide:
 
 <div class="hero" markdown>
 
-<p class="hero__eyebrow">Senior Python &amp; Platform Engineer · Madrid, Spain</p>
+<p class="hero__eyebrow">Senior Platform Engineer · Python · Madrid, Spain</p>
 
 # Oscar Redondo { .hero__title }
 
 <p class="hero__lead">
-I build the <strong>Python platforms that other engineers build on</strong> — self-service
-infrastructure APIs, declarative orchestration engines and deterministic AI agents
-that turn complex, multi-cloud operations into simple, auditable abstractions.
+I design and build <strong>internal developer platforms that make complex distributed infrastructure invisible</strong> — turning hybrid cloud operations across AWS, OpenStack, OpenShift, and bare metal into clean self-service APIs, declarative lifecycle engines, and deterministic automation.
 </p>
 
-[:material-folder-star-outline: View case studies](projects/index.md){ .md-button .md-button--primary }
+[:material-sitemap-outline: Explore the platform ecosystem](projects/index.md){ .md-button .md-button--primary }
 [:material-file-account-outline: Read my CV](cv/index.md){ .md-button }
-[:material-email-outline: Get in touch](mailto:o.redondo91@gmail.com){ .md-button }
+[:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }
 
 </div>
 
@@ -34,7 +32,7 @@ that turn complex, multi-cloud operations into simple, auditable abstractions.
     <span class="kpi-label">Nodes governed</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-value">High Scale</span>
+    <span class="kpi-value">High-Throughput</span>
     <span class="kpi-label">Daily operations</span>
   </div>
   <div class="kpi-card">
@@ -43,176 +41,133 @@ that turn complex, multi-cloud operations into simple, auditable abstractions.
   </div>
   <div class="kpi-card">
     <span class="kpi-value">10+ yrs</span>
-    <span class="kpi-label">Production Python</span>
+    <span class="kpi-label">Platform &amp; Python</span>
   </div>
 </div>
 
-## What I do
+## How my work connects: one platform built layer by layer
 
-<div class="grid cards" markdown>
+Over the last nine years at **BBVA Technology**, my work has not been a collection of isolated tools — it is a single **Internal Developer Platform** that evolved layer by layer as each architectural bottleneck was solved:
 
--   :material-language-python:{ .lg .middle } __Python backend & platform APIs__
+```mermaid
+flowchart LR
+    JSL["Jenkins Shared Libraries<br/>(Standardized CI/CD)"] -->|"Outgrew single controller"| DISP["HA Operation Dispatcher<br/>(Django + Celery API)"]
+    CFG["Central Config Mgmt<br/>(Runtime variable injection)"] --> DISP & PIPE
+    DISP --> K8S["Kubernetes Job Engine<br/>(Ephemeral pods)"]
+    DISP --> PIPE["Universal Driver Pipeline<br/>(AWS · OpenStack · OpenShift · Bare-metal)"]
+    PIPE --> ORION["Orion IaaS Control Plane<br/>(RBAC, hybrid DB & audit pipelines)"]
+    ORION --> BP["Blueprint Engine<br/>(Declarative YAML & idempotent teardown)"]
+    ORION --> AI["Orion AI (Validated PoC)<br/>(LangGraph + ReAct CI/CD diagnostics)"]
+```
 
-    ---
+## Enterprise Architecture Case Studies
 
-    Django / DRF services, Celery task pipelines and AsyncIO engines designed for
-    high-throughput, long-running infrastructure operations — with hybrid
-    PostgreSQL + MongoDB + Redis data tiers behind them.
-
--   :material-server-network:{ .lg .middle } __Platform engineering & IaC__
-
-    ---
-
-    Internal developer platforms that hide AWS, OpenStack, OpenShift and bare
-    metal behind one self-service API. Declarative, GitOps-driven, idempotent
-    and auditable by design.
-
--   :material-robot-outline:{ .lg .middle } __Applied AI for operations__
-
-    ---
-
-    Agentic systems with LangGraph, ReAct and MCP that automate CI/CD triage —
-    bounded by typed schemas and deterministic guardrails so they never guess
-    in production.
-
-</div>
-
-## Featured case studies
+*Abstracted architecture, trade-offs, and failure modes — respecting banking confidentiality with zero proprietary or fabricated code:*
 
 <div class="grid cards two-col" markdown>
 
--   :material-cloud-cog-outline:{ .lg .middle } __[Orion — Enterprise IaaS Platform](projects/orion-iaas.md)__
+-   :material-cloud-cog-outline:{ .lg .middle } __[Orion — Central IaaS Platform & Driver Pipeline](projects/orion-iaas.md)__
 
     ---
 
-    Sole architect of the central IaaS platform powering BBVA's Core Banking Infrastructure:
-    one API over AWS, OpenStack, OpenShift and on-prem, governing tens of thousands of nodes with 100% audit compliance.
+    Sole architect of the central IaaS platform powering BBVA's Core Banking Infrastructure: one OpenAPI interface over AWS, OpenStack, OpenShift, and bare metal, backed by PostgreSQL, MongoDB, Redis, automated audit exports, and a zero-downtime F5/OpenStack API bridge.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 
-    [:octicons-arrow-right-24: Read the case study](projects/orion-iaas.md)
+    [:octicons-arrow-right-24: Read architecture case study](projects/orion-iaas.md)
 
--   :material-file-tree-outline:{ .lg .middle } __[Blueprint — Declarative Orchestrator](projects/blueprint.md)__
-
-    ---
-
-    A Terraform-style AsyncIO engine driven by versioned YAML that replaced a
-    commercial automation platform with fully owned, idempotent Python.
-
-    <span class="tech-tag">AsyncIO</span><span class="tech-tag">DAG scheduling</span><span class="tech-tag">YAML / JSON Schema</span><span class="tech-tag">GitOps</span>
-
-    [:octicons-arrow-right-24: Read the case study](projects/blueprint.md)
-
--   :material-stethoscope:{ .lg .middle } __[Orion AI — CI/CD Auto-Diagnostics](projects/orion-ai.md)__
+-   :material-file-tree-outline:{ .lg .middle } __[Blueprint — Declarative Lifecycle Engine](projects/blueprint.md)__
 
     ---
 
-    Multi-agent LangGraph pipeline that reasons over Jenkins logs, GitLab diffs
-    and runbooks to deliver cited root-cause reports in under 15 seconds.
+    Terraform-like asynchronous Python engine driven by versioned YAML blueprints. Orchestrates parallel DAG waves against Orion, emits full audit traces, and supports idempotent teardowns — eliminating commercial automation licensing.
 
-    <span class="tech-tag">LangGraph</span><span class="tech-tag">ReAct</span><span class="tech-tag">MCP</span><span class="tech-tag">Qwen</span><span class="tech-tag">Vector search</span>
+    <span class="tech-tag">Python</span><span class="tech-tag">AsyncIO</span><span class="tech-tag">DAG Scheduling</span><span class="tech-tag">Declarative YAML</span><span class="tech-tag">GitOps</span>
 
-    [:octicons-arrow-right-24: Read the case study](projects/orion-ai.md)
+    [:octicons-arrow-right-24: Read architecture case study](projects/blueprint.md)
 
--   :material-school-outline:{ .lg .middle } __[OmniLecture — Multimodal AI Suite](projects/omni-lecture.md)__
+-   :material-Cached:{ .lg .middle } __[Leaving Jenkins — HA Dispatcher & K8s Execution](projects/dispatcher-migration.md)__
 
     ---
 
-    Personal project: a Linux-native pipeline that turns lecture video, audio
-    and slides into grounded notes and flashcards with Whisper, OCR and LangGraph.
+    How we evolved from Groovy Jenkins Shared Libraries to a purpose-built High-Availability Operation Dispatcher (Django + Celery), dynamic runtime configuration injection, and ephemeral Kubernetes Job execution.
 
-    <span class="tech-tag">Whisper</span><span class="tech-tag">OpenCV</span><span class="tech-tag">OCR</span><span class="tech-tag">LangGraph</span>
+    <span class="tech-tag">Django</span><span class="tech-tag">Celery</span><span class="tech-tag">Kubernetes Jobs</span><span class="tech-tag">Ansible</span><span class="tech-tag">OpenAPI</span>
 
-    [:octicons-arrow-right-24: Read the case study](projects/omni-lecture.md)
+    [:octicons-arrow-right-24: Read architecture case study](projects/dispatcher-migration.md)
 
-</div>
+-   :material-stethoscope:{ .lg .middle } __[Orion AI — CI/CD Auto-Diagnostics (Validated PoC)](projects/orion-ai.md)__
 
-## Tech stack
+    ---
 
-<div class="stack-grid" markdown>
+    Validated multi-agent prototype using LangGraph and ReAct loops to correlate execution logs, Redis-cached docs, and GitLab diffs under deterministic guardrails — plus a candid breakdown of enterprise rollout constraints.
 
-<div class="stack-group" markdown>
-<p class="stack-group__title">Python &amp; Backend</p>
-<span class="tech-tag">Python</span><span class="tech-tag">Django</span><span class="tech-tag">DRF</span><span class="tech-tag">Celery</span><span class="tech-tag">AsyncIO</span><span class="tech-tag">OpenAPI</span><span class="tech-tag">Bash</span><span class="tech-tag">Groovy</span>
-</div>
+    <span class="tech-tag">LangGraph</span><span class="tech-tag">ReAct</span><span class="tech-tag">MCP</span><span class="tech-tag">Qwen 131k</span><span class="tech-tag">Deterministic Guardrails</span>
 
-<div class="stack-group" markdown>
-<p class="stack-group__title">Data &amp; Messaging</p>
-<span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span><span class="tech-tag">RabbitMQ</span><span class="tech-tag">Vector DBs</span>
-</div>
-
-<div class="stack-group" markdown>
-<p class="stack-group__title">Cloud &amp; Infrastructure</p>
-<span class="tech-tag">AWS</span><span class="tech-tag">OpenStack</span><span class="tech-tag">OpenShift</span><span class="tech-tag">Kubernetes</span><span class="tech-tag">Docker</span><span class="tech-tag">Podman</span><span class="tech-tag">Ceph</span><span class="tech-tag">F5</span><span class="tech-tag">Infoblox</span>
-</div>
-
-<div class="stack-group" markdown>
-<p class="stack-group__title">Automation &amp; CI/CD</p>
-<span class="tech-tag">Ansible</span><span class="tech-tag">GitOps</span><span class="tech-tag">Jenkins</span><span class="tech-tag">GitLab CI</span><span class="tech-tag">Terraform concepts</span>
-</div>
-
-<div class="stack-group" markdown>
-<p class="stack-group__title">Applied AI</p>
-<span class="tech-tag">LangGraph</span><span class="tech-tag">LangChain</span><span class="tech-tag">ReAct agents</span><span class="tech-tag">MCP</span><span class="tech-tag">RAG</span><span class="tech-tag">Whisper</span>
-</div>
+    [:octicons-arrow-right-24: Read architecture case study](projects/orion-ai.md)
 
 </div>
 
-## Experience at a glance
+## Public Open-Source Systems on GitHub
 
-<div class="timeline" markdown>
-
-<div class="timeline__item" markdown>
-<span class="timeline__date">2017 – Present</span>
-
-**Senior Python Developer, DevOps — IaaS Platform Owner** · BBVA Technology
-
-Owner and sole architect of the central IaaS & operational AI platform suite
-(Orion, Blueprint, Orion AI) for BBVA's Core Banking Infrastructure. End-to-end ownership: architecture, APIs,
-data modelling, deployment strategy, on-call and international rollout to Mexico and Turkey.
-</div>
-
-<div class="timeline__item" markdown>
-<span class="timeline__date">2015 – 2017</span>
-
-**OpenStack Administrator & Developer** · Oesia
-
-Operated a production private cloud on OpenStack and Ceph, and built a
-Dropbox-like storage application on top of OpenStack Swift.
-</div>
-
-</div>
-
-[:octicons-arrow-right-24: Full career history in the CV](cv/index.md)
-
-## Latest writing
+*Complete, runnable Python codebases built outside enterprise boundaries:*
 
 <div class="grid cards two-col" markdown>
 
--   __[Why We Built Our Own Declarative YAML Engine in Python](blog/posts/2026-03-01-declarative-infrastructure-python.md)__
+-   :material-school-outline:{ .lg .middle } __[OmniLecture Studio — Linux Multimodal AI Suite](projects/omni-lecture.md)__
 
     ---
 
-    When a commercial orchestration suite costs more in licences and friction than
-    a lean AsyncIO engine that fits your organisation exactly.
+    Native Linux (Wayland/GNOME, GTK 3) screen/audio capture and LangGraph study pipeline combining dual Whisper (`faster-whisper` CPU `int8` + cloud API), 16×16 slide diffing, and OpenCV CLAHE + Tesseract OCR.
 
--   __[Automating CI/CD Root-Cause Triage with LangGraph & ReAct](blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)__
+    <span class="tech-tag">Python</span><span class="tech-tag">GTK 3 / Wayland</span><span class="tech-tag">LangGraph</span><span class="tech-tag">Whisper int8</span><span class="tech-tag">OpenCV / OCR</span>
+
+    [:octicons-arrow-right-24: Case study](projects/omni-lecture.md) · [:fontawesome-brands-github: Source on GitHub](https://github.com/oredondo/omnilecture-studio)
+
+-   :material-wrench-outline:{ .lg .middle } __[WrenchBuddy — AI Vehicle Lifecycle & pgvector RAG](projects/wrenchbuddy.md)__
 
     ---
 
-    How stateful graphs, MCP tooling and citation-checked outputs took initial
-    triage from ~45 minutes to under 15 seconds.
+    Full-stack platform built with Django 6, DRF, PostgreSQL (`pgvector` 768-dim RAG), Celery, Redis, S3/MinIO, LangChain Vision invoice OCR, ReportLab PDF export, and a TypeScript frontend.
+
+    <span class="tech-tag">Django 6 / DRF</span><span class="tech-tag">PostgreSQL pgvector</span><span class="tech-tag">Celery &amp; Redis</span><span class="tech-tag">LangChain RAG</span><span class="tech-tag">TypeScript</span>
+
+    [:octicons-arrow-right-24: Case study](projects/wrenchbuddy.md) · [:fontawesome-brands-github: Backend](https://github.com/oredondo/WrenchBuddy) · [:fontawesome-brands-github: Frontend](https://github.com/oredondo/WrenchBuddy-frontend)
+
+</div>
+
+## Engineering Notes & Essays
+
+<div class="grid cards" markdown>
+
+-   __[When Shared Libraries Hit a Wall: Why We Replaced Jenkins with a Custom HA Dispatcher](blog/posts/2026-02-15-leaving-jenkins-at-scale-custom-dispatcher.md)__
+
+    ---
+
+    Why standardizing CI/CD on Jenkins Shared Libraries was necessary first — and how it exposed the limits that led to a Django/Celery HA dispatcher and ephemeral Kubernetes Jobs.
+
+-   __[Nine Years of Internal Cloud Platforms: Why Declarative YAML Replaced Our Commercial Orchestrator](blog/posts/2026-03-01-declarative-infrastructure-python.md)__
+
+    ---
+
+    How owning the central control plane changes the build-vs-buy calculus, why we avoided local state files, and why idempotent teardown is the true test of an infrastructure engine.
+
+-   __[The PoC Was the Easy Part: Lessons from Building an Agentic CI/CD Diagnostic Engine in Banking](blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)__
+
+    ---
+
+    Why cyclic LangGraph state machines beat linear chains for log triage, and what actually blocks validated AI prototypes from wide production rollout in regulated institutions.
 
 </div>
 
 <div class="cta-banner" markdown>
 
-### Let's build something reliable
+### Let's talk platform architecture
 
-I enjoy conversations about platform engineering, Python architecture and
-bringing AI agents safely into production operations.
+I enjoy discussing internal developer platforms, distributed Python systems, cloud-agnostic abstractions, and bringing AI safely into production operations.
 
 [:material-linkedin: Connect on LinkedIn](https://linkedin.com/in/oscarredondodjangopython){ .md-button .md-button--primary }
+[:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }
 [:material-email-outline: o.redondo91@gmail.com](mailto:o.redondo91@gmail.com){ .md-button }
 
 </div>

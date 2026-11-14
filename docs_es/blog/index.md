@@ -1,12 +1,9 @@
 ---
-title: Blog de Ingeniería
+title: Notas de Ingeniería y Ensayos de Arquitectura
 description: >-
-  Artículos técnicos y análisis sobre ingeniería de plataformas en Python,
-  orquestación declarativa, agentes de IA operativos y DevOps a escala.
+  Ensayos de arquitectura en primera persona sobre plataformas internas de desarrollo, motores de ejecución distribuida, diseño declarativo de ciclo de vida e IA operativa en entornos regulados.
 ---
 
-# Blog de Ingeniería
+# Notas de Ingeniería y Ensayos de Arquitectura
 
-Notas directas desde la construcción de plataformas en producción: diseño de plataformas
-internas de desarrollo, creación de motores declarativos en Python, eliminación de tareas
-operativas repetitivas y aplicación segura de IA agéntica en entornos reales.
+Reflexiones tras una década construyendo y operando plataformas cloud internas: por qué superamos los límites de las herramientas estándar de CI/CD, cuándo compensa diseñar un motor propio frente a comprar una suite comercial y qué ocurre realmente al llevar sistemas agénticos de IA a operaciones de infraestructura bancaria.

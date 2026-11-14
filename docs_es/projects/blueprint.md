@@ -1,207 +1,121 @@
 ---
-title: "Caso de Estudio: Orquestador Declarativo Blueprint"
+title: "Caso de Estudio: Motor Declarativo Blueprint"
 description: >-
-  Un motor de orquestación asíncrono en Python al estilo Terraform guiado por planos
-  YAML versionados: idempotente, auditable y libre de ataduras de proveedor comercial.
+  Motor de orquestación asíncrono en Python guiado por planos YAML versionados — llevando la filosofía declarativa estilo Terraform y desmontajes idempotentes a la nube interna de BBVA.
 ---
 
-# Blueprint: Motor de Orquestación Declarativo y Asíncrono
+# Blueprint: Motor Asíncrono de Ciclo de Vida Declarativo
 
 | Dimensión | Detalles |
 | :--- | :--- |
-| **Rol** | Creador e Ingeniero Líder de Sistemas |
+| **Rol** | Creador y Arquitecto Principal de Sistemas |
 | **Organización** | BBVA Technology (Infraestructura Core Banking) |
-| **Impacto** | Sustitución de plataforma de automatización comercial (Red Hat Ansible Automation Platform); aportó reproducibilidad GitOps a la infraestructura bancaria |
-| **Stack** | Python, AsyncIO, PyYAML, JSON Schema, GitOps, API Orion |
+| **Resultado** | Eliminación de licencias comerciales de orquestación (Red Hat Automation Platform); GitOps declarativo y desmontajes reanudables sobre Orion |
+| **Stack** | Python, AsyncIO, DSL Declarativo en YAML, JSON Schema, GitOps, API REST de Orion |
 
-!!! abstract "Resumen ejecutivo (TL;DR)"
+!!! abstract "Resumen de arquitectura"
 
-    Los ingenieros declaran el **estado deseado** de su infraestructura en un archivo YAML
-    versionado en Git. Blueprint lo valida, genera un grafo acíclico dirigido (DAG) de dependencias,
-    ejecuta pasos independientes en paralelo mediante AsyncIO y reconcilia contra el estado en vivo
-    de Orion para que cualquier ejecución —incluido un desmontaje interrumpido— sea **segura de repetir**.
+    Blueprint es un motor interno de orquestación asíncrona en Python — conceptualmente análogo a Terraform y diseñado específicamente sobre la plataforma **Orion** de BBVA. Los equipos de ingeniería declaran el estado deseado de sus entornos completos en planos YAML versionados; el motor resuelve el grafo de dependencias, ejecuta operaciones independientes en paralelo, genera un informe estructurado con trazabilidad completa de trabajos en Orion para auditoría y soporta **operaciones de destrucción idempotentes** que reanudan desmontajes parciales sin reprocesar pasos ya completados.
 
-## 1. Contexto y reto técnico
+---
 
-La automatización corporativa dependía de una suite comercial pesada. Conllevaba costes de licencia crecientes,
-limitaciones de escalado y escasa alineación con los flujos internos de gobernanza bancaria; en particular,
-reconstruir el estado exacto tras un fallo a mitad de ejecución era complejo para auditoría.
+## 1. Contexto y Por Qué No Encajaban las Suites Comerciales
 
-**Objetivo:** construir un motor declarativo interno en Python donde los equipos describieran entornos
-completos en YAML bajo control de versiones, ejecutado en paralelo con plena trazabilidad y seguridad idempotente.
+Una vez que **Orion** expuso una API REST unificada sobre AWS, OpenStack, OpenShift y bare-metal, los equipos necesitaban orquestar entornos completos (redes, balanceadores, grupos de cómputo, middleware) como una sola unidad en lugar de invocar endpoints aislados.
 
-## 2. Flujo y arquitectura del motor
+Depender de suites comerciales de orquestación como **Red Hat Automation Platform (Ansible Tower)** presentaba tres problemas estructurales:
+
+1. **Coste de licenciamiento por nodo:** Las licencias comerciales escalan según el número de servidores gestionados, penalizando el crecimiento sobre decenas de miles de nodos.
+2. **Opacidad ante fallos a mitad de ejecución:** Cuando una secuencia procedimental de 40 pasos falla en el paso 27 por un corte transitorio de red, reconstruir el estado exacto para auditoría o desmontar de forma segura el entorno parcial exigía intervención manual.
+3. **Desajuste con la arquitectura de Orion:** Ya éramos propietarios de la fuente única de verdad (Orion). Necesitábamos un orquestador que hablara de forma nativa el modelo de identificadores de trabajo (Job IDs), sondeo asíncrono, permisos RBAC y reportes de cumplimiento de Orion.
+
+---
+
+## 2. Flujo Abstracto de Ejecución y Desmontaje
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Dev as Ingeniero / Pipeline CI
-    participant Repo as Repositorio Git (Plano YAML)
-    participant Engine as Motor Blueprint (AsyncIO)
-    participant Orion as API IaaS Orion
-    participant Audit as Almacén inmutable de auditoría
+    actor Team as Equipo de Ingeniería (GitOps)
+    participant Engine as Motor Blueprint (Python AsyncIO)
+    participant Orion as API IaaS Orion (Fuente de Verdad)
+    participant Report as Informe Estructurado de Auditoría
 
-    Dev->>Repo: git push blueprint.yml
-    Repo->>Engine: Disparar ejecución con manifiesto objetivo
-    Engine->>Engine: Validar contra esquema y resolver DAG
-    Engine->>Orion: Consultar estado actual (comprobación de idempotencia)
+    Team->>Engine: Envía plano YAML versionado (aprovisionar o destruir)
+    Engine->>Engine: Valida esquema y construye DAG de dependencias (olas de ejecución)
+    Engine->>Orion: Consulta estado en vivo de los recursos declarados
 
-    par Aprovisionamiento asíncrono en paralelo
-        Engine->>Orion: Aprovisionar cluster de cómputo
-        Engine->>Orion: Configurar redes y subredes virtuales
-        Engine->>Orion: Aplicar reglas de firewall y F5
+    alt El recurso ya cumple el estado objetivo (o ya fue destruido)
+        Orion-->>Engine: Estado satisfecho → marca el paso como NO-OP
+    else Diferencial detectado
+        par Ejecución concurrente dentro de la ola actual del DAG
+            Engine->>Orion: Lanza operación asíncrona A (recibe Job ID de Orion)
+            Engine->>Orion: Lanza operación asíncrona B (recibe Job ID de Orion)
+        end
+        Orion-->>Engine: Sondea / recibe estado de finalización por Job ID
     end
 
-    Orion-->>Engine: Transmitir estado de operaciones e IDs de trabajo
-    Engine->>Audit: Registrar traza completa de ejecución
-    Engine-->>Dev: Resultado estructurado de la operación
+    Engine->>Report: Emite traza estructurada con todos los Job IDs de Orion
+    Report-->>Team: Resultado determinista (seguro de relanzar ante fallo parcial)
 ```
 
-Un plano (*blueprint*) está diseñado para ser limpio y declarativo:
+---
 
-```yaml title="payments-stack.yml"
-version: "2.0"
-target_environment: aws-production
+## 3. Pilares Técnicos Fundamentales
 
-resources:
-  - name: payment-network
-    type: network.subnet
-    cidr: 10.20.0.0/24
+### A. Planos YAML Declarativos frente a Scripts Procedimentales
+En lugar de mantener scripts imperativos que mezclan flujo de control con estado de infraestructura, los equipos versionan en Git un plano YAML declarativo que define **qué** topología debe existir y las dependencias entre componentes. La validación de esquema detecta errores estructurales y ciclos antes de realizar una sola llamada a Orion.
 
-  - name: payment-worker-pool
-    type: compute.instance_group
-    count: 12
-    flavor: m5.xlarge
-    depends_on: [payment-network]
+### B. Concurrencia Asíncrona por Olas (Waves)
+El aprovisionamiento de infraestructura está limitado por I/O (esperas de red ante APIs cloud, hipervisores y balanceadores). Blueprint organiza el grafo de dependencias en **olas de ejecución**:
 
-  - name: payment-redis-cache
-    type: cache.cluster
-    engine: redis
-    depends_on: [payment-network]
+- Los recursos sin dependencias pendientes se ejecutan **de forma concurrente** sobre el bucle de eventos `AsyncIO` de Python.
+- Los recursos dependientes esperan a que su ola predecesora finalice correctamente.
+- Si un paso falla a mitad de una ola, el motor conserva el registro exacto de cada trabajo en vuelo dentro de Orion sin perder la trazabilidad de las operaciones hermanas.
+
+### C. Destrucción Idempotente y Reanudación de Desmontajes Parciales
+El desmantelamiento de entornos complejos es el punto donde suele romperse la automatización tradicional. Si una destrucción falla a mitad de camino, un script ingenuo aborta al relanzarse porque la primera mitad de los recursos ya no existe.
+
+Blueprint gestiona el **ciclo de vida completo de la infraestructura**:
+
+- En modo destrucción, el orden de dependencias se invierte para eliminar los servicios dependientes antes que las redes o el almacenamiento compartido.
+- Antes de actuar sobre cualquier nodo, el motor verifica el estado en vivo en Orion. Los pasos ya completados en una ejecución previa interrumpida se omiten limpiamente, permitiendo relanzar el mismo plano hasta completar el desmontaje sin tocar la base de datos manualmente.
+
+### D. Trazabilidad Extremo a Extremo por Job ID
+En un entorno bancario regulado, que un pipeline termine en verde no basta como evidencia de auditoría. Cada ejecución de Blueprint genera un informe estructurado que vincula cada recurso del manifiesto YAML con los **Job IDs exactos de Orion**, marcas de tiempo y transiciones de estado ejecutadas — incluso cuando una ejecución se detiene a mitad de camino.
+
+---
+
+## 4. Modos de Fallo y Diseño de Resiliencia
+
+```mermaid
+stateDiagram-v2
+    [*] --> ValidacionEsquema
+    ValidacionEsquema --> AbortadoPreFlight: Esquema inválido o dependencia circular
+    ValidacionEsquema --> InspeccionEstado: DAG válido
+    InspeccionEstado --> EjecucionPorOlas: Calcula delta frente al estado en vivo en Orion
+    EjecucionPorOlas --> Completado: Todas las olas finalizan con éxito
+    EjecucionPorOlas --> FalloParcial: Error transitorio de red o proveedor
+    FalloParcial --> InspeccionEstado: Relanzar plano (pasos ya hechos pasan a NO-OP)
+    Completado --> [*]
 ```
 
-## 3. Pilares técnicos fundamentales
-
-### A. Resolvedor de dependencias DAG
-
-La infraestructura tiene dependencias implícitas: una subred debe existir antes de vincular una instancia,
-pero múltiples instancias pueden levantarse simultáneamente. Blueprint calcula **olas de ejecución** a partir
-del grafo: todos los recursos de una misma ola se ejecutan en concurrencia; las olas avanzan secuencialmente.
-
-### B. Idempotencia, auto-reconciliación y desmontajes resilientes
-
-Los scripts tradicionales y playbooks procedimentales fallan bruscamente al reejecutarse si un recurso ya existe o ya ha sido eliminado. Blueprint aplica un **modelo de reconciliación en tres fases**:
-
-1. **Consulta de estado observado:** Antes de ejecutar cualquier mutación, Blueprint consulta el estado en vivo a la API de Orion en lugar de confiar en archivos locales de estado (*statefiles*) propensos a desincronizaciones (*drift*).
-2. **Evaluación del delta de intención:** Calcula una diferencia estricta (`NOOP`, `CREATE`, `UPDATE`, `DELETE`). Si el estado observado ya satisface la especificación deseada, la acción se marca como `NOOP` y concluye inmediatamente.
-3. **Desmontaje reanudable con DAG invertido:** Los procesos de destrucción invierten el grafo de dependencias automáticamente (p. ej., las instancias se apagan antes de destruir subredes). Si un pipeline se interrumpe a mitad de una destrucción por timeout de red, relanzar el trabajo omite limpiamente los recursos ya destruidos y continúa exactamente donde se detuvo, sin intervención manual ni recursos huérfanos.
-
-### C. Cero dependencia de licencias propietarias
-
-La automatización pasa a ser código Python propio, adaptado a los estándares de cumplimiento bancario,
-eliminando costes de licencia recurrente y otorgando total libertad evolutiva al equipo de plataforma.
-
-### Análisis de trade-offs
-
-| Decisión | Alternativa evaluada | Justificación técnica |
+| Escenario de Fallo | Playbook Procedimental Tradicional | Comportamiento del Motor Blueprint |
 | :--- | :--- | :--- |
-| Desarrollar motor propio | Mantener suite comercial / adoptar Terraform genérico | Integración nativa con la API de Orion, reintentos específicos y políticas de rollback a medida, propiedad total de auditoría y sin costes por nodo gestionado |
-| AsyncIO nativo | Hilos (threads) o multiprocessing | Carga de trabajo 100% ligada a I/O (llamadas API y polling); miles de esperas concurrentes con consumo de recursos insignificante |
-| Reconciliación contra estado en vivo | Archivo local de estado (*statefile*) | Orion ya es la fuente única de verdad; evita desincronizaciones de estado (*state drift*) y bloqueos concurrentes |
+| **Dependencia circular en el manifiesto** | Se descubre a mitad del despliegue tras mutar producción | Rechazado en la validación previa del DAG antes de invocar ninguna API |
+| **Timeout a mitad de un desmontaje de 20 nodos** | Al relanzar falla con "recurso no encontrado" en los nodos 1–10 | Al relanzar consulta Orion, omite los nodos 1–10 y reanuda en el nodo 11 |
+| **Auditoría solicita evidencia de un cambio fallido** | Correlación manual entre múltiples logs de consola | Informe estructurado vincula cada paso con su Job ID inmutable en Orion |
 
-## 4. Aspectos destacados de la implementación en Python
+---
 
-### Planificador DAG por olas con reconciliación dinámica de estado
+## 5. Trade-Offs de Arquitectura
 
-Núcleo ilustrativo del planificador combinando `graphlib.TopologicalSorter`, `asyncio.TaskGroup` y cálculo de diferencias idempotentes:
+| Decisión | Alternativa Evaluada | Justificación |
+| :--- | :--- | :--- |
+| **Motor propio en Python** | Red Hat Automation Platform / Terraform | Eliminó costes recurrentes de licencias comerciales, se integró de forma nativa con el modelo de trabajos y auditoría de Orion y evitó bloqueos de archivos de estado externos. |
+| **Orion como fuente única de verdad en vivo** | Archivos locales de estado (equivalente a `tfstate`) | Orion ya mantiene el inventario multi-cloud en tiempo real; consultar Orion evita deriva de estado (*drift*) y bloqueos concurrentes. |
+| **Concurrencia con AsyncIO** | Ejecutores multi-hilo o multi-proceso | Alta concurrencia para cientos de esperas de API simultáneas con una huella de memoria mínima. |
 
-```python title="reconciliation.py (ilustrativo)"
-import asyncio
-from enum import Enum, auto
-from graphlib import TopologicalSorter
-from typing import NamedTuple
+---
 
-
-class DesiredState(NamedTuple):
-    name: str
-    resource_type: str
-    spec: dict
-
-
-class Action(Enum):
-    NOOP = auto()
-    CREATE = auto()
-    UPDATE = auto()
-    DESTROY = auto()
-
-
-class BlueprintReconciler:
-    def __init__(self, client: "OrionClient") -> None:
-        self.client = client
-
-    async def diff(self, desired: DesiredState, is_teardown: bool = False) -> Action:
-        live = await self.client.get_resource(desired.name)
-        if is_teardown:
-            return Action.NOOP if live is None else Action.DESTROY
-
-        if live is None:
-            return Action.CREATE
-        if live.spec == desired.spec:
-            return Action.NOOP
-        return Action.UPDATE
-
-    async def reconcile_resource(self, desired: DesiredState, is_teardown: bool) -> None:
-        action = await self.diff(desired, is_teardown=is_teardown)
-        match action:
-            case Action.NOOP:
-                return  # La operación nula garantiza la idempotencia en reintentos
-            case Action.CREATE:
-                await self.client.create_resource(desired.spec)
-            case Action.UPDATE:
-                await self.client.update_resource(desired.name, desired.spec)
-            case Action.DESTROY:
-                await self.client.delete_resource(desired.name)
-
-    async def run(
-        self,
-        manifest: dict[str, DesiredState],
-        dependencies: dict[str, set[str]],
-        teardown: bool = False,
-    ) -> None:
-        """Ejecuta dependencias en olas concurrentes.
-
-        Si teardown=True, el grafo se invierte (se destruyen dependientes antes que dependencias).
-        """
-        graph_deps = dependencies if not teardown else self._invert_graph(dependencies)
-        sorter = TopologicalSorter(graph_deps)
-        sorter.prepare()  # (1)!
-
-        while sorter.is_active():
-            ready_wave = sorter.get_ready()
-            async with asyncio.TaskGroup() as tg:  # (2)!
-                for name in ready_wave:
-                    tg.create_task(
-                        self.reconcile_resource(manifest[name], is_teardown=teardown)
-                    )
-            sorter.done(*ready_wave)
-
-    @staticmethod
-    def _invert_graph(deps: dict[str, set[str]]) -> dict[str, set[str]]:
-        inverted: dict[str, set[str]] = {k: set() for k in deps}
-        for node, upstream in deps.items():
-            for parent in upstream:
-                inverted.setdefault(parent, set()).add(node)
-        return inverted
-```
-
-1. `sorter.prepare()` valida el grafo al inicio; cualquier ciclo genera una excepción `CycleError` antes de mutar la infraestructura.
-2. `asyncio.TaskGroup` ejecuta tareas independientes en paralelo por cada ola; si una falla, cancela de forma limpia las operaciones hermanas, preservando un estado determinista y reanudable.
-
-## 5. Resultados
-
-- :moneybag: **Ahorro recurrente de licencias:** sustitución completa de orquestación comercial por Python propio.
-- :repeat: **Reproducibilidad GitOps:** cualquier modificación de entorno es un commit auditado y versionado.
-- :mag: **Trazabilidad completa:** cada ejecución genera una traza inmutable para auditores.
-- :zap: **Paralelismo por defecto:** los recursos independientes se aprovisionan en paralelo en lugar de secuencialmente.
-
-[:octicons-arrow-right-24: Artículo relacionado: Por qué construimos nuestro propio motor YAML declarativo](../blog/posts/2026-03-01-declarative-infrastructure-python.md)
+[:octicons-arrow-left-24: Anterior: Plataforma IaaS Orion](orion-iaas.md) · [:octicons-arrow-right-24: Siguiente: Dejar Jenkins Atrás — Dispatcher HA y Ejecución K8s](dispatcher-migration.md)

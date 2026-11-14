@@ -1,265 +1,117 @@
 ---
-title: "Case Study: Orion IaaS Platform"
+title: "Case Study: Orion IaaS Platform & Driver Pipeline"
 description: >-
-  Architecture of BBVA's central IaaS platform — a Python/Django self-service API
-  governing tens of thousands of machines and high-throughput daily operations across AWS,
-  OpenStack, OpenShift and on-premises.
+  High-level architecture of BBVA's central IaaS platform — a Python/Django control plane governing tens of thousands of nodes across AWS, OpenStack, OpenShift, and bare metal.
 ---
 
-# Orion: Enterprise IaaS Audit & Deployment Platform
+# Orion: Central IaaS Platform & Universal Driver Pipeline
 
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Sole Architect & Platform Owner |
-| **Organization** | BBVA Technology (Core Banking Infrastructure) · 2017 – present |
+| **Organization** | BBVA Technology (Core Banking Infrastructure) · 2017 – Present |
 | **Scale** | Tens of thousands of nodes · High-throughput daily operations · 500+ engineers |
-| **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift |
+| **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift, F5, Infoblox |
 
-!!! abstract "TL;DR"
+!!! abstract "Architectural summary"
 
-    Orion turns four very different infrastructure worlds into **one self-service,
-    auditable Python API**. A pluggable driver layer isolates provider specifics, Celery
-    decouples long-running operations from HTTP, and a hybrid data tier keeps strict
-    audit history in PostgreSQL while MongoDB absorbs heterogeneous asset metadata.
+    Orion is the central control plane for infrastructure governance, auditing, and self-service deployment across BBVA's hybrid cloud. It hides four distinct infrastructure substrates (**AWS, OpenStack, OpenShift, and physical bare-metal**) behind a single OpenAPI-documented REST interface, combining a **universal driver deployment pipeline**, a **hybrid relational/document data tier**, and **automated compliance export pipelines**.
 
-## 1. Context & engineering challenge
+---
 
-At banking scale, teams provisioned and audited infrastructure through disparate
-pipelines across heterogeneous environments: **AWS**, private cloud (**OpenStack**),
-container platforms (**OpenShift**) and legacy **on-premises bare metal**.
+## 1. Context & Problem Statement
 
-1. **Environment silos** — every environment needed its own tooling, skills and manual tickets.
-2. **Audit bottlenecks** — regulators require continuous tracking of machine state, security
-   baselines and ownership across tens of thousands of heterogeneous nodes.
-3. **Developer friction** — provisioning took days instead of minutes because there was no
-   self-service abstraction.
+Operating infrastructure at banking scale across public cloud, private cloud, container clusters, and legacy data centers created three structural bottlenecks:
 
-## 2. High-level architecture
+1. **Siloed provisioning:** Every target environment (AWS, OpenStack, OpenShift, physical hardware) required its own specialized tooling, credentials, and manual ticket handoffs — turning simple provisioning requests into multi-day waits.
+2. **Heterogeneous asset auditing:** Regulatory and internal audit teams require continuous, verifiable snapshots of ownership, security baselines, and machine state across tens of thousands of assets whose underlying metadata schemas look nothing alike.
+3. **Vendor integration fragility:** Infrastructure platforms depend on upstream vendor integrations (such as F5 load balancers with OpenStack) that can be deprecated mid-lifecycle without warning.
 
-Orion was designed to make infrastructure effectively **invisible** to 500+ engineers
-while guaranteeing fully auditable governance.
+---
+
+## 2. Abstract System Topology
+
+Orion was architected from scratch to make the underlying cloud provider effectively invisible to the 500+ engineers consuming it, while centralizing permissions, product catalogs, remediation workflows, and audit trails.
 
 ```mermaid
 flowchart TD
-    subgraph Clients["Consumers (500+ engineers)"]
-        UI["Internal developer portal"]
-        CLI["Automation CLI / Blueprint"]
-        API_Callers["CI/CD pipelines & services"]
+    subgraph Consumers["Platform Consumers (500+ Engineers)"]
+        Portal["Self-Service Portal & CLI"]
+        BP["Blueprint Declarative Engine"]
+        Systems["Core Bank Systems & CI/CD"]
     end
 
-    subgraph Core["Orion platform core (Python / Django)"]
-        Gateway["OpenAPI REST gateway (DRF)"]
-        Auth["RBAC & compliance policy engine"]
-        Engine["Async task coordinator (Celery)"]
-        Gateway --> Auth
-        Auth --> Engine
+    subgraph ControlPlane["Orion Control Plane (Python / Django / DRF)"]
+        API["OpenAPI / Swagger REST Gateway"]
+        RBAC["Centralized RBAC & Product Catalog"]
+        Audit["Automated Audit Export Pipelines (CSV / Reports)"]
+        Coord["Async Operation Coordinator (Celery)"]
+        API --> RBAC --> Coord
+        RBAC --> Audit
     end
 
-    subgraph Data["Hybrid data tier"]
-        PG[("PostgreSQL<br/>relational state, RBAC, audit")]
-        Mongo[("MongoDB<br/>polymorphic asset metadata")]
-        Cache[("Redis<br/>hot cache & task queues")]
+    subgraph DataTier["Hybrid Persistence & Messaging Tier"]
+        PG[("PostgreSQL<br/>Transactional state, RBAC & immutable audit trail")]
+        Mongo[("MongoDB<br/>Polymorphic multi-cloud asset inventory")]
+        Redis[("Redis<br/>Hot query cache & Celery broker")]
     end
 
-    UI & CLI & API_Callers --> Gateway
-
-    Engine <--> PG
-    Engine <--> Mongo
-    Engine <--> Cache
-
-    subgraph Drivers["Driver abstraction layer"]
-        AWS_D["AWS driver"]
-        OS_D["OpenStack driver"]
-        OSH_D["OpenShift driver"]
-        Bare_D["Bare-metal driver"]
+    subgraph DriverLayer["Universal Driver Deployment Pipeline"]
+        AWS_D["AWS Driver"]
+        OS_D["OpenStack Driver"]
+        F5_B["Custom F5 ↔ OpenStack REST Bridge"]
+        OSH_D["OpenShift Driver"]
+        BM_D["Bare-Metal / On-Prem Driver"]
     end
 
-    Engine --> AWS_D & OS_D & OSH_D & Bare_D
-
-    AWS_D --> AWS_Env["AWS VPCs"]
-    OS_D --> OS_Env["OpenStack clusters"]
-    OSH_D --> OSH_Env["OpenShift / Kubernetes"]
-    Bare_D --> HW_Env["On-prem data centres"]
+    Consumers --> API
+    Coord <--> PG & Mongo & Redis
+    Audit <-- "High-volume analytical queries" --- PG & Mongo
+    Coord --> AWS_D & OS_D & OSH_D & BM_D
+    OS_D <--> F5_B
 ```
 
-## 3. Key architectural decisions
+---
 
-### A. Hybrid data tier (PostgreSQL + MongoDB + Redis)
+## 3. Core Architectural Decisions
 
-Operating tens of thousands of machines across disparate clouds with wildly different metadata
-(networking, tags, disk layouts, hypervisor-specific fields) made a single rigid relational schema unmaintainable.
+### A. Hybrid Persistence Tier (PostgreSQL + MongoDB + Redis)
+A single database engine could not cleanly serve both strict banking compliance and massive multi-cloud inventory queries:
 
-- **PostgreSQL** owns everything that must be transactional and immutable: audit
-  logs, permissions, operation state histories.
-- **MongoDB** ingests and indexes polymorphic asset metadata, enabling fast queries
-  across tens of thousands of heterogeneous nodes.
-- **Redis** caches permission graphs and hot lookups to keep API responses fast
-  under heavy concurrent load, and backs the Celery queues.
+- **PostgreSQL** stores relational entities requiring transactional integrity: permissions (RBAC), product catalogs, operation state transitions, and immutable audit records.
+- **MongoDB** ingests polymorphic asset documents across tens of thousands of machines (where an AWS EC2 instance, an OpenStack VM, an OpenShift namespace, and a physical server have completely different attribute trees) and indexes them for high-volume cross-estate querying.
+- **Redis** absorbs hot read paths and backs the asynchronous Celery task queues so HTTP endpoints respond immediately while long-running infrastructure workflows execute in the background.
 
-### B. The universal driver pattern & isolated testing
+### B. Universal Driver Deployment Pipeline
+Instead of maintaining separate deployment pipelines per cloud provider, the deployment engine is built around an **abstract driver interface**:
 
-All provider-specific concerns — authentication, API calls, status polling, and payload transformation — live strictly behind an abstract driver contract. A developer submits the **same normalized specification** regardless of the target cloud; the platform resolves the right driver dynamically at runtime without touching core business logic.
+- **Single contract, swappable backends:** Every infrastructure flavor (AWS, OpenStack, OpenShift, bare-metal) implements a common lifecycle contract. The core platform dispatches the same normalized payload regardless of target environment.
+- **Organization-wide deployment standards:** Beyond the software layer, this pattern established the bank's standard deployment philosophy — enabling application teams to ship artifacts to production autonomously without manual intervention from infrastructure teams.
 
-Key engineering advantages of this pattern:
+### C. Zero-Downtime Vendor Deprecation Shield (F5 / OpenStack Bridge)
+When the official native integration between **F5 Load Balancers** and **OpenStack** was deprecated upstream, relying directly on vendor plugins would have forced a disruptive migration across production environments. Because Orion's driver layer already isolated downstream calls, I engineered a **custom RESTful API bridge** between F5 and OpenStack and slotted it behind the driver boundary — restoring full automated load-balancing interoperability with **zero banking downtime**.
 
-- **Zero core refactoring for new clouds:** Adding a new cloud provider requires writing a single isolated plugin module that inherits from `InfrastructureDriver`. The core platform remains untouched.
-- **Self-registration with capability negotiation:** Drivers declare capabilities (e.g., live resize, VPC peering, bare-metal PXE boot) during class registration, allowing the platform to validate requests before delegating work.
-- **Isolated, mock-free testing:** Because drivers encapsulate all provider SDKs (boto3, openstacksdk, kubernetes client), core platform services and Celery workflows are tested against an `InMemoryDriver` without fragile third-party SDK monkeypatching. Conformance tests run against the abstract contract to verify every driver satisfies the expected lifecycle invariants.
+### D. Automated Compliance & Audit Pipelines
+Rather than treating compliance as an ad-hoc manual data gathering exercise before inspections, Orion runs automated export pipelines that aggregate operational state across MongoDB and PostgreSQL into structured reports (CSV pipelines) consumed directly by internal auditors and governance stakeholders.
 
-### C. Asynchronous processing by default
+---
 
-Provisioning can take minutes; HTTP requests should take milliseconds. Long-running
-workflows run in Celery worker pools tuned for I/O-bound concurrency, and publish
-granular status events so clients can follow progress instead of blocking.
+## 4. Architectural Trade-Offs
 
-### Trade-offs
-
-| Decision | Alternative considered | Why this choice |
+| Decision | Alternative Considered | Rationale |
 | :--- | :--- | :--- |
-| Hybrid PostgreSQL + MongoDB | Single relational DB with JSON columns | Audit data needs strict relational guarantees; asset metadata is genuinely schemaless and query-heavy |
-| Driver abstraction in Python | One pipeline per environment | One API and one audit trail; new providers are additive, not invasive |
-| Celery async workers | Synchronous API calls | Decouples user latency from provider latency; enables retries and back-pressure |
+| **Hybrid PostgreSQL + MongoDB** | Single relational DB with JSONB | Kept strict relational integrity for permissions and audit trails while allowing high-speed indexing across deeply heterogeneous cloud metadata schemas. |
+| **In-house Python driver abstraction** | Separate provider-native pipelines per cloud | Unified RBAC, product catalog, and audit trail in one control plane; new infrastructure targets are additive modules. |
+| **Custom F5/OpenStack REST bridge** | Full load-balancer platform migration | Preserved operational continuity and delivered zero downtime when the vendor deprecated native integration. |
 
-## 4. Python implementation highlights
+---
 
-### Abstract driver contract & registry
+## 5. Operational Impact
 
-A simplified, illustrative version of the driver contract with auto-registration and capability flags:
+- **Self-service at scale:** Enabled **500+ engineers** to provision, govern, and remediate infrastructure autonomously across **tens of thousands of nodes**, reducing provisioning lead times from days of ticket handoffs to minutes.
+- **Continuous auditability:** Replaced manual compliance evidence gathering with automated, verifiable audit pipelines consumed directly by governance teams.
+- **International adoption:** Rolled out across engineering organizations in **Spain, Mexico, and Turkey**, including cross-team onboarding and targeted platform extensions for regional workflows.
 
-```python title="drivers.py (illustrative)"
-from __future__ import annotations
+---
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from enum import Flag, auto
-from typing import ClassVar
-
-
-class Capability(Flag):
-    NONE = 0
-    RESIZE = auto()
-    VPC_PEERING = auto()
-    SNAPSHOT = auto()
-    BAREMETAL_PXE = auto()
-
-
-@dataclass(frozen=True, slots=True)
-class MachineSpec:
-    name: str
-    flavor: str
-    image: str
-    environment: str  # "aws" | "openstack" | "openshift" | "baremetal"
-    tags: dict[str, str] = field(default_factory=dict)
-
-
-class InfrastructureDriver(ABC):
-    """Abstract contract that every provider driver must fulfill."""
-
-    registry: ClassVar[dict[str, type[InfrastructureDriver]]] = {}
-    environment: ClassVar[str]
-    capabilities: ClassVar[Capability] = Capability.NONE
-
-    def __init_subclass__(cls, **kwargs) -> None:
-        super().__init_subclass__(**kwargs)
-        if not hasattr(cls, "environment"):
-            raise TypeError(f"Driver class {cls.__name__} must declare 'environment'")
-        InfrastructureDriver.registry[cls.environment] = cls  # (1)!
-
-    @abstractmethod
-    def provision(self, spec: MachineSpec) -> str:
-        """Provision resource synchronously or return a provider-assigned job ID."""
-        ...
-
-    @abstractmethod
-    def status(self, resource_id: str) -> str: ...
-
-    @abstractmethod
-    def decommission(self, resource_id: str) -> None: ...
-
-
-def driver_for(spec: MachineSpec) -> InfrastructureDriver:
-    try:
-        return InfrastructureDriver.registry[spec.environment]()
-    except KeyError:
-        raise ValueError(f"No driver registered for environment: {spec.environment!r}") from None
-```
-
-1.  Drivers self-register automatically at import time via `__init_subclass__`. Adding a new cloud provider is strictly an additive module import — zero changes to the core dispatch logic.
-
-### Decoupled conformance testing without SDK mocking
-
-Instead of writing fragile unit tests that mock dozens of deep AWS boto3 or OpenStack SDK calls, platform tests enforce a universal behavioral contract suite. Any driver implementation can be tested against the same contract:
-
-```python title="test_driver_contract.py (illustrative)"
-import pytest
-from drivers import Capability, InfrastructureDriver, MachineSpec
-
-
-class ConformanceTestSuite:
-    """Base conformance test suite that every driver implementation must pass."""
-
-    @pytest.fixture
-    def driver(self) -> InfrastructureDriver:
-        raise NotImplementedError("Subclasses must yield a configured driver fixture")
-
-    def test_provision_returns_valid_identifier(self, driver: InfrastructureDriver) -> None:
-        spec = MachineSpec(
-            name="test-node-01",
-            flavor="standard-2",
-            image="rhel9-hardened",
-            environment=driver.environment,
-        )
-        resource_id = driver.provision(spec)
-        assert isinstance(resource_id, str) and len(resource_id) > 0
-        assert driver.status(resource_id) in {"PENDING", "ACTIVE"}
-
-    def test_decommission_is_idempotent(self, driver: InfrastructureDriver) -> None:
-        spec = MachineSpec(
-            name="test-node-02",
-            flavor="standard-2",
-            image="rhel9-hardened",
-            environment=driver.environment,
-        )
-        resource_id = driver.provision(spec)
-        driver.decommission(resource_id)
-        # Decommissioning an already terminated resource should not raise an unhandled exception
-        driver.decommission(resource_id)
-        assert driver.status(resource_id) == "DELETED"
-```
-
-### Celery async task coordination
-
-And on the Celery side, keeping HTTP cycles thin while publishing real-time audit logs:
-
-```python title="tasks.py (illustrative)"
-from celery import shared_task
-
-
-@shared_task(
-    bind=True,
-    autoretry_for=(ConnectionError,),
-    retry_backoff=True,
-    max_retries=5,
-    acks_late=True,
-)
-def provision_machine(self, spec_payload: dict, operation_id: str) -> str:
-    spec = MachineSpec(**spec_payload)
-    driver = driver_for(spec)
-    resource_id = driver.provision(spec)
-    record_audit_event(operation_id, action="provision", resource_id=resource_id)
-    return resource_id
-```
-
-## 5. Measurable impact
-
-<div class="kpi-grid">
-  <div class="kpi-card"><span class="kpi-value">Days → min</span><span class="kpi-label">Provisioning lead time</span></div>
-  <div class="kpi-card"><span class="kpi-value">100%</span><span class="kpi-label">Audit compliance</span></div>
-  <div class="kpi-card"><span class="kpi-value">3</span><span class="kpi-label">Countries rolled out</span></div>
-</div>
-
-- :rocket: **Zero-ticket provisioning** — self-service replaced manual tickets; delivery went from days to automated minutes.
-- :shield: **100% audit compliance** — automated export pipelines deliver verified governance snapshots straight to audit teams.
-- :earth_africa: **International scale** — rolled out across engineering hubs in Spain, Mexico and Turkey, with onboarding and platform enhancements for each team.
-
-[:octicons-arrow-right-24: Next: Blueprint — the declarative engine built on top of Orion](blueprint.md)
+[:octicons-arrow-right-24: Next: Blueprint — Declarative lifecycle orchestration built on top of Orion](blueprint.md)

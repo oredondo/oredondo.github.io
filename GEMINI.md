@@ -28,5 +28,5 @@ This repository contains the professional portfolio, architectural case studies,
 3. Test dual builds with `uv run zensical build -s && uv run zensical build -s -f mkdocs.es.yml`.
 4. Keep Markdown internal links relative to the `.md` file (e.g., `projects/orion-iaas.md`).
 5. Never use raw HTML `<a href="*.md">` links: use Markdown links inside `markdown`-enabled blocks (e.g., Material grid cards).
-6. Code in case studies must be labelled as simplified/illustrative — never publish proprietary employer code.
+6. Enterprise case studies (BBVA / Oesia) must use **abstract architecture diagrams and high-level trade-offs only** — never publish proprietary employer code or invented/toy code snippets. Open-source case studies must link directly to the real public GitHub repositories (`omnilecture-studio`, `WrenchBuddy`).
 7. Enforce LF endings on all files (configured via `.gitattributes`).
