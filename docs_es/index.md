@@ -86,7 +86,7 @@ flowchart LR
 
     [:octicons-arrow-right-24: Leer caso de estudio](projects/blueprint.md)
 
--   :material-Cached:{ .lg .middle } __[Dejar Jenkins Atrás — Dispatcher HA y Ejecución K8s](projects/dispatcher-migration.md)__
+-   :material-cached:{ .lg .middle } __[Dejar Jenkins Atrás — Dispatcher HA y Ejecución K8s](projects/dispatcher-migration.md)__
 
     ---
 

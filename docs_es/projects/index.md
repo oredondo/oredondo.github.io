@@ -85,7 +85,7 @@ flowchart TB
 
     [:octicons-arrow-right-24: Arquitectura y trade-offs](blueprint.md)
 
--   :material-Cached:{ .lg .middle } __[Dejar Jenkins Atrás — Dispatcher HA y Ejecución K8s](dispatcher-migration.md)__
+-   :material-cached:{ .lg .middle } __[Dejar Jenkins Atrás — Dispatcher HA y Ejecución K8s](dispatcher-migration.md)__
 
     ---
 

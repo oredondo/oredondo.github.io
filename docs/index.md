@@ -86,7 +86,7 @@ flowchart LR
 
     [:octicons-arrow-right-24: Read architecture case study](projects/blueprint.md)
 
--   :material-Cached:{ .lg .middle } __[Leaving Jenkins — HA Dispatcher & K8s Execution](projects/dispatcher-migration.md)__
+-   :material-cached:{ .lg .middle } __[Leaving Jenkins — HA Dispatcher & K8s Execution](projects/dispatcher-migration.md)__
 
     ---
 
