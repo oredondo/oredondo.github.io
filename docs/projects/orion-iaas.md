@@ -129,11 +129,12 @@ Operational interactions with Orion avoid manual console work on servers:
 
 ---
 
-## 6. Operational Impact
+## 6. Operational & Business Impact
 
+- **Cost efficiency & technology sovereignty:** Consolidating an in-house control plane and HA dispatcher with native layered Ansible execution eliminated the need for commercial node-licensed automation suites (such as Red Hat Ansible Automation Platform), generating an **estimated cumulative cost avoidance exceeding €6M** in enterprise licensing fees for the organization.
 - **Auditability & complete traceability:** Reduced audit preparation from weeks of manual data compilation to instant queries covering any machine: who authorized it, what is installed, and its full historical event log.
 - **Enforced security & observability baseline (Ground):** 100% of the **30,000+ managed machines** run verified corporate security policies and monitoring agents from the moment of provisioning.
-- **Self-service at banking scale:** Over **500 engineers** govern infrastructure autonomously, executing **40,000+ daily operations** via REST APIs and scheduled automations.
+- **Self-service at banking scale:** Over **500 engineers** govern infrastructure autonomously, executing **40,000+ daily operations** via web forms, REST APIs, and scheduled automations.
 - **International adoption:** Successfully deployed across multiple international banking divisions (**Spain, Mexico, and Turkey**).
 
 ---

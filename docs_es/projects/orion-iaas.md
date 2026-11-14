@@ -129,11 +129,12 @@ La interacción operativa con Orion no depende de intervenciones manuales en ser
 
 ---
 
-## 6. Impacto Operativo
+## 6. Impacto Operativo y de Negocio
 
+- **Eficiencia de costes y soberanía tecnológica:** La consolidación de este plano de control propio y su motor de ejecución en alta disponibilidad permitió prescindir por completo de suites comerciales de automatización licenciadas por nodo (como Red Hat Ansible Automation Platform), generando un **ahorro acumulado estimado superior a 6 millones de euros** en licencias e intermediarios para la organización.
 - **Auditoría y trazabilidad completa:** Transformó la preparación de auditorías bancarias de semanas de recopilación manual a consultas automatizadas e instantáneas de cualquier máquina: quién la creó, qué paquetes tiene instalados y su histórico completo de eventos.
 - **Seguridad y observabilidad garantizada (Ground):** El 100% de las más de **30.000 máquinas** cuentan con agentes de seguridad y monitorización desplegados y verificados automáticamente desde el momento de su aprovisionamiento.
-- **Autoservicio y operaciones masivas:** Más de **500 ingenieros** gestionan su ciclo de vida de infraestructura de forma autónoma, procesando más de **40.000 operaciones diarias** mediante API REST y Schedulers programados.
+- **Autoservicio y operaciones masivas:** Más de **500 ingenieros** gestionan su ciclo de vida de infraestructura de forma autónoma, procesando más de **40.000 operaciones diarias** mediante API REST, formularios web y Schedulers programados.
 - **Adopción internacional:** Plataforma implantada y operativa en múltiples geografías del grupo bancario (**España, México y Turquía**).
 
 ---
