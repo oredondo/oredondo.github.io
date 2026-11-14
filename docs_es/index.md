@@ -118,7 +118,7 @@ Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de inf
 
     ---
 
-    Arquitecto único del plano de control IaaS y despliegue para BBVA: una sola interfaz OpenAPI que gobierna 30.000+ máquinas sobre AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por PostgreSQL, MongoDB, Redis y auditorías automáticas.
+    Arquitecto y responsable del plano de control IaaS y despliegue para BBVA: una sola interfaz OpenAPI que gobierna 30.000+ máquinas sobre AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por PostgreSQL, MongoDB, Redis y auditorías automáticas.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 

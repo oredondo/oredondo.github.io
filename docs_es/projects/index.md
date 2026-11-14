@@ -56,7 +56,7 @@ El trabajo de ingeniería recogido en este portal se articula en torno a tres gr
 
     ---
 
-    Arquitecto único del plano de control IaaS y despliegue: una sola interfaz OpenAPI que gobierna 30.000+ máquinas en AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por una capa híbrida PostgreSQL + MongoDB + Redis y canalizaciones automáticas de auditoría.
+    Arquitecto y responsable del plano de control IaaS y despliegue: una sola interfaz OpenAPI que gobierna 30.000+ máquinas en AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por una capa híbrida PostgreSQL + MongoDB + Redis y canalizaciones automáticas de auditoría.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 

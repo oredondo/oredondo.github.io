@@ -8,7 +8,7 @@ description: >-
 
 | Dimension | Details |
 | :--- | :--- |
-| **Role** | Sole Architect & Platform Owner |
+| **Role** | Architect & Platform Lead |
 | **Organization** | BBVA Technology (Core Banking Infrastructure) · 2017 – Present |
 | **Scale** | 30,000+ governed machines · 40,000+ daily operations · 500+ engineers |
 | **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, Ansible, AWS, OpenStack, OpenShift, Infoblox |
