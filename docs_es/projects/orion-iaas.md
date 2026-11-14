@@ -90,9 +90,15 @@ Gestionar decenas de miles de máquinas en entornos heterogéneos con configurac
 - **MongoDB** ingiere e indexa metadatos polimórficos, permitiendo consultas ultrarrápidas sobre decenas de miles de nodos dispares.
 - **Redis** acelera las consultas de permisos y datos frecuentes para mantener tiempos de respuesta de API sub-100ms y da soporte a las colas Celery.
 
-### B. Patrón universal de drivers
+### B. Patrón universal de drivers y testing desacoplado
 
-Todas las particularidades de proveedor —autenticación, llamadas API, sondeo de estado— se aíslan tras un contrato base de driver en Python. El desarrollador envía la **misma especificación JSON** sin importar el destino; la plataforma resuelve el driver correcto en tiempo de ejecución sin modificar la lógica de negocio. Añadir un nuevo entorno consiste en crear un nuevo driver, no en refactorizar la plataforma.
+Todas las particularidades de proveedor —autenticación, llamadas API, sondeo de estado y transformación de modelos de datos— se aíslan estrictamente tras un contrato abstracto de driver en Python. El desarrollador envía la **misma especificación normalizada** sin importar el entorno cloud; la plataforma resuelve el driver correcto dinámicamente en tiempo de ejecución sin modificar la lógica de negocio.
+
+Ventajas clave de ingeniería de este patrón:
+
+- **Cero refactorización del núcleo al añadir nuevas nubes:** Integrar un nuevo proveedor consiste únicamente en añadir un módulo plugin aislado que hereda de `InfrastructureDriver`. El núcleo de la plataforma permanece intacto.
+- **Auto-registro y negociación de capacidades:** Los drivers declaran sus capacidades (p. ej., redimensionamiento en caliente, emparejamiento VPC, arranque PXE bare-metal) al registrarse, permitiendo a la plataforma validar operaciones antes de delegar la ejecución.
+- **Testing aislado y libre de mocks frágiles:** Dado que los drivers encapsulan los SDKs de terceros (boto3, openstacksdk, cliente de Kubernetes), los servicios centrales y flujos de Celery se prueban frente a un `InMemoryDriver` sin recurrir a monkeypatching de librerías externas. Una batería de pruebas de conformidad verifica que cada driver respeta los invariantes del ciclo de vida.
 
 ### C. Procesamiento asíncrono por defecto
 
@@ -108,14 +114,25 @@ El aprovisionamiento de infraestructura puede tardar minutos; las peticiones HTT
 
 ## 4. Aspectos destacados de la implementación en Python
 
-Versión ilustrativa y simplificada del contrato de driver y registro automático:
+### Contrato abstracto de drivers y registro dinámico
+
+Versión ilustrativa y simplificada del contrato de driver con auto-registro y declaración de capacidades:
 
 ```python title="drivers.py (ilustrativo)"
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Flag, auto
 from typing import ClassVar
+
+
+class Capability(Flag):
+    NONE = 0
+    RESIZE = auto()
+    VPC_PEERING = auto()
+    SNAPSHOT = auto()
+    BAREMETAL_PXE = auto()
 
 
 @dataclass(frozen=True, slots=True)
@@ -124,20 +141,26 @@ class MachineSpec:
     flavor: str
     image: str
     environment: str  # "aws" | "openstack" | "openshift" | "baremetal"
+    tags: dict[str, str] = field(default_factory=dict)
 
 
 class InfrastructureDriver(ABC):
-    """Contrato base que cada driver de infraestructura debe implementar."""
+    """Contrato abstracto base que cada driver de infraestructura debe implementar."""
 
     registry: ClassVar[dict[str, type[InfrastructureDriver]]] = {}
     environment: ClassVar[str]
+    capabilities: ClassVar[Capability] = Capability.NONE
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
+        if not hasattr(cls, "environment"):
+            raise TypeError(f"La clase driver {cls.__name__} debe declarar 'environment'")
         InfrastructureDriver.registry[cls.environment] = cls  # (1)!
 
     @abstractmethod
-    def provision(self, spec: MachineSpec) -> str: ...
+    def provision(self, spec: MachineSpec) -> str:
+        """Aprovisiona el recurso síncronamente o retorna un ID de tarea asignado."""
+        ...
 
     @abstractmethod
     def status(self, resource_id: str) -> str: ...
@@ -150,21 +173,71 @@ def driver_for(spec: MachineSpec) -> InfrastructureDriver:
     try:
         return InfrastructureDriver.registry[spec.environment]()
     except KeyError:
-        raise ValueError(f"No hay driver registrado para {spec.environment!r}") from None
+        raise ValueError(f"No hay driver registrado para el entorno: {spec.environment!r}") from None
 ```
 
-1. Los drivers se auto-registran al importarse, por lo que añadir un nuevo proveedor es crear un archivo nuevo sin tocar el núcleo de la plataforma.
+1. Los drivers se auto-registran al importarse mediante `__init_subclass__`. Añadir un nuevo proveedor es una operación puramente aditiva sin tocar la lógica central de despacho.
 
-Y en el lado de Celery, desacoplando la ejecución HTTP:
+### Pruebas de conformidad desacopladas (sin mocks de SDKs)
+
+En lugar de crear tests unitarios frágiles con múltiples niveles de mocks sobre librerías como boto3 o openstacksdk, las pruebas de plataforma se basan en una suite de conformidad universal aplicable a cualquier driver:
+
+```python title="test_driver_contract.py (ilustrativo)"
+import pytest
+from drivers import Capability, InfrastructureDriver, MachineSpec
+
+
+class ConformanceTestSuite:
+    """Suite base de conformidad que cualquier implementación de driver debe superar."""
+
+    @pytest.fixture
+    def driver(self) -> InfrastructureDriver:
+        raise NotImplementedError("Las subclases deben proveer una fixture del driver configurado")
+
+    def test_provision_returns_valid_identifier(self, driver: InfrastructureDriver) -> None:
+        spec = MachineSpec(
+            name="test-node-01",
+            flavor="standard-2",
+            image="rhel9-hardened",
+            environment=driver.environment,
+        )
+        resource_id = driver.provision(spec)
+        assert isinstance(resource_id, str) and len(resource_id) > 0
+        assert driver.status(resource_id) in {"PENDING", "ACTIVE"}
+
+    def test_decommission_is_idempotent(self, driver: InfrastructureDriver) -> None:
+        spec = MachineSpec(
+            name="test-node-02",
+            flavor="standard-2",
+            image="rhel9-hardened",
+            environment=driver.environment,
+        )
+        resource_id = driver.provision(spec)
+        driver.decommission(resource_id)
+        # Desmantelar un recurso ya eliminado debe ser idempotente sin lanzar excepciones no controladas
+        driver.decommission(resource_id)
+        assert driver.status(resource_id) == "DELETED"
+```
+
+### Coordinación asíncrona de tareas con Celery
+
+Y en el lado de Celery, manteniendo ciclos HTTP mínimos mientras se registran pistas de auditoría en tiempo real:
 
 ```python title="tasks.py (ilustrativo)"
 from celery import shared_task
 
 
-@shared_task(bind=True, autoretry_for=(ConnectionError,), retry_backoff=True, max_retries=5)
+@shared_task(
+    bind=True,
+    autoretry_for=(ConnectionError,),
+    retry_backoff=True,
+    max_retries=5,
+    acks_late=True,
+)
 def provision_machine(self, spec_payload: dict, operation_id: str) -> str:
     spec = MachineSpec(**spec_payload)
-    resource_id = driver_for(spec).provision(spec)
+    driver = driver_for(spec)
+    resource_id = driver.provision(spec)
     record_audit_event(operation_id, action="provision", resource_id=resource_id)
     return resource_id
 ```

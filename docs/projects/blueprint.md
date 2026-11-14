@@ -90,11 +90,13 @@ Infrastructure has implicit ordering — a subnet must exist before an instance 
 it, yet many instances can be created at once. Blueprint computes **execution waves**
 from the dependency graph: everything inside a wave runs concurrently, waves run in order.
 
-### B. Idempotent teardown & resumable runs
+### B. Idempotency, self-reconciliation & crash-resilient teardowns
 
-Naive scripts fail on re-run because a resource is already gone. Blueprint inspects live
-Orion state first, skips steps already satisfied and only acts on the remaining delta —
-an interrupted destroy can simply be run again, with no manual database surgery.
+Traditional scripting and procedural playbooks fail abruptly on re-runs because a resource already exists or has already been deleted. Blueprint enforces a **three-phase reconciliation model**:
+
+1. **Observed state query:** Prior to executing any mutation, Blueprint queries Orion for live reality rather than relying on stale local state files.
+2. **Intent delta evaluation:** Computes a strict diff (`NOOP`, `CREATE`, `UPDATE`, `DELETE`). If the live state already satisfies the target specification, the action is marked as `NOOP` and immediately resolves.
+3. **Resumable teardown with inverted DAG:** Teardowns invert the dependency graph automatically (e.g., instances are terminated before subnets). If a pipeline crashes or times out midway through a teardown, re-running the job safely skips already-deleted resources and resumes right where it left off — eliminating manual database intervention or orphaned cloud resources.
 
 ### C. Zero commercial lock-in
 
@@ -111,42 +113,91 @@ recurring licence cost and letting the platform team evolve the engine at its ow
 
 ## 4. Python implementation highlights
 
-A simplified, illustrative core of the wave scheduler, built only on the standard library:
+### Wave-based DAG scheduler with dynamic state reconciliation
 
-```python title="scheduler.py (illustrative)"
+An illustrative core of the scheduler combining `graphlib.TopologicalSorter`, `asyncio.TaskGroup`, and idempotency diffing:
+
+```python title="reconciliation.py (illustrative)"
 import asyncio
+from enum import Enum, auto
 from graphlib import TopologicalSorter
-from collections.abc import Awaitable, Callable
-
-Step = Callable[[str], Awaitable[None]]
+from typing import NamedTuple
 
 
-async def run_blueprint(dependencies: dict[str, set[str]], apply: Step) -> None:
-    """Run each resource as soon as all its dependencies have completed."""
-    graph = TopologicalSorter(dependencies)
-    graph.prepare()  # (1)!
-
-    while graph.is_active():
-        wave = graph.get_ready()
-        async with asyncio.TaskGroup() as tg:  # (2)!
-            for resource in wave:
-                tg.create_task(apply(resource))
-        graph.done(*wave)
+class DesiredState(NamedTuple):
+    name: str
+    resource_type: str
+    spec: dict
 
 
-async def apply(resource: str) -> None:
-    current = await orion.get_state(resource)
-    if current.matches_desired():  # (3)!
-        return
-    await orion.reconcile(resource)
+class Action(Enum):
+    NOOP = auto()
+    CREATE = auto()
+    UPDATE = auto()
+    DESTROY = auto()
+
+
+class BlueprintReconciler:
+    def __init__(self, client: "OrionClient") -> None:
+        self.client = client
+
+    async def diff(self, desired: DesiredState, is_teardown: bool = False) -> Action:
+        live = await self.client.get_resource(desired.name)
+        if is_teardown:
+            return Action.NOOP if live is None else Action.DESTROY
+
+        if live is None:
+            return Action.CREATE
+        if live.spec == desired.spec:
+            return Action.NOOP
+        return Action.UPDATE
+
+    async def reconcile_resource(self, desired: DesiredState, is_teardown: bool) -> None:
+        action = await self.diff(desired, is_teardown=is_teardown)
+        match action:
+            case Action.NOOP:
+                return  # Safe no-op makes re-runs idempotent
+            case Action.CREATE:
+                await self.client.create_resource(desired.spec)
+            case Action.UPDATE:
+                await self.client.update_resource(desired.name, desired.spec)
+            case Action.DESTROY:
+                await self.client.delete_resource(desired.name)
+
+    async def run(
+        self,
+        manifest: dict[str, DesiredState],
+        dependencies: dict[str, set[str]],
+        teardown: bool = False,
+    ) -> None:
+        """Execute dependencies in concurrent waves.
+
+        If teardown=True, the graph is reversed (dependents torn down before dependencies).
+        """
+        graph_deps = dependencies if not teardown else self._invert_graph(dependencies)
+        sorter = TopologicalSorter(graph_deps)
+        sorter.prepare()  # (1)!
+
+        while sorter.is_active():
+            ready_wave = sorter.get_ready()
+            async with asyncio.TaskGroup() as tg:  # (2)!
+                for name in ready_wave:
+                    tg.create_task(
+                        self.reconcile_resource(manifest[name], is_teardown=teardown)
+                    )
+            sorter.done(*ready_wave)
+
+    @staticmethod
+    def _invert_graph(deps: dict[str, set[str]]) -> dict[str, set[str]]:
+        inverted: dict[str, set[str]] = {k: set() for k in deps}
+        for node, upstream in deps.items():
+            for parent in upstream:
+                inverted.setdefault(parent, set()).add(node)
+        return inverted
 ```
 
-1.  `prepare()` raises `CycleError` on circular dependencies, so invalid blueprints fail
-    before touching any infrastructure.
-2.  `TaskGroup` (Python 3.11+) cancels sibling tasks if one fails — a wave either fully
-    succeeds or stops cleanly.
-3.  The idempotency check: if live state already matches, the step is a no-op, which is
-    what makes re-runs and resumed teardowns safe.
+1.  `sorter.prepare()` validates the entire graph upfront; circular dependencies immediately trigger a `CycleError` before any infrastructure mutation occurs.
+2.  `asyncio.TaskGroup` runs independent steps in parallel per wave; if any task fails, all concurrent sibling operations are canceled cleanly, preserving a deterministically resumable state.
 
 ## 5. Outcome
 

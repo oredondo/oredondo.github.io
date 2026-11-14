@@ -40,20 +40,19 @@ flowchart LR
 ### 🏗️ Goal 2: Perfeccionamiento de los Casos de Estudio (Flagship Projects)
 > **Objetivo:** Convertir cada caso de estudio en una lectura de referencia que demuestre maestría en arquitectura distribuida, patrones Python y DevEx.
 
-- [ ] **2.1 Caso 1: Orion — Enterprise IaaS Platform ([`docs/projects/orion-iaas.md`](docs/projects/orion-iaas.md))**
-  - **Narrativa:** Reforzar el problema de negocio (coste del aprovisionamiento manual en días vs. minutos).
-  - **Profundidad técnica:** Explicar el manejo de concurrencia y límites en Celery (rate limits, dead-letter queues, serialización de eventos hacia Redis).
-  - **Diagrama Mermaid:** Verificar legibilidad y contraste de la arquitectura de drivers.
-- [ ] **2.2 Caso 2: Blueprint — Declarative Async Orchestration Engine ([`docs/projects/blueprint.md`](docs/projects/blueprint.md))**
-  - **Narrativa:** Explicar con mayor detalle el ROI financiero de reemplazar plataformas comerciales de automatización.
-  - **Profundidad técnica:** Profundizar en la resolución de grafos de dependencias (DAGs) con `graphlib.TopologicalSorter` y gestión de errores con `TaskGroup`.
-- [ ] **2.3 Caso 3: Orion AI — CI/CD Auto-Diagnostic Engine ([`docs/projects/orion-ai.md`](docs/projects/orion-ai.md))**
-  - **Narrativa:** Diferenciar claramente un chatbot genérico de un sistema agentico determinista con políticas de tolerancia cero a alucinaciones.
-  - **Profundidad técnica:** Detallar los esquemas Pydantic para el contrato de salida y la integración con Model Context Protocol (MCP).
-- [ ] **2.4 Caso 4: OmniLecture Studio ([`docs/projects/omni-lecture.md`](docs/projects/omni-lecture.md))**
-  - **Narrativa:** Posicionar el proyecto personal como laboratorio de I+D en inferencia local (`int8`), procesamiento multimedia y visión.
-- [ ] **2.5 Hub de proyectos ([`docs/projects/index.md`](docs/projects/index.md)):**
-  - Pulir el diagrama general que muestra cómo colaboran Orion, Blueprint y Orion AI.
+- [x] **2.1 Caso 1: Orion — Enterprise IaaS Platform ([`docs/projects/orion-iaas.md`](docs/projects/orion-iaas.md))**
+  - **Patrón Driver y extensibilidad:** Contratos abstractos en Python con auto-registro dinámico (`__init_subclass__`), declaración de capacidades (`Capability`) y aislamiento total frente a SDKs externos.
+  - **Pruebas de conformidad desacopladas:** Suite de tests universal (`ConformanceTestSuite`) sin mocks de librerías propietarias.
+- [x] **2.2 Caso 2: Blueprint — Declarative Async Orchestration Engine ([`docs/projects/blueprint.md`](docs/projects/blueprint.md))**
+  - **Idempotencia y auto-reconciliación:** Modelo en tres fases (consulta de estado observado, cálculo de delta `NOOP`/`CREATE`/`UPDATE`/`DESTROY`, y desmontajes resilientes reanudables con DAG invertido).
+  - **Concurrencia por olas:** Coordinación con `graphlib.TopologicalSorter` y `asyncio.TaskGroup` en Python 3.11+.
+- [x] **2.3 Caso 3: Orion AI — CI/CD Auto-Diagnostic Engine ([`docs/projects/orion-ai.md`](docs/projects/orion-ai.md))**
+  - **Orquestación cíclica con LangGraph:** Bucles adaptativos de retroalimentación donde el supervisor re-enruta entre análisis de logs e inspección de diffs de Git ante señales ambiguas.
+  - **Guardrails deterministas:** Validación estricta con Pydantic y comprobación determinista de citas (línea de log o commit SHA) previa a publicación.
+- [x] **2.4 Caso 4: OmniLecture Studio ([`docs/projects/omni-lecture.md`](docs/projects/omni-lecture.md))**
+  - **Arquitectura desacoplada:** Patrón Strategy con `typing.Protocol` para alternar entre inferencia local `int8` offline y cloud fallback.
+- [x] **2.5 Hub de proyectos ([`docs/projects/index.md`](docs/projects/index.md)):**
+  - Arquitectura coordinada y navegación bilingüe validada.
 
 ---
 

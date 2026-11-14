@@ -96,13 +96,15 @@ Operating tens of thousands of machines across disparate clouds with wildly diff
 - **Redis** caches permission graphs and hot lookups to keep API responses fast
   under heavy concurrent load, and backs the Celery queues.
 
-### B. The universal driver pattern
+### B. The universal driver pattern & isolated testing
 
-All provider-specific concerns — authentication, API calls, status polling — live
-behind a single driver contract. A developer submits the **same JSON specification**
-regardless of target; the platform resolves the right driver at runtime without
-touching core business logic. Adding a new environment means adding a driver, not
-changing the platform.
+All provider-specific concerns — authentication, API calls, status polling, and payload transformation — live strictly behind an abstract driver contract. A developer submits the **same normalized specification** regardless of the target cloud; the platform resolves the right driver dynamically at runtime without touching core business logic.
+
+Key engineering advantages of this pattern:
+
+- **Zero core refactoring for new clouds:** Adding a new cloud provider requires writing a single isolated plugin module that inherits from `InfrastructureDriver`. The core platform remains untouched.
+- **Self-registration with capability negotiation:** Drivers declare capabilities (e.g., live resize, VPC peering, bare-metal PXE boot) during class registration, allowing the platform to validate requests before delegating work.
+- **Isolated, mock-free testing:** Because drivers encapsulate all provider SDKs (boto3, openstacksdk, kubernetes client), core platform services and Celery workflows are tested against an `InMemoryDriver` without fragile third-party SDK monkeypatching. Conformance tests run against the abstract contract to verify every driver satisfies the expected lifecycle invariants.
 
 ### C. Asynchronous processing by default
 
@@ -120,14 +122,25 @@ granular status events so clients can follow progress instead of blocking.
 
 ## 4. Python implementation highlights
 
-A simplified, illustrative version of the driver contract and registry:
+### Abstract driver contract & registry
+
+A simplified, illustrative version of the driver contract with auto-registration and capability flags:
 
 ```python title="drivers.py (illustrative)"
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Flag, auto
 from typing import ClassVar
+
+
+class Capability(Flag):
+    NONE = 0
+    RESIZE = auto()
+    VPC_PEERING = auto()
+    SNAPSHOT = auto()
+    BAREMETAL_PXE = auto()
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,20 +149,26 @@ class MachineSpec:
     flavor: str
     image: str
     environment: str  # "aws" | "openstack" | "openshift" | "baremetal"
+    tags: dict[str, str] = field(default_factory=dict)
 
 
 class InfrastructureDriver(ABC):
-    """Contract every provider driver must fulfil."""
+    """Abstract contract that every provider driver must fulfill."""
 
     registry: ClassVar[dict[str, type[InfrastructureDriver]]] = {}
     environment: ClassVar[str]
+    capabilities: ClassVar[Capability] = Capability.NONE
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
+        if not hasattr(cls, "environment"):
+            raise TypeError(f"Driver class {cls.__name__} must declare 'environment'")
         InfrastructureDriver.registry[cls.environment] = cls  # (1)!
 
     @abstractmethod
-    def provision(self, spec: MachineSpec) -> str: ...
+    def provision(self, spec: MachineSpec) -> str:
+        """Provision resource synchronously or return a provider-assigned job ID."""
+        ...
 
     @abstractmethod
     def status(self, resource_id: str) -> str: ...
@@ -162,22 +181,71 @@ def driver_for(spec: MachineSpec) -> InfrastructureDriver:
     try:
         return InfrastructureDriver.registry[spec.environment]()
     except KeyError:
-        raise ValueError(f"No driver registered for {spec.environment!r}") from None
+        raise ValueError(f"No driver registered for environment: {spec.environment!r}") from None
 ```
 
-1.  Drivers self-register on import, so supporting a new environment is a new module —
-    the core platform never changes.
+1.  Drivers self-register automatically at import time via `__init_subclass__`. Adding a new cloud provider is strictly an additive module import — zero changes to the core dispatch logic.
 
-And the Celery side, keeping the HTTP request cycle thin:
+### Decoupled conformance testing without SDK mocking
+
+Instead of writing fragile unit tests that mock dozens of deep AWS boto3 or OpenStack SDK calls, platform tests enforce a universal behavioral contract suite. Any driver implementation can be tested against the same contract:
+
+```python title="test_driver_contract.py (illustrative)"
+import pytest
+from drivers import Capability, InfrastructureDriver, MachineSpec
+
+
+class ConformanceTestSuite:
+    """Base conformance test suite that every driver implementation must pass."""
+
+    @pytest.fixture
+    def driver(self) -> InfrastructureDriver:
+        raise NotImplementedError("Subclasses must yield a configured driver fixture")
+
+    def test_provision_returns_valid_identifier(self, driver: InfrastructureDriver) -> None:
+        spec = MachineSpec(
+            name="test-node-01",
+            flavor="standard-2",
+            image="rhel9-hardened",
+            environment=driver.environment,
+        )
+        resource_id = driver.provision(spec)
+        assert isinstance(resource_id, str) and len(resource_id) > 0
+        assert driver.status(resource_id) in {"PENDING", "ACTIVE"}
+
+    def test_decommission_is_idempotent(self, driver: InfrastructureDriver) -> None:
+        spec = MachineSpec(
+            name="test-node-02",
+            flavor="standard-2",
+            image="rhel9-hardened",
+            environment=driver.environment,
+        )
+        resource_id = driver.provision(spec)
+        driver.decommission(resource_id)
+        # Decommissioning an already terminated resource should not raise an unhandled exception
+        driver.decommission(resource_id)
+        assert driver.status(resource_id) == "DELETED"
+```
+
+### Celery async task coordination
+
+And on the Celery side, keeping HTTP cycles thin while publishing real-time audit logs:
 
 ```python title="tasks.py (illustrative)"
 from celery import shared_task
 
 
-@shared_task(bind=True, autoretry_for=(ConnectionError,), retry_backoff=True, max_retries=5)
+@shared_task(
+    bind=True,
+    autoretry_for=(ConnectionError,),
+    retry_backoff=True,
+    max_retries=5,
+    acks_late=True,
+)
 def provision_machine(self, spec_payload: dict, operation_id: str) -> str:
     spec = MachineSpec(**spec_payload)
-    resource_id = driver_for(spec).provision(spec)
+    driver = driver_for(spec)
+    resource_id = driver.provision(spec)
     record_audit_event(operation_id, action="provision", resource_id=resource_id)
     return resource_id
 ```

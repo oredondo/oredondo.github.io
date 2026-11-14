@@ -60,11 +60,15 @@ flowchart TD
 
 ## 3. Decisiones de diseño clave
 
-### A. Grafos con estado frente a cadenas lineales
+### A. Orquestación cíclica y adaptativa (LangGraph + ReAct)
 
-LangGraph mantiene un estado tipado a lo largo del proceso. Si el análisis de logs arroja una traza ambigua,
-el grafo retrocede de forma cíclica hacia el nodo de inspección de código para verificar dependencias recién modificadas,
-algo inviable en canalizaciones secuenciales tradicionales.
+Las cadenas lineales (DAGs estrictamente acíclicos) son frágiles ante el diagnóstico de incidentes: si el análisis inicial de trazas arroja señales ambiguas, un pipeline secuencial se ve forzado a especular o abortar.
+
+Orion AI recurre a **LangGraph** para modelar la investigación de incidentes como una máquina de estados cíclica gobernada por un agente Supervisor:
+
+1. **Extracción inicial de señales:** El nodo `parse_logs` aísla trazas de excepción, códigos de salida y marcas de tiempo.
+2. **Detección de ambigüedad y bucle adaptativo:** Si un fallo carece de trazas explícitas (p. ej., un código 137 OOM opaco en un contenedor o un error silencioso en resolución de dependencias), el supervisor evalúa el estado y bifurca dinámicamente hacia `inspect_git_diff` para auditar los últimos commits, manifiestos de dependencias (`pyproject.toml`, `requirements.txt`) y modificaciones en Dockerfiles.
+3. **Re-evaluación causal:** Con los diffs de git integrados en el estado, el grafo retrocede al agente de razonamiento ReAct con contexto enriquecido, permitiendo al LLM correlacionar un error críptico con un cambio de código específico antes de emitir la causa raíz.
 
 ### B. Adopción de Model Context Protocol (MCP)
 
@@ -87,11 +91,14 @@ y un validador algorítmico comprueba que **cada afirmación del diagnóstico ci
 
 ## 4. Aspectos destacados de la implementación en Python
 
-Extracto ilustrativo y simplificado del bucle de verificación de evidencias:
+### Máquina de estados cíclica con enrutamiento adaptativo
+
+Implementación ilustrativa de la máquina de estados en LangGraph con re-enrutamiento cíclico entre triaje de logs e inspección de diferencias de git:
 
 ```python title="graph.py (ilustrativo)"
-from typing import TypedDict
-
+from typing import Annotated, Literal
+from operator import add
+from typing_extensions import TypedDict
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
@@ -103,39 +110,91 @@ class Finding(BaseModel):
 
 
 class Diagnosis(BaseModel):
-    category: str  # ej: "infrastructure", "dependency", "code", "config"
+    category: Literal["infrastructure", "dependency", "code", "configuration"]
     findings: list[Finding]
-    recommended_action: str
+    root_cause: str
+    confidence_score: float = Field(ge=0.0, le=1.0)
 
 
 class TriageState(TypedDict):
-    log: list[str]
-    commits: set[str]
+    job_id: str
+    raw_logs: list[str]
+    diff_patches: Annotated[list[str], add]  # Concatena evidencias a lo largo de los ciclos
     diagnosis: Diagnosis | None
-    attempts: int
+    investigation_depth: int
+    is_ambiguous: bool
 
 
-def verify(state: TriageState) -> str:
-    """Puerta determinista: cada hallazgo debe apuntar a una evidencia real verificada."""
-    diagnosis = state["diagnosis"]
-    for f in diagnosis.findings:
-        line_ok = f.evidence_log_line is not None and 0 <= f.evidence_log_line < len(state["log"])
-        commit_ok = f.evidence_commit in state["commits"]
-        if not (line_ok or commit_ok):
-            return "retry" if state["attempts"] < 3 else "escalate"
+def supervisor_router(
+    state: TriageState,
+) -> Literal["inspect_git_diff", "reason_with_llm", "escalate"]:
+    """Evalúa la ambigüedad de la evidencia y enruta cíclicamente o prosigue."""
+    if state["investigation_depth"] > 3:
+        return "escalate"  # Disyuntor (circuit breaker) contra bucles infinitos de investigación
+
+    if state["is_ambiguous"] and not state["diff_patches"]:
+        return "inspect_git_diff"  # Bucle de retroalimentación: recupera diffs de código y manifiestos
+
+    return "reason_with_llm"
+
+
+def verify_guardrails(state: TriageState) -> Literal["publish", "retry_deeper", "escalate"]:
+    """Puerta determinista: cada afirmación debe citar líneas de log reales o commits SHAs válidos."""
+    diagnosis = state.get("diagnosis")
+    if not diagnosis or diagnosis.confidence_score < 0.85:
+        return "retry_deeper" if state["investigation_depth"] < 3 else "escalate"
+
+    for finding in diagnosis.findings:
+        valid_line = (
+            finding.evidence_log_line is not None
+            and 0 <= finding.evidence_log_line < len(state["raw_logs"])
+        )
+        valid_commit = bool(finding.evidence_commit and finding.evidence_commit in state.get("diff_patches", ""))
+        if not (valid_line or valid_commit):
+            return "escalate"
+
     return "publish"
 
 
+# Construcción del grafo cíclico con estado
 graph = StateGraph(TriageState)
-graph.add_node("gather", gather_evidence)      # agentes paralelos de logs / diffs / runbooks
-graph.add_node("reason", reason_with_llm)      # bucle ReAct, salida estructurada -> Diagnosis
-graph.add_node("publish", publish_report)
-graph.add_node("escalate", hand_off_to_human)
-graph.set_entry_point("gather")
-graph.add_edge("gather", "reason")
-graph.add_conditional_edges("reason", verify, {"retry": "gather", "publish": "publish", "escalate": "escalate"})
+
+graph.add_node("parse_logs", parse_logs_node)
+graph.add_node("inspect_git_diff", fetch_gitlab_diff_node)
+graph.add_node("reason_with_llm", llm_react_reasoning_node)
+graph.add_node("publish", publish_to_mr_and_slack_node)
+graph.add_node("escalate", notify_oncall_engineer_node)
+
+graph.set_entry_point("parse_logs")
+
+# Bifurcación condicional cíclica del supervisor
+graph.add_conditional_edges(
+    "parse_logs",
+    supervisor_router,
+    {
+        "inspect_git_diff": "inspect_git_diff",
+        "reason_with_llm": "reason_with_llm",
+        "escalate": "escalate",
+    },
+)
+
+# Tras obtener los diffs, vuelve a ciclar hacia el razonamiento
+graph.add_edge("inspect_git_diff", "reason_with_llm")
+
+# Puerta de verificación determinista posterior al LLM
+graph.add_conditional_edges(
+    "reason_with_llm",
+    verify_guardrails,
+    {
+        "publish": "publish",
+        "retry_deeper": "inspect_git_diff",  # Bucle de realimentación adaptativo
+        "escalate": "escalate",
+    },
+)
+
 graph.add_edge("publish", END)
 graph.add_edge("escalate", END)
+
 app = graph.compile()
 ```
 

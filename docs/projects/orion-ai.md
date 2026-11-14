@@ -61,11 +61,15 @@ flowchart TD
 
 ## 3. Key design decisions
 
-### A. Cyclic, stateful graphs instead of linear chains
+### A. Cyclic, adaptive graph orchestration (LangGraph + ReAct)
 
-LangGraph maintains a typed state across steps. If log extraction yields an ambiguous
-stack trace, the graph routes back to the diff agent to inspect recently changed
-dependencies before concluding — something a linear chain cannot express.
+Linear chains (DAGs without loops) are inherently brittle for incident diagnostics: if early log analysis produces ambiguous signals, a linear pipeline is forced to guess or fail. 
+
+Orion AI uses **LangGraph** to model diagnostic investigation as a stateful, cyclic state machine with an autonomous Supervisor:
+
+1. **Initial signal extraction:** The `log_extractor` node isolates stack traces, exit codes, and timestamps.
+2. **Ambiguity detection & adaptive loop-back:** If a failure lacks explicit stack traces (e.g., an opaque container exit code 137 OOM or silent dependency resolution failure), the supervisor evaluates the state and dynamically branches to `git_diff_inspector` to examine recent commits, dependency manifests (`pyproject.toml`, `requirements.txt`), and Dockerfile changes.
+3. **Causal re-evaluation:** Armed with git commit diffs, the graph cycles back into the ReAct reasoning agent with enriched context, enabling the LLM to correlate an obscure error with an exact upstream commit or dependency bump before proposing root cause.
 
 ### B. Model Context Protocol (MCP) for tools
 
@@ -89,11 +93,14 @@ line or an existing commit SHA** before anything is published.
 
 ## 4. Python implementation highlights
 
-A simplified, illustrative version of the verification loop:
+### Cyclic supervisor state machine with adaptive routing
+
+Illustrative implementation of the LangGraph state machine featuring cyclical re-routing between log triage and git diff inspection:
 
 ```python title="graph.py (illustrative)"
-from typing import TypedDict
-
+from typing import Annotated, Literal
+from operator import add
+from typing_extensions import TypedDict
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
@@ -105,39 +112,91 @@ class Finding(BaseModel):
 
 
 class Diagnosis(BaseModel):
-    category: str  # e.g. "infrastructure", "dependency", "code", "config"
+    category: Literal["infrastructure", "dependency", "code", "configuration"]
     findings: list[Finding]
-    recommended_action: str
+    root_cause: str
+    confidence_score: float = Field(ge=0.0, le=1.0)
 
 
 class TriageState(TypedDict):
-    log: list[str]
-    commits: set[str]
+    job_id: str
+    raw_logs: list[str]
+    diff_patches: Annotated[list[str], add]  # Appends evidence across cycles
     diagnosis: Diagnosis | None
-    attempts: int
+    investigation_depth: int
+    is_ambiguous: bool
 
 
-def verify(state: TriageState) -> str:
-    """Deterministic gate: every finding must point at real evidence."""
-    diagnosis = state["diagnosis"]
-    for f in diagnosis.findings:
-        line_ok = f.evidence_log_line is not None and 0 <= f.evidence_log_line < len(state["log"])
-        commit_ok = f.evidence_commit in state["commits"]
-        if not (line_ok or commit_ok):
-            return "retry" if state["attempts"] < 3 else "escalate"
+def supervisor_router(
+    state: TriageState,
+) -> Literal["inspect_git_diff", "reason_with_llm", "escalate"]:
+    """Evaluate current evidence ambiguity and route cyclically or proceed."""
+    if state["investigation_depth"] > 3:
+        return "escalate"  # Circuit breaker against infinite investigation loops
+
+    if state["is_ambiguous"] and not state["diff_patches"]:
+        return "inspect_git_diff"  # Loop back: fetch code/manifest diffs for context
+
+    return "reason_with_llm"
+
+
+def verify_guardrails(state: TriageState) -> Literal["publish", "retry_deeper", "escalate"]:
+    """Deterministic gate: every claim must cite genuine log lines or verified commit SHAs."""
+    diagnosis = state.get("diagnosis")
+    if not diagnosis or diagnosis.confidence_score < 0.85:
+        return "retry_deeper" if state["investigation_depth"] < 3 else "escalate"
+
+    for finding in diagnosis.findings:
+        valid_line = (
+            finding.evidence_log_line is not None
+            and 0 <= finding.evidence_log_line < len(state["raw_logs"])
+        )
+        valid_commit = bool(finding.evidence_commit and finding.evidence_commit in state.get("diff_patches", ""))
+        if not (valid_line or valid_commit):
+            return "escalate"
+
     return "publish"
 
 
+# Build the stateful cyclic graph
 graph = StateGraph(TriageState)
-graph.add_node("gather", gather_evidence)      # parallel log / diff / runbook agents
-graph.add_node("reason", reason_with_llm)      # ReAct loop, structured output -> Diagnosis
-graph.add_node("publish", publish_report)
-graph.add_node("escalate", hand_off_to_human)
-graph.set_entry_point("gather")
-graph.add_edge("gather", "reason")
-graph.add_conditional_edges("reason", verify, {"retry": "gather", "publish": "publish", "escalate": "escalate"})
+
+graph.add_node("parse_logs", parse_logs_node)
+graph.add_node("inspect_git_diff", fetch_gitlab_diff_node)
+graph.add_node("reason_with_llm", llm_react_reasoning_node)
+graph.add_node("publish", publish_to_mr_and_slack_node)
+graph.add_node("escalate", notify_oncall_engineer_node)
+
+graph.set_entry_point("parse_logs")
+
+# Conditional cyclic branching from supervisor
+graph.add_conditional_edges(
+    "parse_logs",
+    supervisor_router,
+    {
+        "inspect_git_diff": "inspect_git_diff",
+        "reason_with_llm": "reason_with_llm",
+        "escalate": "escalate",
+    },
+)
+
+# After fetching diffs, cycle back into reasoning
+graph.add_edge("inspect_git_diff", "reason_with_llm")
+
+# Post-reasoning verification gate
+graph.add_conditional_edges(
+    "reason_with_llm",
+    verify_guardrails,
+    {
+        "publish": "publish",
+        "retry_deeper": "inspect_git_diff",  # Adaptive feedback loop
+        "escalate": "escalate",
+    },
+)
+
 graph.add_edge("publish", END)
 graph.add_edge("escalate", END)
+
 app = graph.compile()
 ```
 

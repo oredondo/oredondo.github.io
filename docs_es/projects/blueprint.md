@@ -88,11 +88,13 @@ La infraestructura tiene dependencias implícitas: una subred debe existir antes
 pero múltiples instancias pueden levantarse simultáneamente. Blueprint calcula **olas de ejecución** a partir
 del grafo: todos los recursos de una misma ola se ejecutan en concurrencia; las olas avanzan secuencialmente.
 
-### B. Desmontaje idempotente y reanudación segura
+### B. Idempotencia, auto-reconciliación y desmontajes resilientes
 
-Los scripts tradicionales fallan al reejecutarse si un recurso ya fue eliminado previamente. Blueprint
-inspecciona primero el estado en vivo en Orion, omite los pasos ya satisfechos y solo actúa sobre el diferencial restante:
-un proceso de destrucción interrumpido puede relanzarse de inmediato sin intervención manual sobre la base de datos.
+Los scripts tradicionales y playbooks procedimentales fallan bruscamente al reejecutarse si un recurso ya existe o ya ha sido eliminado. Blueprint aplica un **modelo de reconciliación en tres fases**:
+
+1. **Consulta de estado observado:** Antes de ejecutar cualquier mutación, Blueprint consulta el estado en vivo a la API de Orion en lugar de confiar en archivos locales de estado (*statefiles*) propensos a desincronizaciones (*drift*).
+2. **Evaluación del delta de intención:** Calcula una diferencia estricta (`NOOP`, `CREATE`, `UPDATE`, `DELETE`). Si el estado observado ya satisface la especificación deseada, la acción se marca como `NOOP` y concluye inmediatamente.
+3. **Desmontaje reanudable con DAG invertido:** Los procesos de destrucción invierten el grafo de dependencias automáticamente (p. ej., las instancias se apagan antes de destruir subredes). Si un pipeline se interrumpe a mitad de una destrucción por timeout de red, relanzar el trabajo omite limpiamente los recursos ya destruidos y continúa exactamente donde se detuvo, sin intervención manual ni recursos huérfanos.
 
 ### C. Cero dependencia de licencias propietarias
 
@@ -109,39 +111,91 @@ eliminando costes de licencia recurrente y otorgando total libertad evolutiva al
 
 ## 4. Aspectos destacados de la implementación en Python
 
-Núcleo simplificado e ilustrativo del planificador por olas, construido íntegramente con la librería estándar:
+### Planificador DAG por olas con reconciliación dinámica de estado
 
-```python title="scheduler.py (ilustrativo)"
+Núcleo ilustrativo del planificador combinando `graphlib.TopologicalSorter`, `asyncio.TaskGroup` y cálculo de diferencias idempotentes:
+
+```python title="reconciliation.py (ilustrativo)"
 import asyncio
+from enum import Enum, auto
 from graphlib import TopologicalSorter
-from collections.abc import Awaitable, Callable
-
-Step = Callable[[str], Awaitable[None]]
+from typing import NamedTuple
 
 
-async def run_blueprint(dependencies: dict[str, set[str]], apply: Step) -> None:
-    """Ejecuta cada recurso en cuanto todas sus dependencias han concluido."""
-    graph = TopologicalSorter(dependencies)
-    graph.prepare()  # (1)!
-
-    while graph.is_active():
-        wave = graph.get_ready()
-        async with asyncio.TaskGroup() as tg:  # (2)!
-            for resource in wave:
-                tg.create_task(apply(resource))
-        graph.done(*wave)
+class DesiredState(NamedTuple):
+    name: str
+    resource_type: str
+    spec: dict
 
 
-async def apply(resource: str) -> None:
-    current = await orion.get_state(resource)
-    if current.matches_desired():  # (3)!
-        return
-    await orion.reconcile(resource)
+class Action(Enum):
+    NOOP = auto()
+    CREATE = auto()
+    UPDATE = auto()
+    DESTROY = auto()
+
+
+class BlueprintReconciler:
+    def __init__(self, client: "OrionClient") -> None:
+        self.client = client
+
+    async def diff(self, desired: DesiredState, is_teardown: bool = False) -> Action:
+        live = await self.client.get_resource(desired.name)
+        if is_teardown:
+            return Action.NOOP if live is None else Action.DESTROY
+
+        if live is None:
+            return Action.CREATE
+        if live.spec == desired.spec:
+            return Action.NOOP
+        return Action.UPDATE
+
+    async def reconcile_resource(self, desired: DesiredState, is_teardown: bool) -> None:
+        action = await self.diff(desired, is_teardown=is_teardown)
+        match action:
+            case Action.NOOP:
+                return  # La operación nula garantiza la idempotencia en reintentos
+            case Action.CREATE:
+                await self.client.create_resource(desired.spec)
+            case Action.UPDATE:
+                await self.client.update_resource(desired.name, desired.spec)
+            case Action.DESTROY:
+                await self.client.delete_resource(desired.name)
+
+    async def run(
+        self,
+        manifest: dict[str, DesiredState],
+        dependencies: dict[str, set[str]],
+        teardown: bool = False,
+    ) -> None:
+        """Ejecuta dependencias en olas concurrentes.
+
+        Si teardown=True, el grafo se invierte (se destruyen dependientes antes que dependencias).
+        """
+        graph_deps = dependencies if not teardown else self._invert_graph(dependencies)
+        sorter = TopologicalSorter(graph_deps)
+        sorter.prepare()  # (1)!
+
+        while sorter.is_active():
+            ready_wave = sorter.get_ready()
+            async with asyncio.TaskGroup() as tg:  # (2)!
+                for name in ready_wave:
+                    tg.create_task(
+                        self.reconcile_resource(manifest[name], is_teardown=teardown)
+                    )
+            sorter.done(*ready_wave)
+
+    @staticmethod
+    def _invert_graph(deps: dict[str, set[str]]) -> dict[str, set[str]]:
+        inverted: dict[str, set[str]] = {k: set() for k in deps}
+        for node, upstream in deps.items():
+            for parent in upstream:
+                inverted.setdefault(parent, set()).add(node)
+        return inverted
 ```
 
-1. `prepare()` genera una excepción `CycleError` ante dependencias circulares, bloqueando planos erróneos antes de tocar infraestructura.
-2. `TaskGroup` (Python 3.11+) cancela las tareas hermanas de la ola si una falla: el lote tiene éxito completo o se detiene limpiamente.
-3. La comprobación de idempotencia: si el estado en vivo ya coincide con el deseado, la acción es una operación nula (*no-op*), lo que hace seguros los reintentos y desmontajes.
+1. `sorter.prepare()` valida el grafo al inicio; cualquier ciclo genera una excepción `CycleError` antes de mutar la infraestructura.
+2. `asyncio.TaskGroup` ejecuta tareas independientes en paralelo por cada ola; si una falla, cancela de forma limpia las operaciones hermanas, preservando un estado determinista y reanudable.
 
 ## 5. Resultados
 
