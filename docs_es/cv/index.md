@@ -18,6 +18,7 @@ hide:
 <p class="cv-contact">
 Madrid, España ·
 <a href="mailto:o.redondo91@gmail.com">o.redondo91@gmail.com</a> ·
+<a href="https://oredondo.github.io/es/">oredondo.github.io/es</a> ·
 <a href="https://linkedin.com/in/oscarredondodjangopython">linkedin.com/in/oscarredondodjangopython</a> ·
 <a href="https://github.com/oredondo">github.com/oredondo</a>
 </p>
