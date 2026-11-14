@@ -1,9 +1,8 @@
 ---
 title: Senior Platform Engineer · Python
 description: >-
-  Oscar Redondo — Senior Platform Engineer · Python con más de 10 años construyendo
-  plataformas internas de desarrollo, motores de automatización distribuida e IA
-  operativa. Arquitecto único de la plataforma IaaS central de BBVA.
+  Oscar Redondo — Senior Platform Engineer · Python con más de 10 años diseñando
+  plataformas de despliegue de infraestructura, motores propios de IaC e IA operativa a gran escala.
 hide:
   - navigation
   - toc
@@ -20,9 +19,9 @@ hide:
 Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de infraestructura impulsadas por una filosofía propia de Infrastructure as Code</strong> — haciendo invisible la complejidad distribuida de AWS, OpenStack, OpenShift y bare-metal mediante APIs en autoservicio, motores declarativos de ciclo de vida y automatización determinista.
 </p>
 
-[:material-sitemap-outline: Explorar el ecosistema de plataforma](projects/index.md){ .md-button .md-button--primary }
+[:material-sitemap-outline: Explorar arquitectura y proyectos](projects/index.md){ .md-button .md-button--primary }
+[:material-newspaper-variant-outline: Leer ensayos técnicos](blog/index.md){ .md-button }
 [:material-file-account-outline: Ver mi CV](cv/index.md){ .md-button }
-[:fontawesome-brands-github: GitHub (@oredondo)](https://github.com/oredondo){ .md-button }
 
 </div>
 
@@ -45,38 +44,69 @@ Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de inf
   </div>
 </div>
 
-## La Evolución de Orion: De CMDB e Inventario a Dispatcher de Alta Disponibilidad
+## Filosofía de Ingeniería de Plataforma
 
-**Orion** no nació como un producto estático, sino como una respuesta evolutiva a los cuellos de botella reales de infraestructura en BBVA:
+*Tres principios arquitectónicos que guían cómo diseño y opero sistemas distribuidos a gran escala:*
 
-1. **El Origen: CMDB, Inventario y Catálogo Apificado:** Nació como un plano de control unificado sobre AWS, OpenStack, OpenShift y bare-metal para consolidar inventario en tiempo real, permisos RBAC, persistencia híbrida (PostgreSQL + MongoDB + Redis) y canalizaciones automáticas de auditoría consumidas directamente por los auditores del banco.
-2. **El Cuello de Botella de Jenkins:** Inicialmente, la ejecución del catálogo de operaciones dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad (HA) nativa (siendo un SPOF crítico), ofrecía una interfaz rígida e inadecuada para operaciones de infraestructura y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
-3. **La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución mediante un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta transición sustituyó por completo a Jenkins para operaciones de plataforma, aportando APIs REST limpias, trazabilidad de estados y ejecución en contenedores efímeros.
-4. **La Madurez: IaC Declarativo e IA Operativa:** Con el inventario y el dispatcher unificados bajo la misma arquitectura, Orion se extendió con **Blueprint** (motor declarativo en YAML con dependencias DAG y desmontajes idempotentes) y **Orion AI** (diagnóstico agéntico de fallos con LangGraph).
+<div class="grid cards" markdown>
 
-```mermaid
-flowchart TD
-    subgraph Origen["1. Origen: CMDB y Catálogo Apificado"]
-        direction TB
-        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Catálogo de operaciones REST (OpenAPI / RBAC)<br/>• Canalizaciones automáticas de auditoría"]
-    end
+-   :material-road-variant:{ .lg .middle } __Trazar Golden Paths, no colas de tickets__
 
-    subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
-        direction LR
-        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF)<br/>❌ UI rígida e inadecuada para ops<br/>❌ Complejo de mantener y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ API REST y UI orientada a operaciones<br/>✅ Fácil integración de nuevas funcionalidades"]
-    end
+    ---
 
-    subgraph Expansion["3. Ecosistema Declarativo e IA"]
-        direction LR
-        BP["Blueprint<br/>(Motor declarativo en YAML, olas DAG y teardown idempotente)"]
-        AI["Orion AI (PoC Validada)<br/>(Diagnóstico multi-agente de CI/CD con LangGraph)"]
-    end
+    La complejidad de la infraestructura debe resolverse en el software, no en procesos burocráticos. Las APIs en autoservicio sobre AWS, OpenStack, OpenShift y bare-metal deben hacer que el camino seguro, auditable y conforme sea también el más rápido y sencillo para los equipos de ingeniería.
 
-    CMDB -->|"Evolucionó integrando"| DISP
-    DISP --> BP & AI
-```
+-   :material-file-code-outline:{ .lg .middle } __Filosofía propia de IaC y estado idempotente__
 
-## Casos de Estudio de Arquitectura Corporativa
+    ---
+
+    Crear entornos desde cero es trivial; recuperarse de un fallo a mitad de un desmontaje de 30 pasos es donde se pone a prueba un sistema. Diseño motores declarativos en YAML con dependencias por olas (DAG) y desmontajes idempotentes que reconcilian contra el estado en vivo, eliminando el coste y el bloqueo de suites comerciales.
+
+-   :material-shield-check-outline:{ .lg .middle } __Guardarraíles deterministas para la IA operativa__
+
+    ---
+
+    Los modelos de lenguaje y sistemas agénticos son componentes no confiables en operaciones críticas. En lugar de prompts libres, deben acotarse mediante máquinas de estado cíclicas (LangGraph), contratos de herramientas tipadas de solo lectura (MCP) y verificación estricta de esquemas antes de ejecutar diagnósticos o acciones.
+
+</div>
+
+## Ensayos de Arquitectura y Lecciones de Producción
+
+*Reflexiones en profundidad tras una década construyendo plataformas cloud internas y operando infraestructura bancaria:*
+
+<div class="grid cards" markdown>
+
+-   :material-cached:{ .lg .middle } __[Cuando las Shared Libraries Tocan Techo: Por Qué Sustituimos Jenkins por un Dispatcher HA Propio](blog/posts/2026-02-15-leaving-jenkins-at-scale-custom-dispatcher.md)__
+
+    ---
+
+    Por qué estandarizar el CI/CD con Jenkins Shared Libraries fue el primer paso indispensable — y cómo dejó al descubierto los cuellos de botella de estado y disponibilidad que motivaron diseñar nuestro propio dispatcher en Django/Celery y Kubernetes Jobs efímeros.
+
+    [:octicons-arrow-right-24: Leer ensayo de arquitectura](blog/posts/2026-02-15-leaving-jenkins-at-scale-custom-dispatcher.md)
+
+-   :material-file-tree-outline:{ .lg .middle } __[Nueve Años de Plataformas Cloud Internas: Por Qué el YAML Declarativo Sustituyó a Nuestro Orquestador Comercial](blog/posts/2026-03-01-declarative-infrastructure-python.md)__
+
+    ---
+
+    Cómo ser propietarios del plano de control central cambia la decisión *build-vs-buy*, por qué evitamos archivos locales de estado y por qué el desmontaje idempotente es la verdadera prueba de fuego de cualquier motor de aprovisionamiento.
+
+    [:octicons-arrow-right-24: Leer ensayo de arquitectura](blog/posts/2026-03-01-declarative-infrastructure-python.md)
+
+-   :material-radar:{ .lg .middle } __[La PoC Fue la Parte Fácil: Lecciones al Construir un Motor Agéntico de Diagnóstico CI/CD en Banca](blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)__
+
+    ---
+
+    Por qué los grafos cíclicos con estado en LangGraph superan a las cadenas lineales en el triaje de incidentes, y qué bloquea realmente el paso de prototipos validados de IA a producción masiva en un gran banco regulado.
+
+    [:octicons-arrow-right-24: Leer ensayo de arquitectura](blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)
+
+</div>
+
+<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;">
+  <a href="blog/index.md" class="md-button md-button--primary">Explorar todos los ensayos del blog :octicons-arrow-right-24:</a>
+</div>
+
+## Sistemas de Plataforma e Infraestructura Corporativa
 
 *Topología de sistemas, trade-offs de arquitectura y modos de fallo en entornos de producción multi-cloud:*
 
@@ -86,7 +116,7 @@ flowchart TD
 
     ---
 
-    Arquitecto único de la plataforma IaaS central y despliegue para BBVA: una sola interfaz OpenAPI gobernando 30.000+ máquinas sobre AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por PostgreSQL, MongoDB, Redis y auditorías automáticas.
+    Arquitecto único del plano de control IaaS y despliegue para BBVA: una sola interfaz OpenAPI que gobierna 30.000+ máquinas sobre AWS, OpenStack, OpenShift y bare-metal (40.000+ operaciones diarias), respaldada por PostgreSQL, MongoDB, Redis y auditorías automáticas.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 
@@ -106,7 +136,7 @@ flowchart TD
 
     ---
 
-    Cómo evolucionamos desde Jenkins Shared Libraries en Groovy hacia un Dispatcher de Operaciones en Alta Disponibilidad (Django + Celery), inyección dinámica de configuración en runtime y ejecución efímera en Kubernetes Jobs.
+    Cómo evolucionamos desde Jenkins hacia un Dispatcher de Operaciones en Alta Disponibilidad (Django + Celery), inyección dinámica de configuración en runtime y ejecución efímera en Kubernetes Jobs.
 
     <span class="tech-tag">Django</span><span class="tech-tag">Celery</span><span class="tech-tag">Kubernetes Jobs</span><span class="tech-tag">Ansible</span><span class="tech-tag">OpenAPI</span>
 
@@ -122,6 +152,10 @@ flowchart TD
 
     [:octicons-arrow-right-24: Leer caso de estudio](projects/orion-ai.md)
 
+</div>
+
+<div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2.5rem;">
+  <a href="projects/index.md" class="md-button">Ver la evolución completa de arquitectura y subsistemas :octicons-arrow-right-24:</a>
 </div>
 
 ## Sistemas Open-Source en GitHub
@@ -147,30 +181,6 @@ flowchart TD
     <span class="tech-tag">Django 6 / DRF</span><span class="tech-tag">PostgreSQL pgvector</span><span class="tech-tag">Celery &amp; Redis</span><span class="tech-tag">LangChain RAG</span><span class="tech-tag">TypeScript</span>
 
     [:octicons-arrow-right-24: Caso de estudio](projects/wrenchbuddy.md) · [:fontawesome-brands-github: Backend](https://github.com/oredondo/WrenchBuddy) · [:fontawesome-brands-github: Frontend](https://github.com/oredondo/WrenchBuddy-frontend)
-
-</div>
-
-## Notas de Ingeniería y Ensayos de Arquitectura
-
-<div class="grid cards" markdown>
-
--   __[Cuando las Shared Libraries Tocan Techo: Por Qué Sustituimos Jenkins por un Dispatcher HA Propio](blog/posts/2026-02-15-leaving-jenkins-at-scale-custom-dispatcher.md)__
-
-    ---
-
-    Por qué estandarizar el CI/CD con Jenkins Shared Libraries fue el primer paso indispensable — y cómo dejó al descubierto los límites que motivaron nuestro dispatcher HA en Django/Celery y Kubernetes Jobs efímeros.
-
--   __[Nueve Años de Plataformas Cloud Internas: Por Qué el YAML Declarativo Sustituyó a Nuestro Orquestador Comercial](blog/posts/2026-03-01-declarative-infrastructure-python.md)__
-
-    ---
-
-    Cómo ser propietarios del plano de control central cambia la decisión build-vs-buy, por qué evitamos archivos locales de estado y por qué el desmontaje idempotente es la prueba real de cualquier motor.
-
--   __[La PoC Fue la Parte Fácil: Lecciones al Construir un Motor Agéntico de Diagnóstico CI/CD en Banca](blog/posts/2026-03-10-agentic-cicd-diagnostics-langgraph.md)__
-
-    ---
-
-    Por qué los grafos cíclicos en LangGraph superan a las cadenas lineales en el triaje de logs, y qué bloquea realmente el paso de prototipos validados de IA a producción masiva en entornos regulados.
 
 </div>
 
