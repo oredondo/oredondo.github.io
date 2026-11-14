@@ -29,9 +29,9 @@ Senior Python & Platform Engineer con **más de 10 años de experiencia** diseñ
 para plataformas internas de alta escala, motores de automatización distribuida y flujos de trabajo
 agénticos en producción.
 
-Como **arquitecto único y responsable técnico de la suite IaaS central de BBVA (Orion y Blueprint)**,
-diseñé e implementé los sistemas que gobiernan **más de 30.000 máquinas** en AWS, OpenStack,
-OpenShift y entornos locales, procesando **más de 40.000 operaciones diarias para más de 500
+Como **arquitecto único y responsable técnico de la suite IaaS central (Orion y Blueprint) para la Infraestructura Core Banking de BBVA**,
+diseñé e implementé los sistemas que gobiernan **decenas de miles de máquinas** en AWS, OpenStack,
+OpenShift y entornos locales, procesando **operaciones masivas diarias para más de 500
 ingenieros**. Diseñé la arquitectura de datos subyacente (PostgreSQL, MongoDB, Redis) para soportar
 operaciones de alto rendimiento, exportaciones masivas de auditoría y cumplimiento normativo estricto,
 y desarrollé motores asíncronos en YAML que eliminaron el bloqueo de proveedor empresarial.
@@ -44,7 +44,7 @@ definiendo estándares de despliegue y formando ingenieros.
 
 ## Logros clave
 
-- Diseñé y lidero la plataforma detrás de **más de 40.000 operaciones diarias de infraestructura** sobre **más de 30.000 máquinas** para **más de 500 ingenieros**.
+- Diseñé y lidero la plataforma detrás de **operaciones diarias de infraestructura de alto rendimiento** sobre **decenas de miles de máquinas** en cloud híbrido para **más de 500 ingenieros**.
 - Sustituí una **suite comercial de automatización con licencias recurrentes** por Blueprint, un motor declarativo AsyncIO propio en Python.
 - Reduje el tiempo de entrega de aprovisionamiento **de días a minutos** mediante autoservicio sin tickets.
 - Alcancé **100% de cumplimiento en auditoría** con canalizaciones automáticas de exportación de gobernanza.
@@ -53,12 +53,12 @@ definiendo estándares de despliegue y formando ingenieros.
 ## Experiencia profesional
 
 ### Senior Python Developer, DevOps — Responsable de Plataforma IaaS
-<p class="cv-meta"><strong>BBVA Technology</strong> · Madrid · 2017 – Presente</p>
+<p class="cv-meta"><strong>BBVA Technology</strong> (Infraestructura Core Banking) · Madrid · 2017 – Presente</p>
 
-- **Liderazgo de la plataforma central IaaS:** propietario y arquitecto único de la suite de plataforma IaaS e IA operativa de BBVA (Orion, Orion AI y herramientas de automatización), la columna vertebral operativa de infraestructura en el banco.
+- **Liderazgo de la plataforma central IaaS:** propietario y arquitecto único de la suite de plataforma IaaS e IA operativa (Orion, Orion AI y herramientas de automatización) para la Infraestructura Core Banking de BBVA, la columna vertebral operativa de infraestructura en el banco.
 - **Arquitectura e ingeniería de datos:** toma de decisiones técnicas integrales de extremo a extremo: arquitectura de sistemas, diseño de API, modelado de datos y gestión de esquemas entre MongoDB y PostgreSQL, ejecución de consultas a gran escala, procesamiento asíncrono, estrategia de despliegue y evolución a largo plazo.
 - **Orquestación declarativa:** concebí y desarrollé **Blueprint**, un motor de orquestación asíncrono en Python mediante planos YAML (conceptual a Terraform), eliminando la necesidad de plataformas comerciales como Red Hat Ansible Automation Platform.
-- **IA operativa:** concebí, diseñé y desarrollé **Orion AI**, PoC validada para FONIL: un sistema agéntico (LangGraph, ReAct, Qwen LLM) que automatiza el diagnóstico de fallos de CI/CD y triaje de logs.
+- **IA operativa:** concebí, diseñé y desarrollé **Orion AI**: un sistema agéntico (LangGraph, ReAct, Qwen LLM) que automatiza el diagnóstico de fallos de CI/CD y triaje de logs; reduciendo el MTTR de horas a segundos.
 - **Estándares de ingeniería y gobernanza:** definí la filosofía de despliegue y los estándares de ingeniería adoptados a nivel corporativo para el aprovisionamiento, auditoría y control de infraestructura.
 - **Habilitación global:** lideré la integración técnica de la plataforma con equipos internacionales en México y Turquía mediante sesiones de onboarding, soporte cruzado y mejoras dedicadas en la plataforma.
 - **Operaciones en producción:** guardias e intervención en incidentes de producción a escala bancaria, garantizando alta disponibilidad y rápida resolución.

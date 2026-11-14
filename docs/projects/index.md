@@ -27,7 +27,7 @@ plus a look at the Python design patterns behind each system.
 
     One self-service API over AWS, OpenStack, OpenShift and bare metal.
 
-    **Scale:** 30k+ machines · 40k+ ops/day · 500+ engineers<br>
+    **Scale:** Tens of thousands of nodes · High-throughput ops · 500+ engineers<br>
     **Stack:** Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis
 
     [:octicons-arrow-right-24: Read the case study](orion-iaas.md)

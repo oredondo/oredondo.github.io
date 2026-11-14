@@ -30,12 +30,12 @@ deterministas que transforman operaciones complejas y multi-cloud en abstraccion
 
 <div class="kpi-grid">
   <div class="kpi-card">
-    <span class="kpi-value">30k+</span>
-    <span class="kpi-label">Máquinas gobernadas</span>
+    <span class="kpi-value">10,000s</span>
+    <span class="kpi-label">Nodos gobernados</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-value">40k+</span>
-    <span class="kpi-label">Operaciones / día</span>
+    <span class="kpi-value">Alta escala</span>
+    <span class="kpi-label">Operaciones diarias</span>
   </div>
   <div class="kpi-card">
     <span class="kpi-value">500+</span>
@@ -85,8 +85,8 @@ deterministas que transforman operaciones complejas y multi-cloud en abstraccion
 
     ---
 
-    Arquitecto único de la plataforma IaaS central de BBVA: una sola API sobre AWS,
-    OpenStack, OpenShift y bare-metal, gobernando más de 30.000 nodos con 100% de cumplimiento en auditoría.
+    Arquitecto único de la plataforma IaaS central para la Infraestructura Core Banking de BBVA:
+    una sola API sobre AWS, OpenStack, OpenShift y bare-metal, gobernando decenas de miles de nodos con 100% de cumplimiento en auditoría.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 
@@ -167,9 +167,9 @@ deterministas que transforman operaciones complejas y multi-cloud en abstraccion
 
 **Senior Python Developer, DevOps — Responsable de Plataforma IaaS** · BBVA Technology
 
-Líder y arquitecto único de la plataforma central IaaS e IA operativa del banco
-(Orion, Blueprint, Orion AI). Responsabilidad técnica de extremo a extremo: arquitectura, APIs, modelado de datos,
-estrategia de despliegue, guardias en producción y despliegue internacional a México y Turquía.
+Líder y arquitecto único de la plataforma central IaaS e IA operativa
+(Orion, Blueprint, Orion AI) para la Infraestructura Core Banking de BBVA. Responsabilidad técnica de extremo a extremo:
+arquitectura, APIs, modelado de datos, estrategia de despliegue, guardias en producción y despliegue internacional a México y Turquía.
 </div>
 
 <div class="timeline__item" markdown>

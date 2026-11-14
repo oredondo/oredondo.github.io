@@ -27,7 +27,7 @@ además de analizar los patrones de diseño en Python detrás de cada sistema.
 
     Una sola API en autoservicio sobre AWS, OpenStack, OpenShift y bare-metal.
 
-    **Escala:** 30k+ máquinas · 40k+ ops/día · 500+ ingenieros<br>
+    **Escala:** Decenas de miles de nodos · Operaciones de alto rendimiento · 500+ ingenieros<br>
     **Stack:** Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis
 
     [:octicons-arrow-right-24: Leer caso de estudio](orion-iaas.md)

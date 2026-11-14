@@ -23,7 +23,7 @@ En infraestructura empresarial, la respuesta por defecto a la orquestación suel
 comercial como Red Hat Automation Platform (Ansible Tower) o forzar una herramienta genérica en flujos para los que nunca fue concebida.
 
 Aquí explicamos por qué decidimos desarrollar **Blueprint** —un motor de orquestación asíncrono propio en Python—
-y cómo eliminó el bloqueo de proveedor garantizando idempotencia real sobre más de 30.000 máquinas bancarias.
+y cómo eliminó el bloqueo de proveedor garantizando idempotencia real sobre decenas de miles de máquinas de infraestructura bancaria.
 
 <!-- more -->
 

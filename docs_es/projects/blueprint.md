@@ -10,7 +10,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Creador e Ingeniero Líder de Sistemas |
-| **Organización** | BBVA Technology |
+| **Organización** | BBVA Technology (Infraestructura Core Banking) |
 | **Impacto** | Sustitución de plataforma de automatización comercial (Red Hat Ansible Automation Platform); aportó reproducibilidad GitOps a la infraestructura bancaria |
 | **Stack** | Python, AsyncIO, PyYAML, JSON Schema, GitOps, API Orion |
 

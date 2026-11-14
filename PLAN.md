@@ -27,12 +27,13 @@ flowchart LR
 ### 🛡️ Goal 1: Auditoría de Confidencialidad y Sanitización
 > **Objetivo:** Garantizar que todo lo publicado cumple estrictamente con las políticas de confidencialidad bancaria sin perder credibilidad técnica.
 
-- [ ] **1.1 Revisión de acrónimos y proyectos internos:**
-  - Evaluar la conveniencia de citar explícitamente nombres internos como *FONIL* en `orion-ai.md` (o sustituir por *«iniciativa corporativa de innovación operativa»*).
-- [ ] **1.2 Verificación de cifras y métricas públicas:**
-  - Confirmar que las cifras de escala (30.000+ máquinas, 40.000+ operaciones/día, 500+ ingenieros) son representativas pero no revelan topología confidencial ni datos de auditoría restringidos.
-- [ ] **1.3 Validación de snippets de código ilustrativos:**
-  - Comprobar que ningún fragmento de Python en los casos de estudio contiene firmas de APIs privadas, URLs internas o lógica propietaria del banco.
+- [x] **1.1 Revisión de acrónimos y proyectos internos:**
+  - Acrónimo interno *FONIL* eliminado completamente de todo el repositorio, centrando el caso puramente en la solución técnica de triaje agéntico y causa raíz en CI/CD.
+  - Distinción formal de la entidad: empleador **BBVA Technology** y alcance en **Infraestructura Core Banking de BBVA**.
+- [x] **1.2 Verificación de cifras y métricas públicas:**
+  - Cifras fijas de auditoría sustituidas por métricas cualitativas y de alta escala (*decenas de miles de nodos en AWS, OpenStack, OpenShift y bare-metal*, *operaciones de alto rendimiento* y *cientos de ingenieros*).
+- [x] **1.3 Validación de snippets de código ilustrativos:**
+  - Verificado que todos los fragmentos de código son patrones abstractos e ilustrativos (*Driver Pattern*, *TopologicalSorter* de la librería estándar, Pydantic guardrails) sin lógica propietaria ni URLs internas.
 
 ---
 

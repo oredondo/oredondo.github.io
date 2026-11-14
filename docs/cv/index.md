@@ -29,9 +29,9 @@ Senior Python & Platform Engineer with **10+ years of experience** architecting
 high-scale internal platforms, distributed automation engines and production-grade
 agentic workflows.
 
-As **sole architect and owner of BBVA's central IaaS platform suite (Orion & Blueprint)**,
-I conceived and built the systems governing **30,000+ machines** across AWS, OpenStack,
-OpenShift and on-premises environments, processing **40,000+ daily operations for 500+
+As **sole architect and owner of the central IaaS platform suite (Orion & Blueprint) powering BBVA's Core Banking Infrastructure**,
+I conceived and built the systems governing **tens of thousands of machines** across AWS, OpenStack,
+OpenShift and on-premises environments, processing **high-throughput daily operations for 500+
 engineers**. I designed the underlying data architecture (PostgreSQL, MongoDB, Redis) for
 high-throughput operations, large audit exports and strict regulatory compliance, and
 built asynchronous YAML engines that eliminated enterprise vendor lock-in.
@@ -44,7 +44,7 @@ Turkey, defining deployment standards and mentoring engineers.
 
 ## Key achievements
 
-- Designed and own the platform behind **40,000+ daily infrastructure operations** on **30,000+ machines** for **500+ engineers**.
+- Designed and own the platform behind **high-throughput daily infrastructure operations** on **tens of thousands of machines** across hybrid cloud for **500+ engineers**.
 - Replaced a **commercial automation platform licence** with Blueprint, an in-house declarative AsyncIO engine.
 - Reduced provisioning lead time **from days to minutes** through zero-ticket self-service.
 - Delivered **100% audit compliance** with automated governance export pipelines.
@@ -53,12 +53,12 @@ Turkey, defining deployment standards and mentoring engineers.
 ## Professional experience
 
 ### Senior Python Developer, DevOps — IaaS Platform Owner
-<p class="cv-meta"><strong>BBVA Technology</strong> · Madrid · 2017 – Present</p>
+<p class="cv-meta"><strong>BBVA Technology</strong> (Core Banking Infrastructure) · Madrid · 2017 – Present</p>
 
-- **Central IaaS platform leadership:** owner and sole architect of BBVA's internal IaaS & operational AI platform suite (Orion, Orion AI and automation tooling) — the backbone of infrastructure operations across the bank.
+- **Central IaaS platform leadership:** owner and sole architect of the internal IaaS & operational AI platform suite (Orion, Orion AI and automation tooling) powering BBVA's Core Banking Infrastructure — the backbone of infrastructure operations across the bank.
 - **Architecture & data engineering:** led all technical decisions end-to-end — system architecture, API design, data modelling and schema management across MongoDB and PostgreSQL, large-scale query execution, async processing, deployment strategy and long-term evolution.
 - **Declarative orchestration:** conceived and built **Blueprint**, an asynchronous Python orchestration engine using YAML blueprints (conceptually similar to Terraform), removing the need for Red Hat Ansible Automation Platform.
-- **Operational AI:** conceived, designed and developed **Orion AI**, a validated PoC for FONIL — an agentic system (LangGraph, ReAct, Qwen LLM) automating CI/CD failure diagnostics and log triage.
+- **Operational AI:** conceived, designed and developed **Orion AI** — an agentic system (LangGraph, ReAct, Qwen LLM) automating CI/CD failure diagnostics and log triage; reduced MTTR from hours to seconds.
 - **Engineering standards & governance:** defined a deployment philosophy and engineering standards adopted organisation-wide for how infrastructure is provisioned, audited and governed.
 - **Global enablement:** led the technical integration of the platform with teams in Mexico and Turkey — onboarding sessions, cross-team support and targeted platform enhancements.
 - **Production operations:** owned incident response and on-call at banking scale, ensuring high availability and fast resolution.

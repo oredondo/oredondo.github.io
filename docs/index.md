@@ -30,12 +30,12 @@ that turn complex, multi-cloud operations into simple, auditable abstractions.
 
 <div class="kpi-grid">
   <div class="kpi-card">
-    <span class="kpi-value">30k+</span>
-    <span class="kpi-label">Machines governed</span>
+    <span class="kpi-value">10,000s</span>
+    <span class="kpi-label">Nodes governed</span>
   </div>
   <div class="kpi-card">
-    <span class="kpi-value">40k+</span>
-    <span class="kpi-label">Operations / day</span>
+    <span class="kpi-value">High Scale</span>
+    <span class="kpi-label">Daily operations</span>
   </div>
   <div class="kpi-card">
     <span class="kpi-value">500+</span>
@@ -85,8 +85,8 @@ that turn complex, multi-cloud operations into simple, auditable abstractions.
 
     ---
 
-    Sole architect of BBVA's central IaaS platform: one API over AWS, OpenStack,
-    OpenShift and on-prem, governing 30k+ nodes with 100% audit compliance.
+    Sole architect of the central IaaS platform powering BBVA's Core Banking Infrastructure:
+    one API over AWS, OpenStack, OpenShift and on-prem, governing tens of thousands of nodes with 100% audit compliance.
 
     <span class="tech-tag">Python</span><span class="tech-tag">Django REST</span><span class="tech-tag">Celery</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">MongoDB</span><span class="tech-tag">Redis</span>
 
@@ -167,9 +167,9 @@ that turn complex, multi-cloud operations into simple, auditable abstractions.
 
 **Senior Python Developer, DevOps — IaaS Platform Owner** · BBVA Technology
 
-Owner and sole architect of the bank's central IaaS & operational AI platform suite
-(Orion, Blueprint, Orion AI). End-to-end ownership: architecture, APIs, data modelling,
-deployment strategy, on-call and international rollout to Mexico and Turkey.
+Owner and sole architect of the central IaaS & operational AI platform suite
+(Orion, Blueprint, Orion AI) for BBVA's Core Banking Infrastructure. End-to-end ownership: architecture, APIs,
+data modelling, deployment strategy, on-call and international rollout to Mexico and Turkey.
 </div>
 
 <div class="timeline__item" markdown>

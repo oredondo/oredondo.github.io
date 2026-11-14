@@ -2,8 +2,8 @@
 title: "Case Study: Orion IaaS Platform"
 description: >-
   Architecture of BBVA's central IaaS platform — a Python/Django self-service API
-  governing 30,000+ machines and 40,000+ daily operations across AWS, OpenStack,
-  OpenShift and on-premises.
+  governing tens of thousands of machines and high-throughput daily operations across AWS,
+  OpenStack, OpenShift and on-premises.
 ---
 
 # Orion: Enterprise IaaS Audit & Deployment Platform
@@ -11,8 +11,8 @@ description: >-
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Sole Architect & Platform Owner |
-| **Organization** | BBVA Technology · 2017 – present |
-| **Scale** | 30,000+ machines · 40,000+ daily operations · 500+ engineers |
+| **Organization** | BBVA Technology (Core Banking Infrastructure) · 2017 – present |
+| **Scale** | Tens of thousands of nodes · High-throughput daily operations · 500+ engineers |
 | **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift |
 
 !!! abstract "TL;DR"
@@ -30,7 +30,7 @@ container platforms (**OpenShift**) and legacy **on-premises bare metal**.
 
 1. **Environment silos** — every environment needed its own tooling, skills and manual tickets.
 2. **Audit bottlenecks** — regulators require continuous tracking of machine state, security
-   baselines and ownership across 30k+ nodes.
+   baselines and ownership across tens of thousands of heterogeneous nodes.
 3. **Developer friction** — provisioning took days instead of minutes because there was no
    self-service abstraction.
 
@@ -86,8 +86,8 @@ flowchart TD
 
 ### A. Hybrid data tier (PostgreSQL + MongoDB + Redis)
 
-30,000+ machines with wildly different metadata (networking, tags, disk layouts,
-hypervisor-specific fields) made a single rigid relational schema unmaintainable.
+Operating tens of thousands of machines across disparate clouds with wildly different metadata
+(networking, tags, disk layouts, hypervisor-specific fields) made a single rigid relational schema unmaintainable.
 
 - **PostgreSQL** owns everything that must be transactional and immutable: audit
   logs, permissions, operation state histories.

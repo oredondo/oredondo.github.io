@@ -21,7 +21,7 @@ tags:
 
 In enterprise infrastructure, the default answer to orchestration is usually to purchase a commercial platform suite like Red Hat Automation Platform (Ansible Tower) or force an off-the-shelf tool into workflows it was never designed to handle.
 
-Here is why we decided to engineer **Blueprint** — an in-house asynchronous Python orchestration engine — and how it eliminated vendor lock-in while providing true idempotency across 30,000+ banking machines.
+Here is why we decided to engineer **Blueprint** — an in-house asynchronous Python orchestration engine — and how it eliminated vendor lock-in while providing true idempotency across tens of thousands of banking infrastructure nodes.
 
 <!-- more -->
 

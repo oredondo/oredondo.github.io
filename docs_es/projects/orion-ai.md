@@ -10,7 +10,7 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Arquitecto e Ingeniero Líder de IA |
-| **Organización** | BBVA — PoC validada para FONIL |
+| **Organización / Alcance** | Infraestructura Core Banking de BBVA (AI Ops autónomo) |
 | **Impacto** | Reducción del triaje inicial de horas a menos de 15 segundos; eliminación de inspección manual de logs |
 | **Stack** | Python, LangGraph, ReAct, Qwen LLM (131k contexto), MCP, búsqueda vectorial en Redis, APIs de GitLab y Jenkins |
 

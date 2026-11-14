@@ -23,8 +23,8 @@ Esa etapa me aportó una comprensión profunda y práctica del comportamiento re
 infraestructura bajo carga y fallos de red.
 
 En 2017 me incorporé a **BBVA Technology**, donde he dedicado estos años a transformar
-ese conocimiento en software: **Orion**, una plataforma en Python que proporciona a más de
-500 ingenieros una única API en autoservicio sobre AWS, OpenStack, OpenShift y bare-metal;
+ese conocimiento en software para la infraestructura central de BBVA: **Orion**, una plataforma en Python
+que proporciona a más de 500 ingenieros una única API en autoservicio sobre AWS, OpenStack, OpenShift y bare-metal;
 **Blueprint**, un motor de orquestación declarativa que eliminó suites comerciales de automatización;
 y más recientemente **Orion AI**, un sistema agéntico que diagnostica fallos de CI/CD en segundos.
 
@@ -47,7 +47,7 @@ y más recientemente **Orion AI**, un sistema agéntico que diagnostica fallos d
 
     Los scripts imperativos ocultan estado y crean dependencias frágiles. Definir el estado deseado
     en Git y reconciliarlo mediante un motor idempotente es la única forma sensata de gobernar
-    más de 30.000 máquinas sin perder el control.
+    decenas de miles de máquinas sin perder el control.
 
 -   :material-shield-check-outline:{ .lg .middle } __IA rigurosa, guardarraíles deterministas__
 

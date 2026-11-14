@@ -2,7 +2,7 @@
 title: "Caso de Estudio: Plataforma IaaS Orion"
 description: >-
   Arquitectura de la plataforma IaaS central de BBVA: una API en autoservicio con Python/Django
-  que gobierna más de 30.000 máquinas y 40.000 operaciones diarias en AWS, OpenStack, OpenShift y bare-metal.
+  que gobierna decenas de miles de máquinas y operaciones masivas diarias en AWS, OpenStack, OpenShift y bare-metal.
 ---
 
 # Orion: Plataforma IaaS Corporativa para Aprovisionamiento y Auditoría
@@ -10,8 +10,8 @@ description: >-
 | Dimensión | Detalles |
 | :--- | :--- |
 | **Rol** | Arquitecto Único y Responsable de Plataforma |
-| **Organización** | BBVA Technology · 2017 – presente |
-| **Escala** | 30.000+ máquinas · 40.000+ operaciones diarias · 500+ ingenieros |
+| **Organización** | BBVA Technology (Infraestructura Core Banking) · 2017 – presente |
+| **Escala** | Decenas de miles de nodos · Operaciones de alto rendimiento · 500+ ingenieros |
 | **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift |
 
 !!! abstract "Resumen ejecutivo (TL;DR)"
@@ -28,7 +28,7 @@ dispersas en entornos heterogéneos: **AWS**, nubes privadas (**OpenStack**), pl
 (**OpenShift**) y servidores físicos locales (**bare-metal**).
 
 1. **Silos de entorno:** cada infraestructura requería su propio conjunto de herramientas, conocimientos y tickets manuales.
-2. **Cuellos de botella en auditoría:** los reguladores bancarios exigen trazabilidad ininterrumpida del estado de las máquinas, líneas base de seguridad y titularidad en más de 30k nodos.
+2. **Cuellos de botella en auditoría:** los reguladores bancarios exigen trazabilidad ininterrumpida del estado de las máquinas, líneas base de seguridad y titularidad en decenas de miles de nodos heterogéneos.
 3. **Fricción para el desarrollador:** el aprovisionamiento demoraba días en lugar de minutos por la ausencia de abstracciones en autoservicio.
 
 ## 2. Arquitectura de alto nivel
@@ -83,7 +83,8 @@ flowchart TD
 
 ### A. Capa híbrida de datos (PostgreSQL + MongoDB + Redis)
 
-Más de 30.000 máquinas con configuraciones divergentes (redes, etiquetas, arreglos de discos, campos específicos de hipervisores) hacían inviable un único esquema relacional rígido.
+Gestionar decenas de miles de máquinas en entornos heterogéneos con configuraciones divergentes
+(redes, etiquetas, arreglos de discos, campos específicos de hipervisores) hacía inviable un único esquema relacional rígido.
 
 - **PostgreSQL** custodia lo transaccional e inmutable: registros de auditoría, permisos y cambios de estado.
 - **MongoDB** ingiere e indexa metadatos polimórficos, permitiendo consultas ultrarrápidas sobre decenas de miles de nodos dispares.

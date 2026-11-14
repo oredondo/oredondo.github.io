@@ -10,7 +10,7 @@ description: >-
 | Dimension | Details |
 | :--- | :--- |
 | **Role** | Architect & Lead AI Engineer |
-| **Organization** | BBVA — validated proof of concept for FONIL |
+| **Organization / Scope** | BBVA Core Banking Infrastructure (Autonomous AI Ops) |
 | **Impact** | Initial triage from hours to under 15 seconds; manual log digging eliminated |
 | **Stack** | Python, LangGraph, ReAct, Qwen LLM (131k context), MCP, Redis vector search, GitLab & Jenkins APIs |
 

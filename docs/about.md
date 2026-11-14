@@ -22,9 +22,9 @@ Oesia — where I also built a storage product on top of OpenStack Swift. That g
 deep, hands-on understanding of how infrastructure actually behaves under load.
 
 In 2017 I joined **BBVA Technology**, where I've spent the years since turning that
-understanding into software: **Orion**, a Python platform that gives 500+ engineers one
-self-service API over AWS, OpenStack, OpenShift and bare metal; **Blueprint**, a
-declarative orchestration engine that replaced a commercial automation suite; and more
+understanding into software powering BBVA's Core Banking Infrastructure: **Orion**, a Python
+platform that gives 500+ engineers one self-service API over AWS, OpenStack, OpenShift and bare metal;
+**Blueprint**, a declarative orchestration engine that replaced a commercial automation suite; and more
 recently **Orion AI**, an agentic system that diagnoses CI/CD failures in seconds.
 
 ## Engineering principles
@@ -44,7 +44,7 @@ recently **Orion AI**, an agentic system that diagnoses CI/CD failures in second
     ---
 
     Imperative scripts hide state and create fragile dependencies. Desired state in Git,
-    reconciled by an idempotent engine, is the only sane way to operate 30,000+ machines.
+    reconciled by an idempotent engine, is the only sane way to operate tens of thousands of distributed machines.
 
 -   :material-shield-check-outline:{ .lg .middle } __Rigorous AI, deterministic guardrails__
 
