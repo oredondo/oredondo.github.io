@@ -12,51 +12,36 @@ This section maps how the systems I architected over the last decade connect int
 
 ---
 
-## 1. Nine Years of Evolution: From CI/CD Standardization to a Custom IaC & Deployment Platform
+## 1. The Evolution of Orion: From API-First CMDB & Inventory to a High-Availability Dispatcher
 
-At **BBVA Technology** (2017 – Present), what started as standardizing CI/CD pipelines across infrastructure teams grew into a comprehensive infrastructure deployment and governance platform managing **30,000+ machines** across **AWS, OpenStack, OpenShift, and bare metal**, processing **40,000+ daily operations** for **500+ engineers**:
+At **BBVA Technology** (2017 – Present), **Orion** was not built as a static tool, but as an evolving architectural response to enterprise infrastructure bottlenecks at scale — governing **30,000+ machines** across **AWS, OpenStack, OpenShift, and bare metal**, processing **40,000+ daily operations** for **500+ engineers**:
 
 ```mermaid
-flowchart TB
-    subgraph Phase1["1. CI/CD Standardization & Its Limits"]
-        JSL["Jenkins Shared Libraries<br/>(Groovy CI/CD standard)"]
-        ANS["Ansible Core Services<br/>(GitLab, Artifactory, Jenkins)"]
+flowchart TD
+    subgraph Origin["1. Origin: API-First CMDB, Inventory & Catalog"]
+        direction TB
+        CMDB["Orion Control Plane<br/>• Multi-cloud inventory (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Hybrid persistence (PostgreSQL + MongoDB + Redis)<br/>• REST operation catalog (OpenAPI / RBAC)<br/>• Automated compliance audit pipelines"]
     end
 
-    subgraph Phase2["2. Decoupling Execution & Configuration"]
-        DISP["HA Operation Dispatcher<br/>(Django + Celery REST API)"]
-        CFG["Central Config Management<br/>(Runtime variable injection)"]
-        K8S["Kubernetes Job Engine<br/>(Ephemeral container execution)"]
+    subgraph Replacement["2. Strategic Jenkins Replacement"]
+        direction LR
+        JNK["Legacy Jenkins<br/>❌ No High Availability (Critical SPOF)<br/>❌ Rigid UI unsuited for ops<br/>❌ Highly complex to maintain, scale & extend"] -.->|"Replaced by"| DISP["Integrated HA Dispatcher in Orion<br/>(Django + Celery + Kubernetes Job Workers)<br/>✅ Native High Availability (HA)<br/>✅ Operation-centric UI & REST APIs<br/>✅ Seamless integration of new banking features"]
     end
 
-    subgraph Phase3["3. Cloud-Agnostic Control Plane"]
-        PIPE["Driver Deployment Pipeline<br/>(AWS · OpenStack · OpenShift · Bare-metal)"]
-        F5["F5 / OpenStack REST Bridge<br/>(Zero-downtime deprecation fix)"]
-        ORION["Orion IaaS Platform<br/>(Central API, RBAC, hybrid DB & audit)"]
+    subgraph Expansion["3. Declarative IaC & Applied AI"]
+        direction LR
+        BP["Blueprint<br/>(Declarative YAML engine, DAG waves & idempotent teardowns)"]
+        AI["Orion AI (Validated PoC)<br/>(Multi-agent CI/CD diagnostics with LangGraph)"]
     end
 
-    subgraph Phase4["4. Declarative Lifecycle & Applied AI"]
-        BP["Blueprint Engine<br/>(Async YAML DAG & idempotent teardown)"]
-        AI["Orion AI (Validated PoC)<br/>(LangGraph + ReAct CI/CD diagnostics)"]
-    end
-
-    JSL -->|"hit scaling & state limits"| DISP
-    ANS --> CFG
-    CFG --> DISP
-    DISP --> K8S
-    DISP --> PIPE
-    CFG --> PIPE
-    F5 -.->|"restored load-balancing interoperability"| PIPE
-    PIPE --> ORION
-    ORION --> BP
-    ORION --> AI
-    DISP --> AI
+    CMDB -->|"Evolved by integrating"| DISP
+    DISP --> BP & AI
 ```
 
-1. **First bottleneck — Pipeline sprawl & Jenkins fragility:** Standardizing on **Jenkins Shared Libraries** unified teams, but exposed Jenkins as a single point of failure under heavy concurrent infrastructure workloads. That directly motivated replacing Jenkins with a purpose-built **High-Availability Operation Dispatcher** in Django and Celery, and later running isolated workloads on a **Kubernetes Job Execution Engine**.
-2. **Second bottleneck — Environment drift:** Duplicated Ansible playbooks across dev, staging, and production caused human errors. Building a **Centralized Configuration Management System** decoupled variable resolution from playbook logic, injecting environment parameters dynamically at runtime.
-3. **Third bottleneck — Multi-cloud fragmentation & compliance:** Provisioning across AWS, OpenStack, OpenShift, and physical servers required different tools and manual tickets. A **Universal Driver Deployment Pipeline** and **Orion** unified governance, RBAC, inventory, and automated compliance exports behind a single OpenAPI gateway.
-4. **Fourth bottleneck — Commercial orchestrator lock-in & slow failure triage:** With Orion as the authoritative source of truth, **Blueprint** brought Terraform-like declarative YAML orchestration and idempotent teardowns without commercial licensing (replacing Red Hat Automation Platform), while **Orion AI (PoC)** explored multi-agent root-cause diagnostics on top of our operational logs and diffs.
+1. **Phase 1 — The Origin: Multi-Cloud CMDB, Inventory & API-First Catalog:** Orion originated as a centralized control plane to inventory and govern heterogeneous assets across AWS, OpenStack, OpenShift, and bare metal, combining a hybrid database tier (PostgreSQL, MongoDB, Redis), RBAC, and automated compliance audit pipelines directly consumed by bank auditors.
+2. **Phase 2 — The Jenkins Bottleneck:** Initially, operation catalog execution relied on Jenkins. However, Jenkins lacked native High Availability (posing a critical single point of failure for the bank), its UI was tailored for software compilation logs rather than infrastructure state machines, and it was notoriously complex to operate, scale, and integrate with new bank functionalities and core systems.
+3. **Phase 3 — Evolution into a Purpose-Built HA Dispatcher:** Orion evolved by absorbing the execution plane into a **native High-Availability Operation Dispatcher (Django + Celery + Kubernetes Jobs)**. This migration completely replaced Jenkins for infrastructure workflows, decoupled variables at runtime (preventing configuration drift), and delivered an API-first architecture with isolated ephemeral container execution.
+4. **Phase 4 — Declarative Extension (Blueprint) & Operational AI (Orion AI):** With the CMDB and dispatcher united under the same architecture, Orion expanded into declarative provisioning with **Blueprint** (asynchronous YAML engine with DAG waves and idempotent teardowns, eliminating suites like Red Hat Automation Platform) and agentic auto-diagnostics with **Orion AI** (LangGraph).
 
 ---
 

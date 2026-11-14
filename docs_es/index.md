@@ -45,19 +45,35 @@ Diseño y construyo <strong>plataformas de despliegue y aprovisionamiento de inf
   </div>
 </div>
 
-## Cómo se conecta todo: una plataforma construida capa por capa
+## La Evolución de Orion: De CMDB e Inventario a Dispatcher de Alta Disponibilidad
 
-Durante los últimos nueve años en **BBVA Technology**, mi trabajo no ha consistido en herramientas aisladas, sino en una **plataforma central de despliegue y gobierno de infraestructura** que ha evolucionado capa por capa bajo una filosofía propia de Infrastructure as Code a medida que resolvíamos cada cuello de botella de escala:
+**Orion** no nació como un producto estático, sino como una respuesta evolutiva a los cuellos de botella reales de infraestructura en BBVA:
+
+1. **El Origen: CMDB, Inventario y Catálogo Apificado:** Nació como un plano de control unificado sobre AWS, OpenStack, OpenShift y bare-metal para consolidar inventario en tiempo real, permisos RBAC, persistencia híbrida (PostgreSQL + MongoDB + Redis) y canalizaciones automáticas de auditoría consumidas directamente por los auditores del banco.
+2. **El Cuello de Botella de Jenkins:** Inicialmente, la ejecución del catálogo de operaciones dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad (HA) nativa (siendo un SPOF crítico), ofrecía una interfaz rígida e inadecuada para operaciones de infraestructura y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
+3. **La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución mediante un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta transición sustituyó por completo a Jenkins para operaciones de plataforma, aportando APIs REST limpias, trazabilidad de estados y ejecución en contenedores efímeros.
+4. **La Madurez: IaC Declarativo e IA Operativa:** Con el inventario y el dispatcher unificados bajo la misma arquitectura, Orion se extendió con **Blueprint** (motor declarativo en YAML con dependencias DAG y desmontajes idempotentes) y **Orion AI** (diagnóstico agéntico de fallos con LangGraph).
 
 ```mermaid
-flowchart LR
-    JSL["Jenkins Shared Libraries<br/>(CI/CD estandarizado)"] -->|"Superó límite de controlador único"| DISP["Dispatcher HA de Operaciones<br/>(API en Django + Celery)"]
-    CFG["Gestión Central de Config<br/>(Inyección de variables en runtime)"] --> DISP & PIPE
-    DISP --> K8S["Motor de Kubernetes Jobs<br/>(Pods efímeros)"]
-    DISP --> PIPE["Pipeline Universal por Drivers<br/>(AWS · OpenStack · OpenShift · Bare-metal)"]
-    PIPE --> ORION["Plano de Control IaaS Orion<br/>(RBAC, BD híbrida y auditoría)"]
-    ORION --> BP["Motor Blueprint<br/>(YAML declarativo y teardown idempotente)"]
-    ORION --> AI["Orion AI (PoC Validada)<br/>(Diagnóstico CI/CD con LangGraph + ReAct)"]
+flowchart TD
+    subgraph Origen["1. Origen: CMDB y Catálogo Apificado"]
+        direction TB
+        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Catálogo de operaciones REST (OpenAPI / RBAC)<br/>• Canalizaciones automáticas de auditoría"]
+    end
+
+    subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
+        direction LR
+        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF)<br/>❌ UI rígida e inadecuada para ops<br/>❌ Complejo de mantener y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ API REST y UI orientada a operaciones<br/>✅ Fácil integración de nuevas funcionalidades"]
+    end
+
+    subgraph Expansion["3. Ecosistema Declarativo e IA"]
+        direction LR
+        BP["Blueprint<br/>(Motor declarativo en YAML, olas DAG y teardown idempotente)"]
+        AI["Orion AI (PoC Validada)<br/>(Diagnóstico multi-agente de CI/CD con LangGraph)"]
+    end
+
+    CMDB -->|"Evolucionó integrando"| DISP
+    DISP --> BP & AI
 ```
 
 ## Casos de Estudio de Arquitectura Corporativa

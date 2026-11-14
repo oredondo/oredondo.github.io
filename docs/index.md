@@ -45,19 +45,35 @@ I design and build <strong>infrastructure deployment and provisioning platforms 
   </div>
 </div>
 
-## How my work connects: one platform built layer by layer
+## The Evolution of Orion: From API-First CMDB & Inventory to a High-Availability Dispatcher
 
-Over the last nine years at **BBVA Technology**, my work has not been a collection of isolated tools — it is a **central infrastructure deployment and governance platform** that evolved layer by layer under a custom Infrastructure as Code philosophy as each architectural bottleneck was solved:
+**Orion** was not built as a static tool, but as an evolving architectural response to enterprise infrastructure bottlenecks at BBVA:
+
+1. **The Origin: API-First CMDB, Inventory & Operation Catalog:** Orion was conceived as a unified control plane across AWS, OpenStack, OpenShift, and bare metal to consolidate real-time multi-cloud inventory, fine-grained RBAC, hybrid persistence (PostgreSQL + MongoDB + Redis), and automated compliance audit pipelines directly consumed by bank auditors.
+2. **The Jenkins Bottleneck:** Initially, operation execution relied on Jenkins. However, Jenkins lacked native High Availability (creating a critical single point of failure), offered a rigid UI poorly suited for infrastructure state machines, and was notoriously complex to operate, scale, and integrate with new bank functionalities.
+3. **Evolution into a Purpose-Built HA Dispatcher:** Orion evolved by absorbing the execution plane into a **native High-Availability Operation Dispatcher (Django + Celery + Kubernetes Jobs)**. This migration completely replaced Jenkins for platform operations, providing clean REST APIs, real-time job state observability, and isolated execution inside ephemeral containers.
+4. **Maturity: Declarative IaC & Operational AI:** With inventory and execution united under the same architecture, Orion expanded with **Blueprint** (asynchronous YAML engine with DAG wave scheduling and idempotent teardowns) and **Orion AI** (multi-agent root-cause failure triage with LangGraph).
 
 ```mermaid
-flowchart LR
-    JSL["Jenkins Shared Libraries<br/>(Standardized CI/CD)"] -->|"Outgrew single controller"| DISP["HA Operation Dispatcher<br/>(Django + Celery API)"]
-    CFG["Central Config Mgmt<br/>(Runtime variable injection)"] --> DISP & PIPE
-    DISP --> K8S["Kubernetes Job Engine<br/>(Ephemeral pods)"]
-    DISP --> PIPE["Universal Driver Pipeline<br/>(AWS · OpenStack · OpenShift · Bare-metal)"]
-    PIPE --> ORION["Orion IaaS Control Plane<br/>(RBAC, hybrid DB & audit pipelines)"]
-    ORION --> BP["Blueprint Engine<br/>(Declarative YAML & idempotent teardown)"]
-    ORION --> AI["Orion AI (Validated PoC)<br/>(LangGraph + ReAct CI/CD diagnostics)"]
+flowchart TD
+    subgraph Origin["1. Origin: API-First CMDB & Catalog"]
+        direction TB
+        CMDB["Orion Control Plane<br/>• Multi-cloud inventory (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Hybrid persistence (PostgreSQL + MongoDB + Redis)<br/>• REST operation catalog (OpenAPI / RBAC)<br/>• Automated compliance audit pipelines"]
+    end
+
+    subgraph Replacement["2. Strategic Jenkins Replacement"]
+        direction LR
+        JNK["Legacy Jenkins<br/>❌ No High Availability (SPOF)<br/>❌ Rigid UI unsuited for ops<br/>❌ Complex to maintain & extend"] -.->|"Replaced by"| DISP["Integrated HA Dispatcher in Orion<br/>(Django + Celery + Kubernetes Job Workers)<br/>✅ Native High Availability (HA)<br/>✅ Operation-centric UI & REST APIs<br/>✅ Seamless integration of new banking features"]
+    end
+
+    subgraph Expansion["3. Declarative IaC & Applied AI"]
+        direction LR
+        BP["Blueprint<br/>(Declarative YAML engine, DAG waves & idempotent teardowns)"]
+        AI["Orion AI (Validated PoC)<br/>(Multi-agent CI/CD diagnostics with LangGraph)"]
+    end
+
+    CMDB -->|"Evolved by integrating"| DISP
+    DISP --> BP & AI
 ```
 
 ## Enterprise Architecture Case Studies

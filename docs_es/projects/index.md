@@ -12,51 +12,36 @@ Esta sección muestra cómo los sistemas que he diseñado durante la última dé
 
 ---
 
-## 1. Nueve Años de Evolución: De la Estandarización CI/CD a una Plataforma Propia de IaC y Despliegue
+## 1. La Evolución de Orion: De CMDB e Inventario a Dispatcher de Alta Disponibilidad
 
-En **BBVA Technology** (2017 – Presente), lo que comenzó como la estandarización de pipelines CI/CD entre equipos de infraestructura evolucionó hasta convertirse en una plataforma de despliegue y gobierno de infraestructura que administra **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y servidores físicos**, procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
+En **BBVA Technology** (2017 – Presente), **Orion** no nació como un producto estático, sino como una respuesta evolutiva a los cuellos de botella reales de escala bancaria — gobernando **más de 30.000 máquinas** en **AWS, OpenStack, OpenShift y bare-metal** y procesando **más de 40.000 operaciones diarias** para **más de 500 ingenieros**:
 
 ```mermaid
-flowchart TB
-    subgraph Phase1["1. Estandarización CI/CD y sus límites"]
-        JSL["Jenkins Shared Libraries<br/>(Estándar CI/CD en Groovy)"]
-        ANS["Servicios Core en Ansible<br/>(GitLab, Artifactory, Jenkins)"]
+flowchart TD
+    subgraph Origen["1. Origen: CMDB, Inventario y Catálogo Apificado"]
+        direction TB
+        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Catálogo de operaciones REST (OpenAPI / RBAC)<br/>• Canalizaciones automáticas de auditoría"]
     end
 
-    subgraph Phase2["2. Desacoplamiento de Ejecución y Configuración"]
-        DISP["Dispatcher HA de Operaciones<br/>(API REST en Django + Celery)"]
-        CFG["Gestión Central de Configuración<br/>(Inyección de variables en runtime)"]
-        K8S["Motor de Kubernetes Jobs<br/>(Ejecución en contenedores efímeros)"]
+    subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
+        direction LR
+        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF crítico)<br/>❌ UI rígida e inadecuada para operaciones<br/>❌ Muy complejo de mantener, escalar y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ API REST y UI orientada a operaciones<br/>✅ Fácil integración de nuevas funcionalidades"]
     end
 
-    subgraph Phase3["3. Plano de Control Agnóstico de Nube"]
-        PIPE["Pipeline de Despliegue por Drivers<br/>(AWS · OpenStack · OpenShift · Bare-metal)"]
-        F5["Puente REST F5 / OpenStack<br/>(Reemplazo sin downtime tras deprecación)"]
-        ORION["Plataforma IaaS Orion<br/>(API central, RBAC, BD híbrida y auditoría)"]
+    subgraph Expansion["3. Ecosistema Declarativo e IA"]
+        direction LR
+        BP["Blueprint<br/>(Motor declarativo en YAML, olas DAG y teardown idempotente)"]
+        AI["Orion AI (PoC Validada)<br/>(Diagnóstico multi-agente de CI/CD con LangGraph)"]
     end
 
-    subgraph Phase4["4. Ciclo de Vida Declarativo e IA Aplicada"]
-        BP["Motor Blueprint<br/>(DAG asíncrono en YAML y teardown idempotente)"]
-        AI["Orion AI (PoC Validada)<br/>(Diagnóstico CI/CD con LangGraph + ReAct)"]
-    end
-
-    JSL -->|"tocó límites de escala y estado"| DISP
-    ANS --> CFG
-    CFG --> DISP
-    DISP --> K8S
-    DISP --> PIPE
-    CFG --> PIPE
-    F5 -.->|"restauró interoperabilidad de balanceo"| PIPE
-    PIPE --> ORION
-    ORION --> BP
-    ORION --> AI
-    DISP --> AI
+    CMDB -->|"Evolucionó integrando"| DISP
+    DISP --> BP & AI
 ```
 
-1. **Primer cuello de botella — Multiplicación de pipelines y fragilidad de Jenkins:** Estandarizar mediante **Jenkins Shared Libraries** unificó a los equipos, pero dejó al descubierto a Jenkins como punto único de fallo bajo cargas masivas y concurrentes de infraestructura. Eso motivó sustituir Jenkins por un **Dispatcher de Operaciones en Alta Disponibilidad** construido en Django y Celery, y posteriormente ejecutar cargas aisladas en un **Motor de Ejecución sobre Kubernetes Jobs**.
-2. **Segundo cuello de botella — Deriva de configuración (*drift*) entre entornos:** Los playbooks de Ansible duplicados entre desarrollo, preproducción y producción generaban errores humanos. Un **Sistema Centralizado de Gestión de Configuración** desacopló la resolución de variables de la lógica del playbook, inyectando los parámetros de cada entorno dinámicamente en tiempo de despliegue.
-3. **Tercer cuello de botella — Fragmentación multi-cloud y auditoría:** Aprovisionar en AWS, OpenStack, OpenShift y servidores físicos exigía herramientas distintas y tickets manuales. Un **Pipeline Universal de Despliegue por Drivers** y **Orion** unificaron el gobierno, permisos RBAC, inventario y exportaciones automáticas de auditoría tras una única pasarela OpenAPI.
-4. **Cuarto cuello de botella — Lock-in de orquestadores comerciales y triaje lento de fallos:** Con Orion consolidado como fuente única de verdad, **Blueprint** aportó orquestación declarativa en YAML (estilo Terraform) y destrucciones idempotentes sin licencias comerciales (evitando suites como Red Hat Automation Platform), mientras que **Orion AI (PoC)** exploró el diagnóstico multi-agente de causa raíz sobre nuestros propios logs y diffs operativos.
+1. **Fase 1 — El Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado:** Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos, combinando una base de datos híbrida (PostgreSQL, MongoDB, Redis), permisos RBAC y canalizaciones automáticas de auditoría consumidas directamente por los auditores del banco.
+2. **Fase 2 — El Cuello de Botella de Jenkins:** Inicialmente, el disparo de operaciones del catálogo dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad nativa (siendo un punto único de fallo crítico para el banco), su interfaz web estaba diseñada para builds de software y no para operaciones de infraestructura, y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
+3. **Fase 3 — La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución con un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta migración reemplazó por completo a Jenkins para operaciones de infraestructura, desacopló las variables en runtime (evitando deriva de configuración) y garantizó una arquitectura API-first con ejecución en contenedores efímeros aislados.
+4. **Fase 4 — Extensión Declarativa (Blueprint) e IA Operativa (Orion AI):** Con la CMDB y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales como Red Hat Automation Platform) y el auto-diagnóstico agéntico con **Orion AI** (LangGraph).
 
 ---
 
