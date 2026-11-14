@@ -1,7 +1,7 @@
 ---
 title: "Caso de Estudio: Plataforma IaaS Orion y Pipeline por Drivers"
 description: >-
-  Arquitectura de alto nivel de la plataforma IaaS central de BBVA — un plano de control en Python/Django que gobierna decenas de miles de nodos en AWS, OpenStack, OpenShift y bare-metal.
+  Arquitectura del plano de control IaaS central de BBVA — un sistema en Python/Django que gobierna 30.000+ máquinas en AWS, OpenStack, OpenShift y bare-metal con auditoría integral, Ansible en capas (Ground + Usuario) y automatización apificada y programada.
 ---
 
 # Orion: Plataforma IaaS Central y Pipeline Universal por Drivers
@@ -11,11 +11,11 @@ description: >-
 | **Rol** | Arquitecto Único y Responsable de Plataforma |
 | **Organización** | BBVA Technology (Infraestructura Core Banking) · 2017 – Presente |
 | **Escala** | 30.000+ máquinas gobernadas · 40.000+ operaciones diarias · 500+ ingenieros |
-| **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, AWS, OpenStack, OpenShift, F5, Infoblox |
+| **Stack** | Python, Django, DRF, Celery, PostgreSQL, MongoDB, Redis, Ansible, AWS, OpenStack, OpenShift, Infoblox |
 
 !!! abstract "Resumen de arquitectura"
 
-    Orion es el plano de control central para el gobierno, auditoría y despliegue en autoservicio de infraestructura en la nube híbrida de BBVA. Abstrae cuatro sustratos tecnológicos distintos (**AWS, OpenStack, OpenShift y servidores físicos bare-metal**) tras una única interfaz REST documentada con OpenAPI, combinando un **pipeline universal de despliegue por drivers**, una **capa híbrida de persistencia relacional y documental** y **canalizaciones automáticas de exportación para auditoría**.
+    Orion es el plano de control central para el gobierno, auditoría integral y despliegue en autoservicio de infraestructura en la nube híbrida de BBVA. Abstrae cuatro sustratos tecnológicos (**AWS, OpenStack, OpenShift y servidores físicos bare-metal**) tras una interfaz REST documentada con OpenAPI y un subsistema de **Schedulers programados**, combinando un **pipeline universal de despliegue por drivers**, ejecución de **operaciones Ansible en dos capas (Ground corporativo y Usuario)**, una **capa híbrida de persistencia** y un **motor de auditoría integral y trazabilidad de máquinas**.
 
 ---
 
@@ -27,12 +27,12 @@ Orion no nació como un producto monolítico estático, sino como una respuesta 
 flowchart TD
     subgraph Origen["1. Origen: CMDB, Inventario y Catálogo Apificado"]
         direction TB
-        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Catálogo de operaciones REST (OpenAPI / RBAC)<br/>• Canalizaciones automáticas de auditoría"]
+        CMDB["Plano de Control Orion<br/>• Inventario multi-cloud (AWS · OpenStack · OpenShift · Bare-metal)<br/>• Persistencia híbrida (PostgreSQL + MongoDB + Redis)<br/>• Operaciones apificadas REST y programadas vía Schedulers<br/>• Auditoría integral de permisos y trazabilidad de máquinas"]
     end
 
     subgraph Sustitucion["2. Sustitución Estratégica de Jenkins"]
         direction LR
-        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF crítico)<br/>❌ UI rígida e inadecuada para operaciones<br/>❌ Muy complejo de mantener, escalar y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ API REST y UI orientada a operaciones<br/>✅ Fácil integración de nuevas funcionalidades"]
+        JNK["Jenkins Legacy<br/>❌ Sin Alta Disponibilidad (SPOF crítico)<br/>❌ UI rígida e inadecuada para operaciones<br/>❌ Muy complejo de mantener, escalar y extender"] -.->|"Sustituido por"| DISP["Dispatcher HA Integrado en Orion<br/>(Django + Celery + Workers en Kubernetes Jobs)<br/>✅ Alta Disponibilidad nativa (HA)<br/>✅ Operaciones apificadas REST y vía Schedulers<br/>✅ Pipeline Ansible en dos capas: Ground + Usuario"]
     end
 
     subgraph Expansion["3. Ecosistema Declarativo e IA"]
@@ -45,10 +45,10 @@ flowchart TD
     DISP --> BP & AI
 ```
 
-1. **Fase 1 — El Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado:** Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos, combinando una base de datos híbrida (PostgreSQL, MongoDB, Redis), permisos RBAC y canalizaciones automáticas de auditoría consumidas directamente por los auditores del banco.
+1. **Fase 1 — El Origen: CMDB, Inventario Multi-Cloud y Catálogo Apificado:** Orion nació como un plano de control central para inventariar y catalogar activos heterogéneos sobre AWS, OpenStack, OpenShift y servidores físicos, combinando una base de datos híbrida (PostgreSQL, MongoDB, Redis), permisos RBAC y canalizaciones de auditoría para responder a las exigencias regulatorias del banco.
 2. **Fase 2 — El Cuello de Botella de Jenkins:** Inicialmente, el disparo de operaciones del catálogo dependía de Jenkins. Sin embargo, Jenkins carecía de Alta Disponibilidad nativa (siendo un punto único de fallo crítico para el banco), su interfaz web estaba diseñada para builds de compilación y no para operaciones de infraestructura, y resultaba muy complejo de operar, escalar e integrar con nuevas funcionalidades y servicios bancarios.
-3. **Fase 3 — La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución con un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta migración reemplazó por completo a Jenkins para operaciones de infraestructura, desacopló las variables en runtime (evitando deriva de configuración) y garantizó una arquitectura API-first con ejecución en contenedores efímeros aislados.
-4. **Fase 4 — Extensión Declarativa (Blueprint) e IA Operativa (Orion AI):** Con la CMDB y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales como Red Hat Automation Platform) y el auto-diagnóstico agéntico con **Orion AI** (LangGraph).
+3. **Fase 3 — La Evolución a Dispatcher HA Integrado:** Orion evolucionó absorbiendo el plano de ejecución con un **Dispatcher de Operaciones en Alta Disponibilidad propio (Django + Celery + Kubernetes Jobs)**. Esta migración reemplazó por completo a Jenkins para operaciones de infraestructura, desacopló las variables en runtime, incorporó operaciones por API y schedulers programados, y estructuró el aprovisionamiento en dos etapas: drivers cloud y configuración Ansible en capas (Ground y Usuario).
+4. **Fase 4 — Extensión Declarativa (Blueprint) e IA Operativa (Orion AI):** Con la CMDB, el motor de auditoría y el dispatcher unificados bajo la misma arquitectura, Orion se extendió hacia la orquestación declarativa con **Blueprint** (motor en YAML con dependencias DAG y desmontajes idempotentes sin suites comerciales como Red Hat Automation Platform) y el auto-diagnóstico agéntico con **Orion AI** (LangGraph).
 
 ---
 
@@ -56,76 +56,103 @@ flowchart TD
 
 Operar infraestructura a escala bancaria entre nube pública, nube privada, plataformas de contenedores y centros de datos propios generaba tres cuellos de botella estructurales:
 
-1. **Aprovisionamiento en silos:** Cada entorno destino (AWS, OpenStack, OpenShift, hardware físico) requería sus propias herramientas, credenciales y traspasos manuales por tickets — convirtiendo peticiones sencillas en esperas de varios días.
-2. **Auditoría sobre activos heterogéneos:** Los equipos de auditoría interna y cumplimiento normativo exigen instantáneas continuas y verificables de titularidad, líneas base de seguridad y estado de máquinas sobre decenas de miles de activos cuyos esquemas de metadatos son completamente dispares.
-3. **Fragilidad ante deprecaciones de fabricantes:** Las plataformas de infraestructura dependen de integraciones oficiales entre proveedores (como los balanceadores F5 con OpenStack) que pueden quedar deprecadas a mitad de ciclo de vida.
+1. **Aprovisionamiento en silos y heterogeneidad:** Cada entorno destino (AWS, OpenStack, OpenShift, hardware físico) requería sus propias herramientas, credenciales y traspasos manuales por tickets — convirtiendo peticiones sencillas en esperas de varios días.
+2. **Falta de auditoría centralizada y trazabilidad de activos:** En un entorno bancario altamente regulado, es imperativo conocer en cualquier momento qué usuario autorizó un recurso, quién tiene permisos sobre él, **qué software exacto tiene instalado cada máquina y qué eventos u operaciones han ocurrido en ella a lo largo de toda su vida útil**. La información dispersa en herramientas de proveedores impedía generar informes forenses y de cumplimiento fiables.
+3. **Deriva de configuración y brechas de seguridad base:** Sin un estándar unificado de configuración, cada equipo desplegaba software con criterios dispares, provocando servidores sin agentes de monitorización obligatorios, políticas de bastionado desactualizadas o repositorios de paquetería no autorizados.
 
 ---
 
 ## 3. Topología Abstracta del Sistema
 
-Orion fue diseñado desde cero para hacer que el proveedor subyacente resulte transparente para los más de 500 ingenieros que lo consumen, centralizando permisos, catálogos de productos, flujos de remediación y trazas de auditoría.
+Orion centraliza el ciclo de vida de la infraestructura bancaria: desde la llamada API o el scheduler programado, pasando por la capa de drivers y la configuración Ansible en capas, hasta el registro inmutable de auditoría forense.
 
 ```mermaid
 flowchart TD
-    subgraph Consumers["Consumidores de Plataforma (500+ Ingenieros)"]
-        Portal["Portal de Autoservicio y CLI"]
+    subgraph Consumers["Disparadores de Operaciones (Apificadas y Planificadas)"]
+        direction TB
+        API_Call["API REST / OpenAPI (Autoservicio & CI/CD)"]
+        Schedulers["Schedulers y Tareas Periódicas (Celery Beat)"]
         BP["Motor Declarativo Blueprint"]
-        Systems["Sistemas Core del Banco y CI/CD"]
     end
 
     subgraph ControlPlane["Plano de Control Orion (Python / Django / DRF)"]
-        API["Pasarela REST OpenAPI / Swagger"]
-        RBAC["RBAC Centralizado y Catálogo de Productos"]
-        Audit["Pipelines Automáticos de Auditoría (CSV / Informes)"]
-        Coord["Coordinador Asíncrono de Operaciones (Celery)"]
-        API --> RBAC --> Coord
+        API_GW["Pasarela REST OpenAPI / Swagger"]
+        RBAC["RBAC y Control Granular de Permisos"]
+        Coord["Dispatcher HA y Coordinador Asíncrono (Celery)"]
+        Audit["Motor de Auditoría Integral y Trazabilidad"]
+        
+        API_GW --> RBAC --> Coord
+        Schedulers --> Coord
         RBAC --> Audit
+        Coord --> Audit
     end
 
-    subgraph DataTier["Capa Híbrida de Persistencia y Mensajería"]
-        PG[("PostgreSQL<br/>Estado transaccional, RBAC y pista inmutable de auditoría")]
-        Mongo[("MongoDB<br/>Inventario polimórfico multi-cloud de activos")]
-        Redis[("Redis<br/>Caché rápida de consultas y broker Celery")]
+    subgraph DataTier["Persistencia Híbrida y Trazabilidad"]
+        PG[("PostgreSQL<br/>RBAC, estado transaccional e historial inmutable")]
+        Mongo[("MongoDB<br/>Inventario polimórfico, software y paquetes instalados")]
+        Redis[("Redis<br/>Caché de consultas y broker de colas Celery")]
     end
 
-    subgraph DriverLayer["Pipeline Universal de Despliegue por Drivers"]
+    subgraph ProvisioningTier["1. Provisión Multi-Cloud (Capa de Drivers)"]
         AWS_D["Driver AWS"]
         OS_D["Driver OpenStack"]
-        F5_B["Puente REST a medida F5 ↔ OpenStack"]
         OSH_D["Driver OpenShift"]
         BM_D["Driver Bare-Metal / On-Prem"]
     end
 
-    Consumers --> API
+    subgraph ConfigTier["2. Pipeline de Configuración Ansible en Capas"]
+        direction TB
+        Ground["Capa Ground (Obligatoria)<br/>• Bastionado y seguridad base del banco<br/>• Agentes de monitorización y observabilidad<br/>• Repositorios oficiales y paquetería core"]
+        UserOp["Capa Usuario<br/>• Despliegue de servicios y aplicaciones<br/>• Lógica de negocio y middleware específico"]
+        Ground --> UserOp
+    end
+
+    Consumers --> API_GW
     Coord <--> PG & Mongo & Redis
-    Audit <-- "Consultas analíticas de alto volumen" --- PG & Mongo
-    Coord --> AWS_D & OS_D & OSH_D & BM_D
-    OS_D <--> F5_B
+    Audit --> PG & Mongo
+    Coord --> ProvisioningTier
+    ProvisioningTier --> ConfigTier
+    ConfigTier -->|"Telemetría, paquetes y eventos"| Audit
 ```
 
 ---
 
 ## 4. Decisiones Clave de Arquitectura
 
-### A. Persistencia Híbrida (PostgreSQL + MongoDB + Redis)
-Un único motor de base de datos no podía resolver simultáneamente el cumplimiento bancario estricto y las consultas masivas de inventario multi-cloud:
+### A. Auditoría Integral de la Plataforma: Permisos y Trazabilidad de Máquinas
+Orion actúa como la **fuente de verdad indiscutible de auditoría** para toda la plataforma de infraestructura de BBVA:
 
-- **PostgreSQL** custodia las entidades relacionales que exigen integridad transaccional: permisos (RBAC), catálogos de productos, transiciones de estado de operaciones y registros inmutables de auditoría.
-- **MongoDB** ingiere documentos polimórficos de activos sobre decenas de miles de máquinas (donde una instancia EC2 de AWS, una VM de OpenStack, un proyecto de OpenShift y un servidor físico tienen árboles de atributos totalmente distintos) y los indexa para consultas masivas de inventario.
-- **Redis** acelera las lecturas frecuentes y respalda las colas de tareas asíncronas en Celery para que la API responda al instante mientras las operaciones pesadas se ejecutan en segundo plano.
+- **Auditoría de Permisos y Autorizaciones:** Control de acceso basado en roles (RBAC) con trazabilidad estricta. Toda petición —sea invocada vía API REST por un ingeniero o generada automáticamente por un **Scheduler**— queda asociada unívocamente a su identidad, rol, aprobación y justificación operativa.
+- **Trazabilidad Completa del Ciclo de Vida de la Máquina:** Cada nodo cuenta con una línea de tiempo inmutable desde su aprovisionamiento inicial hasta su baja definitiva. El sistema registra qué playbooks se han ejecutado, qué cambios de configuración se han aplicado, incidencias detectadas y quién intervino en cada etapa.
+- **Informes Exhaustivos de Software y Eventos:** La plataforma permite extraer en cualquier instante informes detallados para auditoría interna y reguladores bancarios sobre **qué tiene instalado exactamente cualquier máquina** (versiones de paquetes, parches de seguridad, agentes) y **todo lo que ha sucedido en ella** a lo largo de su historia.
 
-### B. Pipeline Universal de Despliegue por Drivers
-En lugar de mantener canalizaciones independientes por cada nube, el motor de despliegue se articula en torno a una **interfaz abstracta de drivers**:
+### B. Pipeline Universal de Despliegue por Drivers Multi-Cloud
+En lugar de mantener canalizaciones heterogéneas por cada proveedor de infraestructura:
 
-- **Un único contrato, backends intercambiables:** Cada sabor de infraestructura (AWS, OpenStack, OpenShift, bare-metal) implementa una interfaz común de ciclo de vida. La plataforma despacha la misma carga útil normalizada sin importar el destino.
-- **Estándares corporativos de despliegue:** Más allá del código, este diseño definió la filosofía estándar de despliegue en la organización — permitiendo a los equipos de desarrollo llevar artefactos a producción de forma autónoma sin intervención manual del equipo de infraestructura.
+- **Un único contrato de ciclo de vida:** AWS, OpenStack, OpenShift y bare-metal implementan una interfaz abstracta común. El plano de control despacha cargas de trabajo normalizadas con independencia del backend tecnológico.
+- **Desacoplamiento total del proveedor:** La lógica de negocio del banco y los sistemas consumidores interactúan con especificaciones abstractas, aislando a la organización de las peculiaridades de cada API de infraestructura.
 
-### C. Escudo frente a Deprecaciones de Fabricante sin Downtime (Puente F5 / OpenStack)
-Cuando la integración nativa oficial entre los balanceadores **F5** y **OpenStack** fue deprecada, depender directamente de plugins de terceros habría obligado a una migración disruptiva en producción. Gracias a que la capa de drivers de Orion ya aislaba las llamadas externas, diseñé e implementé un **puente API RESTful a medida** entre F5 y OpenStack detrás del límite del driver — restaurando la interoperabilidad completa de balanceo automatizado con **cero tiempo de inactividad (zero downtime)**.
+### C. Pipeline de Configuración Ansible en Dos Capas: Ground y Operación de Usuario
+Una vez aprovisionado el recurso computacional a través del driver correspondiente, Orion orquesta la configuración del sistema operativo mediante Ansible dividida en dos fases estrictas y secuenciales:
 
-### D. Pipelines Automatizados de Auditoría y Cumplimiento
-En vez de tratar las auditorías como una recopilación manual de datos previa a cada inspección, Orion ejecuta canalizaciones automáticas de exportación que agregan datos operativos de MongoDB y PostgreSQL en informes estructurados (pipelines CSV) consumidos directamente por auditores internos y responsables de gobierno.
+1. **Capa Ground (Línea Base Obligatoria del Banco):**
+    - **Seguridad:** Bastionado del sistema operativo según estándares CIS bancarios, inyección de certificados corporativos, políticas de cortafuegos y gestión de accesos privilegiados.
+    - **Monitorización:** Despliegue y configuración automática de agentes corporativos de observabilidad, métricas y recolección de logs.
+    - **Paquetería Base:** Configuración de repositorios internos protegidos e instalación de dependencias y utilidades de sistema aprobadas.
+    - *Garantía:* Ninguna máquina pasa a la siguiente fase sin que la capa Ground haya concluido con éxito.
+2. **Capa de Usuario (Operación Específica):**
+    - Ejecución de los playbooks y roles solicitados por el equipo solicitante: aprovisionamiento de middleware, bases de datos, microservicios o dependencias de la aplicación final.
+
+### D. Operaciones Apificadas y Automatización vía Schedulers
+La interacción operativa con Orion no depende de intervenciones manuales ni consolas aisladas:
+
+- **Operaciones Apificadas (API-First):** Todo el catálogo de operaciones (creación, remediación, parada, escalado, decomiso, informes) está expuesto mediante una API REST OpenAPI/Swagger, permitiendo su invocación desatendida desde portales de autoservicio, pipelines de CI/CD y motores de orquestación como **Blueprint**.
+- **Schedulers Programados:** Orion integra un planificador asíncrono para automatizar operaciones recurrentes: reconciliación periódica de inventario contra las nubes reales, auditorías nocturnas de cumplimiento de líneas base, rotación programada de credenciales y tareas de saneamiento periódico.
+
+### E. Persistencia Híbrida (PostgreSQL + MongoDB + Redis)
+- **PostgreSQL** custodia las entidades relacionales que requieren estricta integridad transaccional: permisos RBAC, catálogo de operaciones, estados de tareas y el histórico inmutable de auditoría.
+- **MongoDB** almacena documentos polimórficos con el inventario detallado de activos multi-cloud, árboles heterogéneos de metadatos y el registro de paquetes y software instalado en cada nodo.
+- **Redis** acelera consultas de lectura frecuentes sobre el inventario y actúa como broker de alta velocidad para las colas de trabajo en Celery.
 
 ---
 
@@ -133,17 +160,20 @@ En vez de tratar las auditorías como una recopilación manual de datos previa a
 
 | Decisión | Alternativa Evaluada | Justificación |
 | :--- | :--- | :--- |
-| **Híbrido PostgreSQL + MongoDB** | Base de datos relacional única con JSONB | Mantuvo integridad relacional estricta para permisos y auditoría, permitiendo a la vez indexación de alta velocidad sobre esquemas de metadatos cloud muy heterogéneos. |
-| **Abstracción por drivers en Python** | Pipelines independientes por proveedor cloud | Unificó RBAC, catálogo de productos y trazabilidad en un solo plano de control; añadir un entorno es modular y aditivo. |
-| **Puente REST propio F5/OpenStack** | Migración completa de plataforma de balanceo | Preservó la continuidad operativa y evitó cualquier corte de servicio cuando el fabricante deprecó la integración nativa. |
+| **Ansible en dos capas (Ground + Usuario)** | Playbook monolítico único gestionado por el usuario | Garantiza que el 100% de las máquinas cumplan las normativas de seguridad, bastionado y monitorización bancaria antes de entregar el control al usuario. |
+| **Auditoría integral centralizada en Orion** | Trazabilidad delegada en logs efímeros de pipelines | Permite generar informes forenses y de cumplimiento en segundos con el histórico completo de lo instalado y acontecido en cada máquina. |
+| **Operaciones apificadas y vía Schedulers** | Ejecuciones manuales por consola o scripts cron aislados | Centraliza permisos, trazabilidad y control de concurrencia bajo el mismo dispatcher HA sin dispersión de automatizaciones. |
+| **Híbrido PostgreSQL + MongoDB** | Base de datos relacional única con columnas JSONB | Mantiene integridad relacional estricta para RBAC y auditoría transaccional, con indexación rápida de metadatos e inventario de paquetes heterogéneos. |
+| **Abstracción por drivers en Python** | Herramientas y flujos independientes por nube | Unifica RBAC, catálogo de operaciones y auditoría en un solo plano de control agnóstico de proveedor. |
 
 ---
 
 ## 6. Impacto Operativo
 
-- **Autoservicio a gran escala:** Permitió a **más de 500 ingenieros** aprovisionar, gobernar y remediar infraestructura de forma autónoma sobre **decenas de miles de nodos**, reduciendo los tiempos de entrega de días de tickets manuales a minutos.
-- **Auditoría continua:** Sustituyó la extracción manual de evidencias por canalizaciones automáticas y verificables consumidas directamente por los equipos de cumplimiento.
-- **Adopción internacional:** Desplegado e integrado con equipos de ingeniería en **España, México y Turquía**, liderando sesiones de onboarding técnico y extensiones específicas para flujos regionales.
+- **Auditoría y trazabilidad completa:** Transformó la preparación de auditorías bancarias de semanas de recopilación manual a consultas automatizadas e instantáneas de cualquier máquina: quién la creó, qué paquetes tiene instalados y su histórico completo de eventos.
+- **Seguridad y observabilidad garantizada (Ground):** El 100% de las más de **30.000 máquinas** cuentan con agentes de seguridad y monitorización desplegados y verificados automáticamente desde el momento de su aprovisionamiento.
+- **Autoservicio y operaciones masivas:** Más de **500 ingenieros** gestionan su ciclo de vida de infraestructura de forma autónoma, procesando más de **40.000 operaciones diarias** mediante API REST y Schedulers programados.
+- **Adopción internacional:** Plataforma implantada y operativa en múltiples geografías del grupo bancario (**España, México y Turquía**).
 
 ---
 
