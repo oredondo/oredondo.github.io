@@ -10,30 +10,29 @@ description: >-
 | :--- | :--- |
 | **Rol** | Arquitecto y Responsable Técnico |
 | **Organización / Fase** | BBVA · **Prueba de Concepto Validada (PoC)** |
-| **Resultado** | Prototipo validado que reduce el triaje de logs de horas a segundos; preparado y a la espera de directrices de integración con la infraestructura central de IA |
+| **Resultado** | Prototipo validado que reduce el triaje de logs de horas a segundos; preparado y a la espera de directrices de infraestructura central de IA |
 | **Stack** | Python, LangGraph, Agentes ReAct, Qwen LLM (131k de contexto), Model Context Protocol (MCP), Redis, APIs de Jenkins y GitLab |
 
 !!! abstract "Resumen de arquitectura"
 
-    Orion AI es una **Prueba de Concepto (PoC) funcional y validada** diseñada para evaluar un pipeline multi-agente paralelo de análisis de causa raíz sobre fallos en CI/CD e infraestructura. Mediante máquinas de estado en **LangGraph** y bucles de razonamiento **ReAct**, el sistema agrega concurrentemente logs de ejecución, runbooks operativos (indexados en caché Redis para acelerar la recuperación RAG) y diffs de commits en GitLab utilizando modelos de contexto amplio (`Qwen` 131k) bajo guardarraíles deterministas estrictos — reduciendo el triaje manual de horas a segundos durante las pruebas de validación.
+    Orion AI es una **Prueba de Concepto (PoC) funcional y validada** diseñada para evaluar un pipeline multi-agente paralelo de análisis de causa raíz sobre fallos en CI/CD e infraestructura. Mediante máquinas de estado en **LangGraph** y bucles de razonamiento **ReAct**, el sistema agrega concurrentemente logs de ejecución, runbooks operativos en caché Redis y diffs de commits en GitLab utilizando modelos de contexto amplio (`Qwen` 131k) bajo guardarraíles deterministas estrictos — reduciendo el triaje manual de horas a segundos durante las pruebas de validación.
 
 ---
 
 ## 1. Planteamiento del Problema Operativo
 
-Cuando los pipelines de CI/CD o los despliegues de infraestructura fallan a escala corporativa, la corrección en sí rara vez es lo que consume más tiempo de ingeniería. El **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto:
+Cuando los pipelines o despliegues de infraestructura fallan a escala corporativa, el **Tiempo Medio de Resolución (MTTR)** está dominado por la recopilación manual de contexto:
+1. Rastrear logs de ejecución interminables en Jenkins o el dispatcher para aislar el error raíz.
+2. Buscar manualmente en wikis y tickets históricos patrones de fallo conocidos.
+3. Inspeccionar diffs recientes en GitLab para correlacionar cambios de código o configuración.
 
-1. Bucear entre logs interminables de ejecución en Jenkins o en el dispatcher para localizar la primera traza real del error.
-2. Buscar en la documentación interna de soporte e incidencias previas errores conocidos de infraestructura.
-3. Inspeccionar los commits y diffs recientes en GitLab para comprobar si un cambio de código o configuración provocó el fallo.
-
-**Objetivo de la PoC:** Demostrar que un flujo multi-agente autónomo podía reunir esas tres fuentes de evidencia en paralelo y sintetizar un diagnóstico preciso y sin alucinaciones en cuestión de segundos tras un fallo.
+**Objetivo de la PoC:** Demostrar que un flujo multi-agente autónomo puede consolidar esas tres fuentes en paralelo y emitir un diagnóstico preciso sin alucinaciones en cuestión de segundos.
 
 ---
 
 ## 2. Topología Abstracta del Sistema: Pipeline Multi-Agente de Diagnóstico
 
-Orion AI estructura el análisis de causa raíz como un flujo secuencial con bucles reflexivos: desde la captura del evento de fallo, pasando por la agregación paralela de evidencia y el razonamiento ReAct, hasta el filtrado por guardarraíles deterministas.
+Orion AI estructura el análisis de causa raíz como un flujo secuencial con bucles reflexivos:
 
 ```mermaid
 flowchart LR
@@ -58,18 +57,14 @@ flowchart LR
 
 ## 3. Decisiones Clave de Arquitectura
 
-### A. Orquestación Cíclica en Grafo (LangGraph) frente a Prompts Lineales
-Los fallos en pipelines rara vez pueden diagnosticarse en una única pasada secuencial. Cuando un log solo muestra un código de salida genérico, el agente necesita retroceder e inspeccionar los diffs recientes del repositorio o cambios de configuración antes de emitir una conclusión. **LangGraph** mantiene un estado tipado entre nodos, permitiendo bifurcaciones condicionales y bucles ReAct acotados en lugar de prompts frágiles de un solo paso.
+### A. Grafos Cíclicos con Estado (LangGraph) vs. Cadenas Lineales
+Los fallos en pipelines rara vez se diagnostican en una pasada única. Cuando un log solo arroja un código de salida genérico, el agente necesita retroceder e inspeccionar los diffs del repositorio antes de emitir un veredicto. LangGraph mantiene un estado tipado entre nodos, permitiendo bifurcaciones condicionales y bucles ReAct acotados imposibles en cadenas lineales tradicionales.
 
-### B. Agregación Concurrente de Evidencias con Contexto Amplio
-En lugar de consultar fuentes secuencialmente, el grafo recupera en paralelo las trazas de ejecución, los manuales y runbooks operativos en caché Redis y los metadatos de GitLab, inyectando el contexto consolidado en un **LLM de 131k tokens de contexto (Qwen)** para preservar la causalidad desde la inicialización del entorno hasta el error final.
+### B. Ventana de Contexto Amplia (131k) vs. Fragmentación por Chunks
+En lugar de fragmentar los logs de compilación mediante técnicas RAG tradicionales que pierden la causalidad entre pasos distantes, el sistema alimenta el contexto consolidado en un modelo de 131k tokens (Qwen), preservando la cronología completa desde la inicialización del entorno hasta el error terminal.
 
-### C. Guardarraíles Deterministas Estrictos
-En un entorno bancario regulado, una herramienta de diagnóstico operativo no puede especular ni inventar comandos:
-
-- **Contratos de salida tipados:** Las respuestas se restringen a esquemas estructurados en lugar de texto libre.
-- **Evidencia fundamentada:** Cada hallazgo debe correlacionarse directamente con fragmentos reales del log, entradas existentes en la base de conocimiento o diffs de commits verificados.
-- **Fronteras de herramientas estandarizadas (MCP):** Las integraciones externas (logs, caché de runbooks en Redis, APIs de GitLab) se exponen tras contratos de herramientas limpios para que el modelo no ejecute acciones arbitrarias.
+### C. Guardarraíles Deterministas Tipados vs. Texto Libre
+En un entorno bancario regulado, un agente operativo no puede especular. Las respuestas se restringen a contratos tipados de Pydantic y las integraciones con logs y GitLab se aíslan tras interfaces del Model Context Protocol (MCP), erradicando alucinaciones y garantizando que cada diagnóstico esté respaldado por evidencias reales verificables.
 
 ---
 
@@ -77,9 +72,9 @@ En un entorno bancario regulado, una herramienta de diagnóstico operativo no pu
 
 | Decisión | Alternativa Evaluada | Justificación |
 | :--- | :--- | :--- |
-| **Grafos cíclicos con estado (LangGraph)** | Cadenas secuenciales lineales o prompts aislados | Permite reintentos reflexivos condicionales y retroceso al análisis de diffs cuando los logs son ambiguos, imposible con cadenas lineales. |
-| **Modelo local de contexto amplio (Qwen 131k)** | APIs de modelos cerrados en nube pública | Mantiene la soberanía de datos bancarios confidenciales y preserva la traza completa de ejecución en una sola ventana de contexto. |
-| **Guardarraíles deterministas tipados (Pydantic)** | Generación en texto libre desestructurado | Erradica alucinaciones de comandos o explicaciones inventadas, garantizando salidas verificables contra fuentes reales. |
+| **Grafos cíclicos con estado (LangGraph)** | Cadenas secuenciales lineales o prompts aislados | Permite reintentos reflexivos condicionales y retroceso al análisis de diffs cuando los logs son ambiguos. |
+| **Modelo local de contexto amplio (Qwen 131k)** | APIs de modelos cerrados en nube pública | Mantiene la soberanía de datos bancarios confidenciales y preserva la traza completa de ejecución en una sola ventana. |
+| **Guardarraíles deterministas tipados (Pydantic)** | Generación en texto libre desestructurado | Erradica alucinaciones de comandos o hipótesis inventadas, garantizando salidas verificables contra fuentes reales. |
 
 ---
 
@@ -88,13 +83,11 @@ En un entorno bancario regulado, una herramienta de diagnóstico operativo no pu
 > [!IMPORTANT]
 > Explicar con transparencia las restricciones organizativas reales detrás de una PoC es fundamental en cualquier análisis de arquitectura serio.
 
-El prototipo técnico fue construido íntegramente, probado sobre escenarios reales de fallo y validado — demostrando que el triaje multi-agente reduce el tiempo de diagnóstico de horas de búsqueda manual a segundos.
+El prototipo técnico fue construido íntegramente, probado sobre escenarios reales de fallo y validado con éxito. Sin embargo, llevar un sistema basado en LLMs a **producción masiva** dentro de un gran banco depende de factores corporativos transversales:
 
-Sin embargo, llevar un sistema basado en LLMs desde una **PoC validada** hasta un **despliegue generalizado en producción** dentro de un gran banco depende de fronteras de plataforma que exceden a un único equipo:
-
-1. **Dependencia de la infraestructura central de IA:** El despliegue en producción a gran escala requiere directrices estandarizadas y asignación de capacidad sobre la infraestructura corporativa compartida de inferencia de IA (gestionada por equipos transversales del banco).
-2. **Gobierno y conformidad sobre datos operativos:** Incluso utilizando modelos internos, enviar logs de CI/CD y diffs de repositorios a un servicio compartido de inferencia exige definiciones corporativas formales sobre retención, anonimización y aislamiento multi-inquilino.
-3. **Lección principal de ingeniería:** Construir un agente fiable en LangGraph + ReAct con guardarraíles deterministas es la parte técnica resoluble; alinear las plataformas corporativas compartidas de inferencia y las normativas de gobierno es lo que marca los tiempos reales de adopción en sectores regulados.
+1. **Infraestructura central de inferencia:** Requiere directrices unificadas y asignación de capacidad sobre plataformas GPU compartidas gestionadas por equipos corporativos de IA.
+2. **Gobierno y privacidad de datos operativos:** El enrutamiento de trazas de CI/CD y código fuente exige políticas formales de retención, anonimización y aislamiento multi-inquilino.
+3. **Lección de ingeniería:** Diseñar el agente técnico en LangGraph con guardarraíles es la parte resoluble; coordinar plataformas corporativas compartidas de GPU y normativas de cumplimiento es lo que marca los tiempos de adopción en sectores regulados.
 
 ---
 
